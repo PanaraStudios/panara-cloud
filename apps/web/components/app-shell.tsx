@@ -1,5 +1,7 @@
 "use client";
 
+import { api } from "@panara-cloud/backend/api";
+import { useConvexAuth, useQuery } from "convex/react";
 import { SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -33,11 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { authClient, authResult } from "@/lib/auth/client";
 import { ShortcutProvider, useShortcut } from "@/lib/dashboard/use-shortcut";
 import { navLevel, orgNav, serviceUrl } from "@/lib/navigation";
-import {
-	OrganizationProvider,
-	useIsInstanceAdmin,
-	useOrganizations,
-} from "@/lib/organization";
+import { OrganizationProvider, useOrganizations } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
@@ -152,10 +150,18 @@ function NoOrganization() {
 	const invitations = allInvitations.filter(
 		(invitation) => !declined.includes(invitation.id),
 	);
-	const instanceAdmin = useIsInstanceAdmin();
+	const { isAuthenticated } = useConvexAuth();
+	const security = useQuery(
+		api.account.security,
+		isAuthenticated ? {} : "skip",
+	);
+	const instanceAdmin = security?.instanceAdmin === true;
 	const session = authClient.useSession();
 	const email = session.data?.user.email;
 	const invited = invitations.length > 0;
+	// Until the account's role is known, "ask an admin to invite you" would be
+	// wrong for the administrator, so keep the loading shell.
+	if (security === undefined && !invited) return <ShellSkeleton />;
 	return (
 		<AuthPageFrame>
 			<div className="flex flex-col gap-6">
