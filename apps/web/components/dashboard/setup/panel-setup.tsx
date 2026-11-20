@@ -36,10 +36,10 @@ const EMAIL_PROVIDERS = { opensend: "opensend.cc", resend: "Resend" } as const;
 export function PanelSetup() {
 	const status = usePanelSetupStatus();
 	if (status === undefined)
-		return <Skeleton className="h-64 w-full max-w-3xl" />;
+		return <Skeleton className="h-64 w-full max-w-5xl" />;
 	if (!status?.isInstanceAdmin) {
 		return (
-			<div className="flex w-full max-w-3xl flex-col gap-6">
+			<div className="flex w-full max-w-5xl flex-col gap-6">
 				<PageHeader title="Set up your panel" />
 				<p className="text-muted-foreground text-sm">
 					Only the instance administrator sets up this installation of Panara
@@ -82,7 +82,7 @@ function PanelSetupSteps({ completed }: { completed: boolean }) {
 	};
 
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-6 pb-10">
+		<div className="flex w-full max-w-5xl flex-col gap-6 pb-10">
 			<PageHeader
 				title="Set up your panel"
 				description="One-time settings for this installation of Panara Cloud. Optional steps can wait, and all of it stays editable in Settings."

@@ -166,7 +166,10 @@ export const AssignNetworks = ({ id, type }: Props) => {
 						</span>
 						<ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
 					</PopoverTrigger>
-					<PopoverContent className="w-[var(--anchor-width)] p-0" align="start">
+					<PopoverContent
+						className="w-(--anchor-width) min-w-56 p-0"
+						align="start"
+					>
 						<Command>
 							<CommandInput placeholder="Search networks..." className="h-9" />
 							<CommandList className="max-h-60">

@@ -2,12 +2,9 @@
 
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
 import { notFound, useParams, usePathname } from "next/navigation";
-import { useEffect } from "react";
 import {
-	SectionLinks,
-	SettingsSection,
-	SettingsSections,
-	useSectionJump,
+	SettingsLayout,
+	SettingsPane,
 } from "@/components/ui-kit/settings-page";
 import {
 	SERVER_SETTINGS_SECTIONS,
@@ -29,59 +26,50 @@ const BODIES: Record<ServerSettingsSection, () => React.ReactNode> = {
 	connection: ConnectionSettings,
 };
 
-/** `/servers/[serverId]/settings/*`: every section on one page.
-    `settings/<section>` opens it scrolled to that section. It lives in the
-    layout so moving between sections never remounts it. */
+/** `/servers/[serverId]/settings/*`: the sections listed on the left, one
+    open at a time. `settings/<section>` opens that one, `settings` the
+    first. It lives in the layout so moving between sections never remounts
+    it. */
 export function ServerSettings() {
 	const permissions = usePermissions();
 	const { serverId } = useParams<{ serverId: string }>();
 	const pathname = usePathname();
-	const [page, jumpTo] = useSectionJump();
 	const target = pathname
 		.slice(serverUrl(serverId, "settings").length)
 		.split("/")
 		.filter(Boolean)[0];
-	const known =
-		!target || SERVER_SETTINGS_SECTIONS.some((item) => item.slug === target);
-
-	useEffect(() => {
-		if (target && known) jumpTo(target);
-	}, [target, known, jumpTo]);
+	const active = target ?? SERVER_SETTINGS_SECTIONS[0].slug;
+	const known = SERVER_SETTINGS_SECTIONS.some((item) => item.slug === active);
 
 	if (!known) notFound();
 	if (!permissions.server.create) return null;
 	return (
-		<SettingsSections
-			ref={page}
-			links={
-				<SectionLinks
-					label="Settings sections"
-					links={SERVER_SETTINGS_SECTIONS.map((section) => ({
-						id: section.slug,
-						title: section.title,
-						href: serverUrl(serverId, `settings/${section.slug}`),
-					}))}
-					onJump={jumpTo}
-				/>
-			}
+		<SettingsLayout
+			label="Settings sections"
+			active={active}
+			items={SERVER_SETTINGS_SECTIONS.map((section) => ({
+				id: section.slug,
+				title: section.title,
+				icon: section.icon,
+				href: serverUrl(serverId, `settings/${section.slug}`),
+			}))}
 		>
 			{SERVER_SETTINGS_SECTIONS.map((section) => {
 				const Body = BODIES[section.slug];
 				return (
-					<SettingsSection
+					<SettingsPane
 						key={section.slug}
 						id={section.slug}
-						icon={section.icon}
+						active={section.slug === active}
 						title={section.title}
 						description={section.description}
-						target={section.slug === target}
-						className="max-w-3xl"
+						className="max-w-5xl"
 					>
 						<Body />
-					</SettingsSection>
+					</SettingsPane>
 				);
 			})}
-		</SettingsSections>
+		</SettingsLayout>
 	);
 }
 

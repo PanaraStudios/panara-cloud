@@ -59,6 +59,14 @@ function Input({
 	const shouldShowGenerator =
 		isPassword && enablePasswordGenerator && !props.disabled && !props.readOnly;
 	const inputType = isPassword ? (showPassword ? "text" : "password") : type;
+	// Base UI decides on the first render whether the input is controlled. A
+	// form field whose value arrives later (an edit form waiting for its
+	// record) would stay empty, so an undefined value is held as "".
+	const pendingValue =
+		"value" in props &&
+		props.value === undefined &&
+		props.defaultValue === undefined &&
+		props.onChange !== undefined;
 
 	const setRefs = React.useCallback(
 		(node: HTMLInputElement | null) => {
@@ -112,6 +120,7 @@ function Input({
 				)}
 				ref={setRefs}
 				{...props}
+				{...(pendingValue ? { value: "" } : {})}
 				name={
 					props.name ??
 					(credential && type === "password" ? "service-secret" : undefined)
@@ -189,7 +198,7 @@ function NumberInput({ className, ref, ...props }: InputProps) {
 			className={cn("text-left", className)}
 			ref={ref}
 			{...props}
-			value={props.value === undefined ? undefined : String(props.value)}
+			value={props.value == null ? undefined : String(props.value)}
 			onChange={(e) => {
 				const value = e.target.value;
 				if (value === "") {

@@ -223,7 +223,7 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 																	<FormControl>
 																		<Select
 																			onValueChange={field.onChange}
-																			defaultValue={field.value}
+																			value={field.value ?? null}
 																		>
 																			<SelectTrigger className="w-full">
 																				<SelectValue placeholder="Select a protocol" />

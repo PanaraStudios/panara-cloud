@@ -11,6 +11,7 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { actionIcon, plainLabel } from "@/lib/action-icons";
 import { actionShortcut } from "@/lib/dashboard/shortcuts";
 import {
 	isVisible,
@@ -30,7 +31,7 @@ import {
    `secondary` is the same bevel and press, in the grey/white surface gradient;
    `outline` and `ghost` are flat. */
 const buttonVariants = cva(
-	"group/button relative inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all ease-(--ease-press) outline-none select-none focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] active:transition-transform active:duration-(--dur-press) disabled:pointer-events-none disabled:opacity-50 disabled:active:scale-100 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+	"group/button relative inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all ease-(--ease-press) outline-none select-none focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] active:transition-transform active:duration-(--dur-press) disabled:pointer-events-none disabled:opacity-50 disabled:active:scale-100 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&>[data-slot=button-spinner]+svg]:hidden",
 	{
 		variants: {
 			variant: {
@@ -74,6 +75,7 @@ function Button({
 	size = "default",
 	ref,
 	isLoading = false,
+	autoIcon = true,
 	disabled,
 	children,
 	...props
@@ -81,6 +83,9 @@ function Button({
 	VariantProps<typeof buttonVariants> & {
 		/** Panara Cloud: disables the button and shows a spinner while an action runs. */
 		isLoading?: boolean;
+		/** A text-only label gets the icon of its action ("Deploy", "Save");
+		    false for a label that is data, not an action. */
+		autoIcon?: boolean;
 	}) {
 	const action = React.useContext(ShortcutAction);
 	const target = React.useRef<HTMLButtonElement>(null);
@@ -94,6 +99,11 @@ function Button({
 	);
 	const modifier = useShortcutModifier();
 	const label = props["aria-label"] ?? buttonText(children).trim();
+	const plain =
+		autoIcon && variant !== "link" && !size?.startsWith("icon")
+			? plainLabel(children)
+			: null;
+	const ActionIcon = plain ? actionIcon(plain) : null;
 	const shortcut = actionShortcut(action, label);
 	useShortcut(shortcut, () => {
 		const button = target.current;
@@ -118,7 +128,11 @@ function Button({
 			disabled={isLoading || disabled}
 			{...props}
 		>
-			{isLoading && <Loader2Icon className="animate-spin" />}
+			{isLoading ? (
+				<Loader2Icon data-slot="button-spinner" className="animate-spin" />
+			) : ActionIcon ? (
+				<ActionIcon aria-hidden />
+			) : null}
 			{children}
 		</ButtonPrimitive>
 	);

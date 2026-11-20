@@ -317,7 +317,7 @@ export function TraefikPortsPage() {
 	}
 	if (!settings) return null;
 	return (
-		<div className="flex max-w-3xl flex-col gap-8 pt-2">
+		<div className="flex max-w-5xl flex-col gap-8 pt-2">
 			<PortsSection
 				serverId={ref.serverId}
 				current={settings.additionalPorts.map((port) => ({

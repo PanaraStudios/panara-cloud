@@ -402,7 +402,7 @@ export const AddDomain = ({
 														) : (
 															<Select
 																onValueChange={field.onChange}
-																defaultValue={field.value || ""}
+																value={field.value || null}
 															>
 																<FormControl>
 																	<SelectTrigger className="w-full">

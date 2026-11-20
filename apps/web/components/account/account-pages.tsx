@@ -283,7 +283,7 @@ function Loading() {
 // The tab names the page, so its heading is for screen readers only and the
 // first section starts without a rule under the tabs.
 const PAGE =
-	"flex w-full max-w-3xl flex-col gap-8 pb-10 [&>h2+*]:border-t-0 [&>h2+*]:pt-0 [&>h2+*>section]:border-t-0 [&>h2+*>section]:pt-0";
+	"flex w-full max-w-5xl flex-col gap-8 pb-10 [&>h2+*]:border-t-0 [&>h2+*]:pt-0 [&>h2+*>section]:border-t-0 [&>h2+*>section]:pt-0";
 
 export function ProfilePage() {
 	const security = useSecurity();

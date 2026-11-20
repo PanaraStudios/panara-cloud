@@ -175,7 +175,7 @@ export const AddVolumes = ({
 								<FormControl>
 									<RadioGroup
 										onValueChange={field.onChange}
-										defaultValue={field.value}
+										value={field.value ?? null}
 										className="flex w-fit flex-row gap-0.5 rounded-lg border bg-background p-0.5"
 									>
 										{serviceType !== "compose" && (

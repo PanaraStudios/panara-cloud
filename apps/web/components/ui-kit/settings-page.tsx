@@ -1,249 +1,156 @@
 "use client";
 
 import type { ComponentType } from "react";
+import { useState } from "react";
 import {
-	useCallback,
-	useEffect,
-	useLayoutEffect,
-	useRef,
-	useState,
-} from "react";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-// A Settings page that is every section on one page (a service's, a
-// server's): `SettingsSections` stacks `SettingsSection`s split by a
-// hairline, `SectionLinks` is the optional row of jump links above them.
+// A Settings page with sections (a service's, a server's): the list of
+// sections stays on the left, the open one fills the rest. `SettingsLayout`
+// is the frame, each `SettingsPane` one section.
 
-/** Renders its children once they come near the viewport, so a long page
-    doesn't start every section's queries at once. Once shown they stay, so
-    unsaved edits survive scrolling. */
-export function LazyMount({
-	now = false,
-	children,
-}: {
-	/** Mount without waiting (the section the URL points at). */
-	now?: boolean;
-	children: React.ReactNode;
-}) {
-	const placeholder = useRef<HTMLDivElement>(null);
-	const [near, setNear] = useState(false);
-	const mounted = near || now;
-	useEffect(() => {
-		const element = placeholder.current;
-		if (mounted || !element) return;
-		const observer = new IntersectionObserver(
-			(entries) => {
-				if (entries.some((entry) => entry.isIntersecting)) setNear(true);
-			},
-			{ rootMargin: "400px 0px" },
-		);
-		observer.observe(element);
-		return () => observer.disconnect();
-	}, [mounted]);
-	if (now && !near) setNear(true);
-	if (mounted) return children;
-	return (
-		<div ref={placeholder} aria-hidden className="flex flex-col gap-3">
-			<Skeleton className="h-9 w-full max-w-3xl" />
-			<Skeleton className="h-9 w-full max-w-3xl" />
-		</div>
-	);
-}
+export type SettingsNavItem = {
+	id: string;
+	title: string;
+	href: string;
+	icon: ComponentType<{ className?: string }>;
+	/** What a dot after the title stands for ("Changes not deployed"). */
+	dot?: string;
+};
 
-/** Scrolls to a section and keeps it at the top of the window while the
-    ones above it finish mounting, until the member scrolls. Returns the ref
-    for the page's container and the function that jumps. */
-export function useSectionJump() {
-	const page = useRef<HTMLDivElement>(null);
-	const [pin, setPin] = useState<{ id: string } | null>(null);
-	useLayoutEffect(() => {
-		const container = page.current;
-		const element = pin ? document.getElementById(pin.id) : null;
-		if (!container || !element) return;
-		const align = () => element.scrollIntoView({ block: "start" });
-		align();
-		const observer = new ResizeObserver(align);
-		observer.observe(container);
-		const events = ["wheel", "touchstart", "keydown", "mousedown"] as const;
-		const stop = () => {
-			observer.disconnect();
-			window.clearTimeout(timer);
-			for (const event of events) window.removeEventListener(event, stop);
-		};
-		const timer = window.setTimeout(stop, 2500);
-		for (const event of events) {
-			window.addEventListener(event, stop, { passive: true });
-		}
-		return stop;
-	}, [pin]);
-	const jumpTo = useCallback((id: string) => setPin({ id }), []);
-	return [page, jumpTo] as const;
-}
+// Moves the URL without a navigation, which would remount the page and drop
+// unsaved edits; `usePathname` follows it.
+const open = (href: string) => {
+	window.history.pushState(null, "", href);
+	window.scrollTo({ top: 0 });
+};
 
-export function SettingsSections({
-	ref,
-	links,
-	children,
-}: {
-	ref?: React.Ref<HTMLDivElement>;
-	/** A `SectionLinks` row above the sections. */
-	links?: React.ReactNode;
-	children: React.ReactNode;
-}) {
-	return (
-		<div ref={ref} className="flex w-full min-w-0 flex-col gap-8 pb-16">
-			{links}
-			<div className="flex min-w-0 flex-col">{children}</div>
-		</div>
-	);
-}
-
-/** One row of small links to the sections of the page. A plain click jumps
-    in place and moves the URL without a navigation (which would remount the
-    page and drop unsaved edits). */
-export function SectionLinks({
+/** The sections as a list beside the open one. On a phone the list is one
+    select above it. */
+export function SettingsLayout({
 	label,
-	links,
-	onJump,
+	items,
+	active,
+	children,
 }: {
+	/** Names the list for assistive tech ("Settings sections"). */
 	label: string;
-	links: readonly {
-		id: string;
-		title: string;
-		href: string;
-		/** What a dot after the link stands for ("Changes not deployed"). */
-		dot?: string;
-	}[];
-	onJump: (id: string) => void;
+	items: readonly SettingsNavItem[];
+	active: string;
+	children: React.ReactNode;
 }) {
 	return (
-		<nav
-			aria-label={label}
-			className="flex flex-wrap gap-x-4 gap-y-1.5 text-[13px]"
-		>
-			{links.map((link) => (
-				<a
-					key={link.id}
-					href={link.href}
-					className="inline-flex items-center gap-1.5 rounded-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-					onClick={(event) => {
-						if (event.metaKey || event.ctrlKey || event.shiftKey) return;
-						event.preventDefault();
-						window.history.replaceState(null, "", link.href);
-						onJump(link.id);
-					}}
-				>
-					{link.title}
-					{link.dot ? (
-						<span
-							role="img"
-							aria-label={link.dot}
-							className="size-1.5 shrink-0 rounded-full bg-warning"
-						/>
-					) : null}
-				</a>
-			))}
-		</nav>
+		<div className="grid w-full min-w-0 gap-x-10 gap-y-6 pb-16 md:grid-cols-[13rem_minmax(0,1fr)]">
+			<Select
+				value={active}
+				onValueChange={(id) => {
+					const item = items.find((entry) => entry.id === id);
+					if (item) open(item.href);
+				}}
+			>
+				<SelectTrigger aria-label={label} className="w-full md:hidden">
+					<SelectValue />
+				</SelectTrigger>
+				<SelectContent>
+					{items.map((item) => (
+						<SelectItem key={item.id} value={item.id}>
+							<item.icon className="text-muted-foreground" />
+							{item.title}
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
+			<nav
+				aria-label={label}
+				className="sticky top-6 flex flex-col gap-0.5 self-start max-md:hidden"
+			>
+				{items.map((item) => {
+					const current = item.id === active;
+					return (
+						<a
+							key={item.id}
+							href={item.href}
+							aria-current={current ? "page" : undefined}
+							className={cn(
+								"flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+								current
+									? "bg-muted font-medium text-foreground"
+									: "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+							)}
+							onClick={(event) => {
+								if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+								event.preventDefault();
+								if (!current) open(item.href);
+							}}
+						>
+							<item.icon className="size-4 shrink-0" />
+							<span className="min-w-0 flex-1 truncate">{item.title}</span>
+							{item.dot ? (
+								<span
+									role="img"
+									aria-label={item.dot}
+									className="size-1.5 shrink-0 rounded-full bg-warning"
+								/>
+							) : null}
+						</a>
+					);
+				})}
+			</nav>
+			<div className="min-w-0">{children}</div>
+		</div>
 	);
 }
 
-/** One section of the page: icon and title, one line, an optional notice,
-    then its body, mounted when it nears the viewport. `collapsible` sections
-    are one row ("Show") until opened, and mount nothing before that. */
-export function SettingsSection({
+/** One section: title, one line, an optional notice, then its body. It
+    mounts the first time it is opened and stays mounted behind the others,
+    so unsaved edits survive a look at another section. */
+export function SettingsPane({
 	id,
-	icon: Icon,
+	active,
 	title,
 	description,
 	notice,
-	collapsible = false,
-	open = true,
-	onOpenChange,
-	target = false,
 	className,
 	children,
 }: {
 	id: string;
-	icon: ComponentType<{ className?: string }>;
+	active: boolean;
 	title: string;
 	description?: React.ReactNode;
-	/** Shown under the description while the section is open. */
 	notice?: React.ReactNode;
-	collapsible?: boolean;
-	open?: boolean;
-	onOpenChange?: (open: boolean) => void;
-	/** The URL points at this section: mount it at once. */
-	target?: boolean;
-	/** For the body: `max-w-3xl` for a form. */
+	/** For the body: `max-w-5xl` for a form. */
 	className?: string;
 	children: React.ReactNode;
 }) {
-	const expanded = !collapsible || open;
+	const [opened, setOpened] = useState(active);
+	if (active && !opened) setOpened(true);
+	if (!opened) return null;
 	return (
 		<section
 			id={id}
+			hidden={!active}
 			aria-labelledby={`${id}-title`}
-			className={cn(
-				"flex min-w-0 scroll-mt-6 flex-col gap-5 border-border border-t first:border-t-0",
-				expanded ? "py-8 first:pt-0" : "py-4",
-			)}
+			className={cn("min-w-0 flex-col gap-6", active && "flex")}
 		>
-			<div
-				className={cn(
-					"flex min-w-0 gap-x-4",
-					expanded ? "items-start" : "items-center",
-				)}
-			>
-				<div
-					className={cn(
-						"flex min-w-0 flex-1",
-						expanded
-							? "flex-col gap-1"
-							: "items-center gap-x-3 gap-y-0.5 max-sm:flex-col max-sm:items-start",
-					)}
+			<div className="flex min-w-0 flex-col gap-1">
+				<h2
+					id={`${id}-title`}
+					className="font-semibold text-[17px] leading-snug"
 				>
-					<h2
-						id={`${id}-title`}
-						className="flex shrink-0 items-center gap-2 font-semibold text-[15px] leading-snug"
-					>
-						<Icon
-							aria-hidden
-							className="size-4 shrink-0 text-muted-foreground"
-						/>
-						{title}
-					</h2>
-					{description ? (
-						<p
-							className={cn(
-								"min-w-0 text-muted-foreground text-sm",
-								!expanded && "truncate max-sm:whitespace-normal",
-							)}
-						>
-							{description}
-						</p>
-					) : null}
-					{expanded ? notice : null}
-				</div>
-				{collapsible ? (
-					<Button
-						variant="outline"
-						size="sm"
-						className="shrink-0"
-						aria-expanded={expanded}
-						aria-controls={`${id}-body`}
-						onClick={() => onOpenChange?.(!expanded)}
-					>
-						{expanded ? "Hide" : "Show"}
-					</Button>
+					{title}
+				</h2>
+				{description ? (
+					<p className="text-muted-foreground text-sm">{description}</p>
 				) : null}
+				{notice}
 			</div>
-			{expanded ? (
-				<div id={`${id}-body`} className={cn("min-w-0", className)}>
-					<LazyMount now={target}>{children}</LazyMount>
-				</div>
-			) : null}
+			<div className={cn("min-w-0", className)}>{children}</div>
 		</section>
 	);
 }

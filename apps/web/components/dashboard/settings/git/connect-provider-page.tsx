@@ -30,7 +30,7 @@ export function ConnectProviderPage() {
 	const current = (PROVIDERS.find((p) => p.id === params.get("provider"))?.id ??
 		"github") as ProviderId;
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-6 pb-10">
+		<div className="flex w-full max-w-5xl flex-col gap-6 pb-10">
 			<div className="space-y-1">
 				<p className="text-muted-foreground text-sm">
 					<Link href="/settings/git" className="hover:text-foreground">

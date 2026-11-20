@@ -327,7 +327,7 @@ export function MarkTile({
 		<span
 			aria-hidden="true"
 			className={cn(
-				"flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-muted-foreground [&>img]:size-[18px] [&>svg]:size-[18px]",
+				"flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-muted-foreground [&>img]:size-5 [&>svg]:size-[18px]",
 				className,
 			)}
 		>

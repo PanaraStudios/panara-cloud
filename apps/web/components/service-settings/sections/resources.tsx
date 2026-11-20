@@ -202,6 +202,7 @@ export function ResourcesSection({ id, kind }: SectionProps) {
 									type="button"
 									variant={active ? "outline" : "ghost"}
 									size="xs"
+									autoIcon={false}
 									aria-pressed={active}
 									onClick={() =>
 										set({ memoryLimit: option.mb ? String(option.mb) : "" })

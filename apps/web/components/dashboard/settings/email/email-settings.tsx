@@ -104,7 +104,7 @@ function EmailSettingsForAdmin() {
 	const [editing, setEditing] = useState(false);
 	const connected = !!settings?.provider;
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-8 pb-10">
+		<div className="flex w-full max-w-5xl flex-col gap-8 pb-10">
 			<PageHeader
 				title="Email"
 				description="How Panara Cloud sends sign-in links, invitations and password resets."

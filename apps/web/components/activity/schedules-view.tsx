@@ -225,6 +225,7 @@ function NewHostSchedule({
 					{hosts.map((host) => (
 						<DropdownMenuItem
 							key={host.id}
+							autoIcon={false}
 							onClick={() => onPick({ id: host.id, type: host.type })}
 						>
 							{host.name}
@@ -285,7 +286,7 @@ export function SchedulesView() {
 
 	if (creating)
 		return (
-			<div className="flex w-full max-w-3xl flex-col gap-6 pb-10">
+			<div className="flex w-full max-w-5xl flex-col gap-6 pb-10">
 				<PageHeader
 					title="New host schedule"
 					description="A script that runs as root on the host on a cron schedule."

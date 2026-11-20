@@ -184,8 +184,7 @@ export const SaveGitProviderCompose = ({ composeId }: Props) => {
 											<Select
 												key={field.value}
 												onValueChange={field.onChange}
-												defaultValue={field.value}
-												value={field.value}
+												value={field.value ?? null}
 											>
 												<SelectTrigger className="w-full">
 													<SelectValue placeholder="Select a key" />

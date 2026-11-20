@@ -91,7 +91,7 @@ export function NewSandboxPage() {
 		);
 	}
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-8 pb-10">
+		<div className="flex w-full max-w-5xl flex-col gap-8 pb-10">
 			<PageHeader
 				title="New sandbox"
 				description="A resource-limited container you can drive from here or through the API. It's removed when its timeout runs out."

@@ -33,7 +33,7 @@ export function MemberAccessPage({ userId }: { userId: string }) {
 
 	if (members === undefined) {
 		return (
-			<div className="flex max-w-3xl flex-col gap-8" aria-busy="true">
+			<div className="flex max-w-5xl flex-col gap-8" aria-busy="true">
 				<Skeleton className="h-12 w-64" />
 				<Skeleton className="h-16 w-full" />
 				<Skeleton className="h-64 w-full" />
@@ -53,7 +53,7 @@ export function MemberAccessPage({ userId }: { userId: string }) {
 	const name = member.name || member.email;
 	const isPrivileged = member.role === "owner" || member.role === "admin";
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-8">
+		<div className="flex w-full max-w-5xl flex-col gap-8">
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 				<div className="min-w-0 space-y-1">
 					<p className="text-muted-foreground text-sm">

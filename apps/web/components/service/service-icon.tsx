@@ -25,22 +25,26 @@ export const SERVICE_ICONS: Record<
 	libsql: LibsqlIcon,
 };
 
-/** A service's custom icon (compose templates carry one), else its kind's. */
+/** A service's custom icon (compose templates carry one), else its kind's.
+    A custom icon is a picture with its own padding, so it is drawn larger
+    than a glyph: `imageClassName` sizes it, `className` sizes the glyph. */
 export function ServiceIcon({
 	kind,
 	icon,
 	className,
+	imageClassName = "size-5",
 }: {
 	kind: ServiceKind;
 	icon?: string | null;
 	className?: string;
+	imageClassName?: string;
 }) {
 	if (icon) {
 		return (
 			<img
 				src={icon}
 				alt=""
-				className={cn("size-4 shrink-0 object-contain", className)}
+				className={cn("shrink-0 rounded-sm object-contain", imageClassName)}
 			/>
 		);
 	}

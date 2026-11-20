@@ -402,7 +402,7 @@ export function MonitoringSettingsPage() {
 		);
 	}
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-8 pb-10">
+		<div className="flex w-full max-w-5xl flex-col gap-8 pb-10">
 			<PageHeader
 				title={config?.enabled ? "Monitoring settings" : "Set up monitoring"}
 				description="A small service on the server samples CPU, memory, disk, network and container usage, keeps the history and sends alerts."

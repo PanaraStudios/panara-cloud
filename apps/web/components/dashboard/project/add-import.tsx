@@ -277,7 +277,7 @@ export const AddImport = ({
 											</TooltipProvider>
 											<Select
 												onValueChange={field.onChange}
-												defaultValue={field.value || "local"}
+												value={field.value || "local"}
 											>
 												<SelectTrigger className="w-full">
 													<SelectValue placeholder="Panara Cloud" />

@@ -46,18 +46,18 @@ function ChoiceGroup({ title, items }: { title: string; items: Choice[] }) {
 					<Link
 						key={item.href}
 						href={item.href}
-						className="flex min-h-24 items-start gap-3 rounded-xl border border-border p-4 transition-colors hover:border-border-strong hover:bg-muted/50 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+						className="flex min-h-24 items-center gap-4 rounded-xl border border-border p-4 transition-colors hover:border-border-strong hover:bg-muted/50 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
 					>
 						<span
 							aria-hidden="true"
-							className="flex size-6 shrink-0 items-center justify-center"
+							className="flex size-10 shrink-0 items-center justify-center"
 						>
 							{item.kind && isDatabaseKind(item.kind) ? (
-								<ServiceIcon kind={item.kind} className="size-6" />
+								<ServiceIcon kind={item.kind} className="size-10" />
 							) : item.kind ? (
-								<ServiceIcon kind={item.kind} className="size-5" />
+								<ServiceIcon kind={item.kind} className="size-8 stroke-[1.5]" />
 							) : item.icon ? (
-								<item.icon className="size-5" />
+								<item.icon className="size-8 stroke-[1.5]" />
 							) : null}
 						</span>
 						<span className="flex min-w-0 flex-col gap-0.5">

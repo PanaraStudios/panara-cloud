@@ -214,7 +214,7 @@ function TemplatesGallery() {
 				{templates === undefined ? (
 					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 						{Array.from({ length: 9 }, (_, index) => (
-							<Skeleton key={index} className="h-[7.75rem] rounded-xl" />
+							<Skeleton key={index} className="h-[8.5rem] rounded-xl" />
 						))}
 					</div>
 				) : visible.length === 0 ? (
@@ -231,18 +231,18 @@ function TemplatesGallery() {
 								return (
 									<div
 										key={template.templateId}
-										className="group relative flex h-[7.75rem] flex-col gap-1 rounded-xl border border-border p-4 transition-colors hover:border-border-strong hover:bg-muted/50"
+										className="group relative flex h-[8.5rem] flex-col gap-1 rounded-xl border border-border p-4 transition-colors hover:border-border-strong hover:bg-muted/50"
 									>
 										<Link
 											href={`${base}/new/template?id=${encodeURIComponent(template.templateId)}`}
 											className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
 											aria-label={template.name}
 										/>
-										<div className="flex items-center gap-2.5">
+										<div className="flex items-center gap-3">
 											<CatalogLogo
 												src={template.logoUrl}
 												name={template.name}
-												className="size-6"
+												className="size-8"
 											/>
 											<span className="min-w-0 flex-1 truncate font-medium text-sm">
 												{template.name}
@@ -348,7 +348,7 @@ function TemplateDetail({ templateId }: { templateId: string }) {
 	].filter((link): link is { label: string; href: string } => !!link?.href);
 
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-6 pb-16">
+		<div className="flex w-full max-w-5xl flex-col gap-6 pb-16">
 			<FlowHeader
 				backHref={`${base}/new/template`}
 				backLabel="Templates"

@@ -9,7 +9,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { LogoTile } from "@/components/logo";
+import { BrandMark } from "@/components/logo";
 import { Kbd } from "@/components/ui/kbd";
 import {
 	Sidebar,
@@ -71,7 +71,7 @@ function BrandButton() {
 			tooltip="Panara Cloud"
 			render={<Link href="/" />}
 		>
-			<LogoTile />
+			<BrandMark />
 			<span className="truncate font-semibold tracking-tight">
 				Panara Cloud
 			</span>

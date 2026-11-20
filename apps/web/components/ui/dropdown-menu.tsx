@@ -4,6 +4,7 @@ import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import { cn } from "cn";
 import { CheckIcon, ChevronRightIcon } from "lucide-react";
 import type * as React from "react";
+import { actionIcon, plainLabel } from "@/lib/action-icons";
 
 function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
 	return <MenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
@@ -85,11 +86,18 @@ function DropdownMenuItem({
 	className,
 	inset,
 	variant = "default",
+	autoIcon = true,
+	children,
 	...props
 }: MenuPrimitive.Item.Props & {
 	inset?: boolean;
 	variant?: "default" | "destructive";
+	/** A text-only label gets the icon of its action; false for a label that
+	    is data (a server's name), not an action. */
+	autoIcon?: boolean;
 }) {
+	const plain = autoIcon && !inset ? plainLabel(children) : null;
+	const ActionIcon = plain ? actionIcon(plain) : null;
 	return (
 		<MenuPrimitive.Item
 			data-slot="dropdown-menu-item"
@@ -100,7 +108,10 @@ function DropdownMenuItem({
 				className,
 			)}
 			{...props}
-		/>
+		>
+			{ActionIcon ? <ActionIcon aria-hidden /> : null}
+			{children}
+		</MenuPrimitive.Item>
 	);
 }
 

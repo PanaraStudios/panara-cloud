@@ -802,7 +802,11 @@ export function ServiceHeader() {
 		<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 			<div className="flex min-w-0 items-center gap-3">
 				<span className="icon-tile size-10 shrink-0 rounded-lg max-sm:hidden">
-					<ServiceIcon kind={service.kind} icon={service.icon} />
+					<ServiceIcon
+						kind={service.kind}
+						icon={service.icon}
+						imageClassName="size-8"
+					/>
 				</span>
 				<div className="flex min-w-0 flex-col gap-1">
 					<div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">

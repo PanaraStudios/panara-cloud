@@ -115,6 +115,7 @@ export const StepOne = ({ setTemplateInfo, templateInfo }: any) => {
 									key={index}
 									variant="outline"
 									size="sm"
+									autoIcon={false}
 									onClick={() => handleExampleClick(example)}
 								>
 									{example}

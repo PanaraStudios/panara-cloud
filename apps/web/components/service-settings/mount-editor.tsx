@@ -169,7 +169,7 @@ export function MountEditorPage({ mountId }: { mountId?: string }) {
 			className={cn(
 				"flex w-full flex-col gap-6 pb-16",
 				// A file mount is an editor and uses the full column.
-				type !== "file" && "max-w-3xl",
+				type !== "file" && "max-w-5xl",
 			)}
 		>
 			<SubPageHeader
@@ -177,7 +177,7 @@ export function MountEditorPage({ mountId }: { mountId?: string }) {
 				list="Volumes"
 				title={`${mountId ? "Edit mount" : "Add mount"} · ${name}`}
 			/>
-			<div className="grid max-w-3xl gap-4 sm:grid-cols-[auto_1fr]">
+			<div className="grid max-w-5xl gap-4 sm:grid-cols-[auto_1fr]">
 				<div className="flex flex-col gap-3">
 					<Label>Type</Label>
 					<FilterPills

@@ -208,8 +208,7 @@ export const SaveGithubProvider = ({ applicationId }: Props) => {
 											});
 											form.setValue("branch", "");
 										}}
-										defaultValue={field.value}
-										value={field.value}
+										value={field.value ?? null}
 									>
 										<FormControl>
 											<SelectTrigger className="w-full">

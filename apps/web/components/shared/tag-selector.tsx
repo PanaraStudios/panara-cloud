@@ -105,7 +105,10 @@ export function TagSelector({
 					</div>
 					<ChevronsUpDown className="ml-2 size-4 shrink-0 text-muted-foreground" />
 				</PopoverTrigger>
-				<PopoverContent className="w-full p-0" align="start">
+				<PopoverContent
+					className="w-(--anchor-width) min-w-56 p-0"
+					align="start"
+				>
 					<Command>
 						<CommandInput
 							placeholder="Search tags..."

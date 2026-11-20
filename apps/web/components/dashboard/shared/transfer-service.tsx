@@ -198,7 +198,7 @@ export const TransferService = ({ id, type, serverId, label }: Props) => {
 											<FormLabel>Target server</FormLabel>
 											<Select
 												onValueChange={field.onChange}
-												defaultValue={field.value}
+												value={field.value ?? null}
 											>
 												<FormControl>
 													<SelectTrigger className="w-full">

@@ -396,7 +396,7 @@ function DashboardChrome({
 					onShortcuts={() => setShortcutsOpen(true)}
 				/>
 				<SidebarInset className="min-w-0 bg-background">
-					<div className="mx-auto flex min-h-0 w-full max-w-[1280px] flex-1 flex-col gap-6 px-6 py-8 md:px-10">
+					<div className="flex min-h-0 w-full flex-1 flex-col gap-6 px-6 py-8 md:px-8">
 						<TrailRow onSearch={() => setSearchOpen(true)} />
 						{children}
 					</div>

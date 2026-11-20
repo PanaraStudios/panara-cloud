@@ -399,7 +399,7 @@ export const ShowPreviewSettings = ({ applicationId }: Props) => {
 													<FormLabel>Certificate provider</FormLabel>
 													<Select
 														onValueChange={field.onChange}
-														defaultValue={field.value || ""}
+														value={field.value || null}
 													>
 														<FormControl>
 															<SelectTrigger className="w-full">

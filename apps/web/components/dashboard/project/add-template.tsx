@@ -242,7 +242,10 @@ export const AddTemplate = ({ environmentId, onDone }: Props) => {
 
 							<ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
 						</PopoverTrigger>
-						<PopoverContent className="p-0" align="start">
+						<PopoverContent
+							className="w-(--anchor-width) min-w-56 p-0"
+							align="start"
+						>
 							<Command>
 								<CommandInput placeholder="Search tag..." className="h-9" />
 								<CommandList className="max-h-none">

@@ -288,7 +288,10 @@ export const ConnectServer = ({ session, onCompleteSetup, onClose }: Props) => {
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Server type</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value}>
+							<Select
+								onValueChange={field.onChange}
+								value={field.value ?? null}
+							>
 								<SelectTrigger className="w-full">
 									<SelectValue placeholder="Select a server type" />
 								</SelectTrigger>

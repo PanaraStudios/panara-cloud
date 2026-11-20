@@ -83,7 +83,7 @@ export function SettingsSubPage({
 	}
 
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-6 pb-16">
+		<div className="flex w-full max-w-5xl flex-col gap-6 pb-16">
 			<SubPageHeader back={back} list={listTitle} title={title} />
 			{form}
 		</div>

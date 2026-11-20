@@ -268,6 +268,7 @@ function ProjectCrumbs({
 								kind={service.kind}
 								icon={current?.icon}
 								className="size-3.5"
+								imageClassName="size-5"
 							/>
 							<Name>{current?.name}</Name>
 						</CrumbLink>

@@ -440,7 +440,7 @@ function ConfirmAction({
 export function GeneralSettings() {
 	const isInstanceAdmin = useQuery(api.infra.webServer.isInstanceAdmin, {});
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-8 pb-10">
+		<div className="flex w-full max-w-5xl flex-col gap-8 pb-10">
 			<PageHeader
 				title="General"
 				description="Your organization, and the Panara Cloud panel that runs it."

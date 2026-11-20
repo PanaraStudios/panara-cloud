@@ -364,7 +364,7 @@ export const HandleSchedules = ({
 										<div className="flex gap-2">
 											<Select
 												onValueChange={field.onChange}
-												defaultValue={field.value || ""}
+												value={field.value || null}
 											>
 												<FormControl>
 													<SelectTrigger className="w-full">
@@ -571,7 +571,7 @@ export const HandleSchedules = ({
 										<FormLabel>Shell type</FormLabel>
 										<Select
 											onValueChange={field.onChange}
-											defaultValue={field.value}
+											value={field.value ?? null}
 										>
 											<FormControl>
 												<SelectTrigger className="w-full">

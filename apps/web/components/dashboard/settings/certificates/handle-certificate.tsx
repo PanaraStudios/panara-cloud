@@ -309,7 +309,7 @@ export const HandleCertificate = ({ certificateId, asPage }: Props) => {
 
 										<Select
 											onValueChange={field.onChange}
-											defaultValue={field.value || "local"}
+											value={field.value || "local"}
 										>
 											<SelectTrigger className="w-full">
 												<SelectValue placeholder="Panara Cloud" />

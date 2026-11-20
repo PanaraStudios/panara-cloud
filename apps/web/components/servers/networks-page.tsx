@@ -395,7 +395,7 @@ export function NewNetworkPage() {
 	if (!permissions.docker.read) return <NotAvailable />;
 	const back = () => router.push(serverUrl(ref.routeId, "networks"));
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-6 pb-10">
+		<div className="flex w-full max-w-5xl flex-col gap-6 pb-10">
 			<PageHeader
 				title="Create network"
 				description="A network can't be changed once it exists: to change one, delete it and create it again."

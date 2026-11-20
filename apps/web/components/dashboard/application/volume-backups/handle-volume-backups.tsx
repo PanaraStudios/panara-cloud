@@ -329,7 +329,7 @@ export const HandleVolumeBackups = ({
 									<FormLabel>Destination</FormLabel>
 									<Select
 										onValueChange={field.onChange}
-										defaultValue={field.value}
+										value={field.value ?? null}
 									>
 										<FormControl>
 											<SelectTrigger className="w-full">
@@ -369,7 +369,7 @@ export const HandleVolumeBackups = ({
 												<div className="flex gap-2">
 													<Select
 														onValueChange={field.onChange}
-														defaultValue={field.value || ""}
+														value={field.value || null}
 													>
 														<FormControl>
 															<SelectTrigger className="w-full">
@@ -474,7 +474,7 @@ export const HandleVolumeBackups = ({
 												<FormLabel>Volumes</FormLabel>
 												<Select
 													onValueChange={field.onChange}
-													defaultValue={field.value || ""}
+													value={field.value || null}
 												>
 													<FormControl>
 														<SelectTrigger className="w-full">
@@ -511,7 +511,7 @@ export const HandleVolumeBackups = ({
 										<FormLabel>Volumes</FormLabel>
 										<Select
 											onValueChange={field.onChange}
-											defaultValue={field.value || ""}
+											value={field.value || null}
 										>
 											<FormControl>
 												<SelectTrigger className="w-full">

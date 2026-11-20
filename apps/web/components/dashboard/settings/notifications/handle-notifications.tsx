@@ -754,7 +754,7 @@ export const HandleNotifications = ({ notificationId, asPage }: Props) => {
 							<FormControl>
 								<RadioGroup
 									onValueChange={field.onChange}
-									defaultValue={field.value}
+									value={field.value ?? null}
 									className="flex flex-wrap gap-2"
 								>
 									{Object.entries(notificationsMap).map(([key, value]) => (
@@ -1846,7 +1846,7 @@ export const HandleNotifications = ({ notificationId, asPage }: Props) => {
 	);
 	if (asPage) {
 		return (
-			<div className="flex w-full max-w-3xl flex-col gap-6 pb-10">
+			<div className="flex w-full max-w-5xl flex-col gap-6 pb-10">
 				<div className="space-y-1">
 					<p className="text-muted-foreground text-sm">
 						<Link

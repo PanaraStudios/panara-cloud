@@ -91,7 +91,7 @@ export function AiGeneratorPage() {
 			: "Describe it to AI";
 
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-6 pb-16">
+		<div className="flex w-full max-w-5xl flex-col gap-6 pb-16">
 			<FlowHeader
 				backHref={step === 0 ? chooser : "#"}
 				backLabel={
@@ -220,7 +220,7 @@ export function ImportPage() {
 		permissions.project.create &&
 		(active.role === "owner" || active.role === "admin");
 	return (
-		<div className="flex w-full max-w-3xl flex-col gap-6 pb-16">
+		<div className="flex w-full max-w-5xl flex-col gap-6 pb-16">
 			<FlowHeader
 				backHref={chooser}
 				backLabel="New service"

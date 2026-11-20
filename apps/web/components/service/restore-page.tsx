@@ -212,7 +212,7 @@ export function RestorePage() {
 	const fileName = chosen ? chosen.split("/").at(-1) : null;
 
 	return (
-		<div className="flex max-w-3xl flex-col gap-8">
+		<div className="flex max-w-5xl flex-col gap-8">
 			<SubPageHeader
 				back={serviceUrl(service.ref, "backups")}
 				list="Backups"

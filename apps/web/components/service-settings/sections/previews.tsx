@@ -107,7 +107,7 @@ export function PreviewsSection({ id }: SectionProps) {
 
 	return (
 		<div className="flex flex-col gap-8">
-			<section className="flex max-w-3xl flex-col gap-4">
+			<section className="flex max-w-5xl flex-col gap-4">
 				<SwitchRow
 					id="previews-enabled"
 					className="py-0"

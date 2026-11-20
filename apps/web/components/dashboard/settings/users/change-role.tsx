@@ -140,7 +140,7 @@ export const ChangeRole = ({
 									<FormLabel>Role</FormLabel>
 									<Select
 										onValueChange={field.onChange}
-										defaultValue={field.value}
+										value={field.value ?? null}
 									>
 										<FormControl>
 											<SelectTrigger className="w-full">

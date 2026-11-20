@@ -1,13 +1,10 @@
 "use client";
 
 import { notFound, usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
 import { usePendingSections } from "@/components/service/use-pending-changes";
 import {
-	SectionLinks,
-	SettingsSection,
-	SettingsSections,
-	useSectionJump,
+	SettingsLayout,
+	SettingsPane,
 } from "@/components/ui-kit/settings-page";
 import {
 	isDatabaseKind,
@@ -55,37 +52,23 @@ const ROW_PENDING = new Set(["ports", "volumes"]);
 // A section that is a form is one 768px column; every other section is a
 // table or an editor and uses the full column.
 const FORM = new Set(["general", "resources", "advanced", "danger"]);
-// Sections few services touch: one row until opened.
-const RARE = new Set([
-	"traefik",
-	"previews",
-	"patches",
-	"schedules",
-	"volume-backups",
-]);
 
 function SectionBlock({
 	service,
 	meta,
 	basics,
-	target,
-	open,
-	onOpenChange,
+	active,
 }: {
 	service: ServiceRef;
 	meta: SectionMeta;
 	basics: ServiceBasics;
-	/** The URL points at this section. */
-	target: boolean;
-	/** A rare section's choice, once the member made one. */
-	open: boolean | undefined;
-	onOpenChange: (open: boolean) => void;
+	active: boolean;
 }) {
 	const pending = useSectionPending(service.kind, service.id, meta.events);
 	return (
-		<SettingsSection
+		<SettingsPane
 			id={meta.slug}
-			icon={meta.icon}
+			active={active}
 			title={meta.title}
 			description={
 				meta.slug === "general" && isDatabaseKind(service.kind)
@@ -97,11 +80,7 @@ function SectionBlock({
 					<PendingNotice events={pending.events} />
 				)
 			}
-			collapsible={RARE.has(meta.slug)}
-			open={open ?? (target || pending.events.length > 0)}
-			onOpenChange={onOpenChange}
-			target={target}
-			className={FORM.has(meta.slug) ? "max-w-3xl" : undefined}
+			className={FORM.has(meta.slug) ? "max-w-5xl" : undefined}
 		>
 			<SettingsBody>
 				<SectionBody
@@ -112,13 +91,13 @@ function SectionBlock({
 					pending={pending.events}
 				/>
 			</SettingsBody>
-		</SettingsSection>
+		</SettingsPane>
 	);
 }
 
-/** A service's Settings: every section on one page, in order. `target` is
-    the section of a `…/settings/<section>` link; the page opens scrolled to
-    it. */
+/** A service's Settings: the sections listed on the left, one open at a
+    time. `target` is the section of a `…/settings/<section>` link; without
+    one the first section is open. */
 function ServiceSettingsPage({
 	service,
 	target,
@@ -135,47 +114,25 @@ function ServiceSettingsPage({
 		service.kind,
 		basics ? service.id : undefined,
 	);
-	const [choices, setChoices] = useState<Record<string, boolean>>({});
-	const [page, jumpTo] = useSectionJump();
-	const ready = Boolean(basics);
-	const known = !target || sections.some((section) => section.slug === target);
+	const active = target ?? sections[0]?.slug;
+	const known = sections.some((section) => section.slug === active);
 
-	const reveal = useCallback(
-		(slug: string) => {
-			setChoices((previous) =>
-				RARE.has(slug) && !previous[slug]
-					? { ...previous, [slug]: true }
-					: previous,
-			);
-			jumpTo(slug);
-		},
-		[jumpTo],
-	);
-
-	useEffect(() => {
-		if (ready && target && known) reveal(target);
-	}, [ready, target, known, reveal]);
-
-	if (!known) notFound();
-	if (!basics) return null;
+	if (target && !known) notFound();
+	if (!basics || !active) return null;
 
 	return (
-		<SettingsSections
-			ref={page}
-			links={
-				<SectionLinks
-					label="Settings sections"
-					links={sections.map((section) => ({
-						id: section.slug,
-						title: section.title,
-						href: serviceSettingsUrl(service, section.slug),
-						dot: pending.has(section.slug)
-							? "Changes waiting for a deploy"
-							: undefined,
-					}))}
-					onJump={reveal}
-				/>
-			}
+		<SettingsLayout
+			label="Settings sections"
+			active={active}
+			items={sections.map((section) => ({
+				id: section.slug,
+				title: section.title,
+				icon: section.icon,
+				href: serviceSettingsUrl(service, section.slug),
+				dot: pending.has(section.slug)
+					? "Changes waiting for a deploy"
+					: undefined,
+			}))}
 		>
 			{sections.map((section) => (
 				<SectionBlock
@@ -183,14 +140,10 @@ function ServiceSettingsPage({
 					service={service}
 					meta={section}
 					basics={basics}
-					target={section.slug === target}
-					open={choices[section.slug]}
-					onOpenChange={(open) =>
-						setChoices((previous) => ({ ...previous, [section.slug]: open }))
-					}
+					active={section.slug === active}
 				/>
 			))}
-		</SettingsSections>
+		</SettingsLayout>
 	);
 }
 

@@ -1,9 +1,13 @@
 import { ImageResponse } from "next/og";
 
-import { LOGO_MARK_PATH, LOGO_MARK_STROKE } from "@/components/logo";
+import {
+	BRAND_VIOLET,
+	LOGO_MARK_PATHS,
+	LOGO_MARK_VIEWBOX,
+} from "@/components/logo";
 
-/* 180×180 PNG for iOS home screens. Matches app/icon.svg: dark rounded
-   square, white cloud mark (opensend's icon treatment). */
+/* 180×180 PNG for iOS home screens. Matches app/icon.svg: the white mark on
+   the violet tile. */
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
@@ -17,18 +21,14 @@ export default function AppleIcon() {
 				display: "flex",
 				alignItems: "center",
 				justifyContent: "center",
-				background: "#171717",
+				background: BRAND_VIOLET,
 				borderRadius: 40,
 			}}
 		>
-			<svg width="112" height="112" viewBox="0 0 24 24" fill="none">
-				<path
-					d={LOGO_MARK_PATH}
-					stroke="#ffffff"
-					strokeWidth={LOGO_MARK_STROKE}
-					strokeLinecap="round"
-					strokeLinejoin="round"
-				/>
+			<svg width="71" height="124" viewBox={LOGO_MARK_VIEWBOX} fill="#ffffff">
+				{LOGO_MARK_PATHS.map((d) => (
+					<path key={d} d={d} />
+				))}
 			</svg>
 		</div>,
 		{ ...size },

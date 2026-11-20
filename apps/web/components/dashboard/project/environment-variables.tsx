@@ -214,7 +214,7 @@ API_KEY=your-api-key-here
 		</>
 	);
 	if (onDone)
-		return <div className="flex max-w-3xl flex-col gap-6">{body}</div>;
+		return <div className="flex max-w-5xl flex-col gap-6">{body}</div>;
 
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>

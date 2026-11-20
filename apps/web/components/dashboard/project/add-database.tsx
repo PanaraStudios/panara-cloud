@@ -367,7 +367,7 @@ export const AddDatabase = ({ environmentId, projectName, onDone }: Props) => {
 								<FormControl>
 									<RadioGroup
 										onValueChange={field.onChange}
-										defaultValue={field.value}
+										value={field.value ?? null}
 										className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
 									>
 										{Object.entries(databasesMap).map(([key, value]) => (
@@ -565,7 +565,7 @@ export const AddDatabase = ({ environmentId, projectName, onDone }: Props) => {
 											<FormLabel>Sqld Node</FormLabel>
 											<Select
 												onValueChange={field.onChange}
-												defaultValue={field.value || "primary"}
+												value={field.value || "primary"}
 											>
 												<SelectTrigger className="w-full">
 													<SelectValue placeholder={"primary"} />
@@ -772,7 +772,7 @@ export const AddDatabase = ({ environmentId, projectName, onDone }: Props) => {
 		</>
 	);
 	if (onDone)
-		return <div className="flex max-w-3xl flex-col gap-6">{body}</div>;
+		return <div className="flex max-w-5xl flex-col gap-6">{body}</div>;
 
 	return (
 		<Dialog open={visible} onOpenChange={setVisible}>

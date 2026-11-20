@@ -1,7 +1,7 @@
 import { QuoteIcon } from "lucide-react";
 import Link from "next/link";
 import { RandomQuote } from "@/components/auth/random-quote";
-import { LogoTile } from "@/components/logo";
+import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 
 // opensend's auth layout (components/auth/page-frame.tsx): the form on the
@@ -17,12 +17,8 @@ export function AuthPageFrame({
 		<div className="grid min-h-svh lg:grid-cols-2">
 			<div className="flex flex-col gap-4 p-6 md:p-10">
 				<div className="flex justify-center gap-2 md:justify-start">
-					<Link
-						href="/"
-						className="inline-flex items-center gap-2.5 font-semibold text-foreground text-lg tracking-tight"
-					>
-						<LogoTile />
-						Panara Cloud
+					<Link href="/" className="inline-flex">
+						<Logo className="text-lg" />
 					</Link>
 				</div>
 				<main className="flex flex-1 items-center justify-center">

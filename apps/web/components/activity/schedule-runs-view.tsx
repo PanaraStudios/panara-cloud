@@ -334,7 +334,7 @@ export function ScheduleRunsView({ scheduleId }: { scheduleId: string }) {
 
 	if (editing)
 		return (
-			<div className="flex w-full max-w-3xl flex-col gap-6 pb-10">
+			<div className="flex w-full max-w-5xl flex-col gap-6 pb-10">
 				<PageHeader title={`Edit ${schedule.name}`} />
 				<HandleSchedules
 					id={scheduleFormId(schedule)}
