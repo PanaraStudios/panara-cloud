@@ -1,0 +1,161 @@
+"use client";
+
+import { Activity, Loader2, Monitor, Server, Settings } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { PageHeader } from "@/components/ui-kit/primitives";
+import { NodeCard } from "./details/details-card";
+import { useSwarmNodes } from "./use-swarm-data";
+
+interface Props {
+	serverId?: string;
+}
+
+export default function SwarmMonitorCard({ serverId }: Props) {
+	const { nodes, raw, isLoading: isPending } = useSwarmNodes(serverId);
+
+	const totalNodes = nodes?.length ?? 0;
+	const activeNodes = nodes?.filter((node) => node.Status === "Ready") ?? [];
+	const managerNodes =
+		nodes?.filter(
+			(node) =>
+				node.ManagerStatus === "Leader" || node.ManagerStatus === "Reachable",
+		) ?? [];
+
+	return (
+		<div className="flex w-full flex-col gap-6">
+			<PageHeader
+				title="Swarm"
+				description="Nodes and services of the Docker Swarm on this server."
+			>
+				{!serverId && (
+					<Button onClick={() => window.location.assign("#nodes")}>
+						<Settings className="mr-2 h-4 w-4" />
+						Manage Cluster
+					</Button>
+				)}
+			</PageHeader>
+
+			{isPending ? (
+				<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground min-h-[45vh]">
+					<span>Loading...</span>
+					<Loader2 className="animate-spin size-4" />
+				</div>
+			) : !nodes ? (
+				<div className="flex items-center justify-center min-h-[45vh] text-destructive">
+					<span>Failed to load data</span>
+				</div>
+			) : (
+				<>
+					<div className="grid gap-6 lg:grid-cols-3">
+						<Card className="bg-background">
+							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+								<CardTitle className="text-sm font-medium">
+									Total Nodes
+								</CardTitle>
+								<div className="p-2 bg-emerald-600/20 text-emerald-600 rounded-md">
+									<Server className="h-4 w-4 text-muted-foreground dark:text-emerald-600" />
+								</div>
+							</CardHeader>
+							<CardContent>
+								<div className="text-2xl font-bold">{totalNodes}</div>
+							</CardContent>
+						</Card>
+
+						<Card className="bg-background">
+							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+								<div className="flex items-center gap-2">
+									<CardTitle className="text-sm font-medium">
+										Active Nodes
+									</CardTitle>
+									<Badge variant="success">Online</Badge>
+								</div>
+								<div className="p-2 bg-emerald-600/20 text-emerald-600 rounded-md">
+									<Activity className="h-4 w-4 text-muted-foreground dark:text-emerald-600" />
+								</div>
+							</CardHeader>
+							<CardContent>
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger>
+											<div className="text-2xl font-bold">
+												{activeNodes.length} / {totalNodes}
+											</div>
+										</TooltipTrigger>
+										<TooltipContent>
+											<div className="max-h-48 overflow-y-auto">
+												{activeNodes.map((node) => (
+													<div
+														key={node.ID}
+														className="flex items-center gap-2"
+													>
+														{node.Hostname}
+													</div>
+												))}
+											</div>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+							</CardContent>
+						</Card>
+
+						<Card className="bg-background">
+							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+								<div className="flex items-center gap-2">
+									<CardTitle className="text-sm font-medium">
+										Manager Nodes
+									</CardTitle>
+									<Badge variant="success">Online</Badge>
+								</div>
+								<div className="p-2 bg-emerald-600/20 text-emerald-600 rounded-md">
+									<Monitor className="h-4 w-4 text-muted-foreground dark:text-emerald-600" />
+								</div>
+							</CardHeader>
+							<CardContent>
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger>
+											<div className="text-2xl font-bold">
+												{managerNodes.length} / {totalNodes}
+											</div>
+										</TooltipTrigger>
+										<TooltipContent>
+											<div className="max-h-48 overflow-y-auto">
+												{managerNodes.map((node) => (
+													<div
+														key={node.ID}
+														className="flex items-center gap-2"
+													>
+														{node.Hostname}
+													</div>
+												))}
+											</div>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+							</CardContent>
+						</Card>
+					</div>
+
+					<div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
+						{nodes.map((node) => (
+							<NodeCard
+								key={node.ID}
+								node={node}
+								serverId={serverId}
+								info={raw?.find((entry) => entry.id === node.ID)}
+							/>
+						))}
+					</div>
+				</>
+			)}
+		</div>
+	);
+}

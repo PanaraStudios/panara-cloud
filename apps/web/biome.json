@@ -1,0 +1,18 @@
+{
+	"$schema": "../../node_modules/@biomejs/biome/configuration_schema.json",
+	"root": false,
+	"extends": "//",
+	"overrides": [
+		{
+			"includes": ["components/ui/**"],
+			"linter": {
+				"rules": {
+					"a11y": {
+						"useSemanticElements": "off",
+						"noLabelWithoutControl": "off"
+					}
+				}
+			}
+		}
+	]
+}

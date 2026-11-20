@@ -1,0 +1,139 @@
+name: Release images
+
+# Builds multi-arch (amd64 + arm64) images for the web app, the agent and the
+# monitoring collector and pushes them as
+# <registry>/<owner>/panara-cloud-{web,agent,monitoring}.
+#   tag v1.2.3      -> :1.2.3 and :latest (the installer and the panel's
+#                      update check pick the newest x.y.z tag)
+#   manual dispatch -> :<channel> (e.g. canary), version label <x.y.z>-<channel>.<sha>
+#
+# Registry and owner are repository variables: IMAGE_REGISTRY (default
+# ghcr.io) and IMAGE_OWNER (default the repository owner). Pushing to GHCR
+# uses GITHUB_TOKEN; other registries need REGISTRY_USERNAME and
+# REGISTRY_PASSWORD secrets.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Moving tag to publish (e.g. canary)
+        required: true
+        default: canary
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: release-images-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ${{ vars.IMAGE_REGISTRY || 'ghcr.io' }}
+  OWNER: ${{ vars.IMAGE_OWNER || github.repository_owner }}
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tags: ${{ steps.meta.outputs.tags }}
+      prefix: ${{ steps.meta.outputs.prefix }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - id: meta
+        env:
+          CHANNEL: ${{ inputs.channel }}
+        run: |
+          owner=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
+          echo "prefix=$REGISTRY/$owner/panara-cloud" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            version="${GITHUB_REF_NAME#v}"
+            echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "Tag must be vX.Y.Z" >&2; exit 1; }
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+            echo "tags=$version,latest" >> "$GITHUB_OUTPUT"
+          else
+            echo "$CHANNEL" | grep -Eq '^[a-z][a-z0-9-]{0,30}$' || { echo "Invalid channel" >&2; exit 1; }
+            base=$(node -p "require('./apps/agent/package.json').version")
+            echo "version=$base-$CHANNEL.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "tags=$CHANNEL" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: meta
+    strategy:
+      fail-fast: true
+      matrix:
+        image: [web, agent, monitoring]
+        platform:
+          - { arch: amd64, runner: ubuntu-24.04 }
+          - { arch: arm64, runner: ubuntu-24.04-arm }
+    runs-on: ${{ matrix.platform.runner }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME || github.actor }}
+          password: ${{ secrets.REGISTRY_PASSWORD || secrets.GITHUB_TOKEN }}
+      - id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/${{ matrix.image }}/Dockerfile
+          platforms: linux/${{ matrix.platform.arch }}
+          build-args: PANARA_CLOUD_VERSION=${{ needs.meta.outputs.version }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ needs.meta.outputs.version }}
+          outputs: type=image,name=${{ needs.meta.outputs.prefix }}-${{ matrix.image }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.platform.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.platform.arch }}
+      - name: Export digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          mkdir -p /tmp/digests
+          touch "/tmp/digests/${DIGEST#sha256:}"
+      - uses: actions/upload-artifact@v5
+        with:
+          name: digest-${{ matrix.image }}-${{ matrix.platform.arch }}
+          path: /tmp/digests/*
+          retention-days: 1
+
+  manifest:
+    needs: [meta, build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [web, agent, monitoring]
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          pattern: digest-${{ matrix.image }}-*
+          path: /tmp/digests
+          merge-multiple: true
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME || github.actor }}
+          password: ${{ secrets.REGISTRY_PASSWORD || secrets.GITHUB_TOKEN }}
+      - name: Create multi-arch manifests
+        env:
+          IMAGE: ${{ needs.meta.outputs.prefix }}-${{ matrix.image }}
+          TAGS: ${{ needs.meta.outputs.tags }}
+        working-directory: /tmp/digests
+        run: |
+          set --
+          for tag in $(echo "$TAGS" | tr ',' ' '); do set -- "$@" -t "$IMAGE:$tag"; done
+          docker buildx imagetools create "$@" $(printf "$IMAGE@sha256:%s " *)
+          docker buildx imagetools inspect "$IMAGE:$(echo "$TAGS" | cut -d, -f1)"
