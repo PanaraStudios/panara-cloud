@@ -385,10 +385,20 @@ pull() {
 		docker image inspect "$1" >/dev/null 2>&1 || die "Image $1 is not available locally"
 		return
 	fi
-	if ! docker pull -q "$1" >/dev/null; then
-		docker image inspect "$1" >/dev/null 2>&1 || die "Could not pull $1"
-		warn "Could not pull $1; using the local image"
-	fi
+	# Registries drop large layer downloads now and then ("failed to copy: ...
+	# EOF"); a retry resumes from the layers already fetched.
+	attempt=1
+	while ! docker pull -q "$1" >/dev/null; do
+		if [ "$attempt" -ge 5 ]; then
+			docker image inspect "$1" >/dev/null 2>&1 ||
+				die "Could not pull $1 after $attempt attempts. Run the same command again to retry."
+			warn "Could not pull $1; using the local image"
+			return
+		fi
+		warn "Pulling $1 failed; retrying ($attempt of 4)"
+		sleep $((attempt * 5))
+		attempt=$((attempt + 1))
+	done
 }
 
 # Resolves the release to install: an explicit x.y.z, or the version label of
