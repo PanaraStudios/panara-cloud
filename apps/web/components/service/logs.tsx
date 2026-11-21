@@ -222,11 +222,7 @@ function ContainerLogs() {
 									</span>
 								)}
 							</SelectTrigger>
-							<SelectContent
-								alignItemWithTrigger={false}
-								align="start"
-								className="min-w-72"
-							>
+							<SelectContent align="start" className="min-w-72">
 								{canSwarm ? (
 									<div className="p-1 pb-1.5">
 										<FilterPills

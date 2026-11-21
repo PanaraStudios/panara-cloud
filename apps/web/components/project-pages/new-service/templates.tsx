@@ -196,7 +196,7 @@ function TemplatesGallery() {
 								</SelectValue>
 							</span>
 						</SelectTrigger>
-						<SelectContent alignItemWithTrigger={false} align="start">
+						<SelectContent align="start">
 							{categories.map(([label, value, count]) => (
 								<SelectItem key={value} value={value} className="capitalize">
 									{label}
@@ -304,7 +304,7 @@ function TemplateDetail({ templateId }: { templateId: string }) {
 	const [server, setServer] = useState(LOCAL_SERVER);
 	const [pending, setPending] = useState(false);
 
-	const deploy = async () => {
+	const create = async () => {
 		setPending(true);
 		try {
 			const composeId = await deployTemplate({
@@ -312,7 +312,9 @@ function TemplateDetail({ templateId }: { templateId: string }) {
 				templateId,
 				serverId: toServerId(server),
 			});
-			toast.success(`${template?.name ?? "Template"} is deploying`);
+			toast.success(`${template?.name ?? "Service"} created`, {
+				description: "Deploy it when you're ready.",
+			});
 			router.push(
 				serviceUrl({
 					projectId,
@@ -410,7 +412,7 @@ function TemplateDetail({ templateId }: { templateId: string }) {
 					</p>
 				) : null}
 				<div className="grid gap-4 sm:grid-cols-2">
-					<Field label="Deploys to">
+					<Field label="Created in">
 						<p className="flex h-9 items-center text-sm">
 							{projectName} · {environment?.name}
 						</p>
@@ -428,8 +430,8 @@ function TemplateDetail({ templateId }: { templateId: string }) {
 				>
 					Cancel
 				</Button>
-				<Button isLoading={pending} onClick={deploy}>
-					Deploy to {projectName ?? "project"}
+				<Button isLoading={pending} onClick={create}>
+					Use this template
 				</Button>
 			</FlowFooter>
 		</div>

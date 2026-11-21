@@ -21,7 +21,7 @@ function Checkbox({
 		>
 			<CheckboxPrimitive.Indicator
 				data-slot="checkbox-indicator"
-				className="grid place-content-center text-current transition-none [&>svg]:size-3.5"
+				className="grid place-content-center text-current transition-none motion-safe:zoom-in-50 motion-safe:animate-in motion-safe:duration-150 [&>svg]:size-3.5"
 			>
 				{indeterminate ? <MinusIcon /> : <CheckIcon />}
 			</CheckboxPrimitive.Indicator>

@@ -1,7 +1,8 @@
 "use client";
 
+import { usePathname, useSearchParams } from "next/navigation";
 import type { ComponentType } from "react";
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 import {
 	Select,
 	SelectContent,
@@ -9,6 +10,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useShortcut } from "@/lib/dashboard/use-shortcut";
 import { cn } from "@/lib/utils";
 
 // A Settings page with sections (a service's, a server's): the list of
@@ -23,6 +25,21 @@ export type SettingsNavItem = {
 	/** What a dot after the title stands for ("Changes not deployed"). */
 	dot?: string;
 };
+
+const ActiveSection = createContext<string | null>(null);
+
+/** The open section's id inside a `SettingsLayout`, null outside one. */
+export const useActiveSection = () => useContext(ActiveSection);
+
+/** For a Settings page that is one route: the open section lives in
+    `?section=`. Returns the open id and the link to each section. */
+export function useQuerySection(ids: readonly string[]) {
+	const pathname = usePathname();
+	const requested = useSearchParams().get("section");
+	const active =
+		requested && ids.includes(requested) ? requested : (ids[0] ?? "");
+	return [active, (id: string) => `${pathname}?section=${id}`] as const;
+}
 
 // Moves the URL without a navigation, which would remount the page and drop
 // unsaved edits; `usePathname` follows it.
@@ -45,6 +62,21 @@ export function SettingsLayout({
 	active: string;
 	children: React.ReactNode;
 }) {
+	const step = (by: 1 | -1) => {
+		const next = items[items.findIndex((item) => item.id === active) + by];
+		if (!next) return false;
+		open(next.href);
+	};
+	useShortcut("[", () => step(-1));
+	useShortcut("]", () => step(1));
+	// One section needs no list.
+	if (items.length < 2) {
+		return (
+			<ActiveSection value={active}>
+				<div className="w-full min-w-0 pb-16">{children}</div>
+			</ActiveSection>
+		);
+	}
 	return (
 		<div className="grid w-full min-w-0 gap-x-10 gap-y-6 pb-16 md:grid-cols-[13rem_minmax(0,1fr)]">
 			<Select
@@ -68,8 +100,16 @@ export function SettingsLayout({
 			</Select>
 			<nav
 				aria-label={label}
-				className="sticky top-6 flex flex-col gap-0.5 self-start max-md:hidden"
+				className="sticky top-6 isolate flex flex-col gap-0.5 self-start max-md:hidden"
 			>
+				{/* The pill behind the open section; rows are 32px, 2px apart. */}
+				<span
+					aria-hidden
+					className="absolute inset-x-0 top-0 -z-10 h-8 rounded-lg bg-muted transition-transform duration-200 ease-(--ease-out) motion-reduce:transition-none"
+					style={{
+						transform: `translateY(${items.findIndex((item) => item.id === active) * 34}px)`,
+					}}
+				/>
 				{items.map((item) => {
 					const current = item.id === active;
 					return (
@@ -80,7 +120,7 @@ export function SettingsLayout({
 							className={cn(
 								"flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
 								current
-									? "bg-muted font-medium text-foreground"
+									? "font-medium text-foreground"
 									: "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
 							)}
 							onClick={(event) => {
@@ -102,7 +142,9 @@ export function SettingsLayout({
 					);
 				})}
 			</nav>
-			<div className="min-w-0">{children}</div>
+			<ActiveSection value={active}>
+				<div className="min-w-0">{children}</div>
+			</ActiveSection>
 		</div>
 	);
 }
@@ -112,22 +154,24 @@ export function SettingsLayout({
     so unsaved edits survive a look at another section. */
 export function SettingsPane({
 	id,
-	active,
 	title,
 	description,
 	notice,
+	actions,
 	className,
 	children,
 }: {
 	id: string;
-	active: boolean;
 	title: string;
 	description?: React.ReactNode;
 	notice?: React.ReactNode;
+	/** Buttons at the end of the title row ("New environment"). */
+	actions?: React.ReactNode;
 	/** For the body: `max-w-5xl` for a form. */
 	className?: string;
 	children: React.ReactNode;
 }) {
+	const active = useActiveSection() === id;
 	const [opened, setOpened] = useState(active);
 	if (active && !opened) setOpened(true);
 	if (!opened) return null;
@@ -136,19 +180,28 @@ export function SettingsPane({
 			id={id}
 			hidden={!active}
 			aria-labelledby={`${id}-title`}
-			className={cn("min-w-0 flex-col gap-6", active && "flex")}
+			className={cn(
+				"min-w-0 flex-col gap-6",
+				active &&
+					"flex motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:animate-in motion-safe:duration-200",
+			)}
 		>
-			<div className="flex min-w-0 flex-col gap-1">
-				<h2
-					id={`${id}-title`}
-					className="font-semibold text-[17px] leading-snug"
-				>
-					{title}
-				</h2>
-				{description ? (
-					<p className="text-muted-foreground text-sm">{description}</p>
+			<div className="flex min-w-0 items-start justify-between gap-4">
+				<div className="flex min-w-0 flex-col gap-1">
+					<h2
+						id={`${id}-title`}
+						className="font-semibold text-[17px] leading-snug"
+					>
+						{title}
+					</h2>
+					{description ? (
+						<p className="text-muted-foreground text-sm">{description}</p>
+					) : null}
+					{notice}
+				</div>
+				{actions ? (
+					<div className="flex shrink-0 items-center gap-2">{actions}</div>
 				) : null}
-				{notice}
 			</div>
 			<div className={cn("min-w-0", className)}>{children}</div>
 		</section>

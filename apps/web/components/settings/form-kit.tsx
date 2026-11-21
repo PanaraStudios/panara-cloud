@@ -9,6 +9,7 @@ import {
 	type BadgeTone,
 	toneDotClassName,
 } from "@/components/ui-kit/primitives";
+import { useActiveSection } from "@/components/ui-kit/settings-page";
 import { cn } from "@/lib/utils";
 
 /** State in a table cell: a coloured dot, then the word at the row's size. */
@@ -68,11 +69,20 @@ export function FormSection({
 	className?: string;
 	children?: React.ReactNode;
 }) {
+	const active = useActiveSection();
+	const listed = active !== null && id !== undefined;
 	return (
 		<section
 			id={id}
+			hidden={listed && id !== active}
 			className={cn(
-				"flex min-w-0 flex-col gap-4 border-border border-t pt-8",
+				"min-w-0 flex-col gap-4",
+				// Inside a `SettingsLayout` only the open section shows, so
+				// nothing sits above it to be ruled off from.
+				listed
+					? id === active &&
+							"flex motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:animate-in motion-safe:duration-200"
+					: "flex border-border border-t pt-8",
 				className,
 			)}
 		>

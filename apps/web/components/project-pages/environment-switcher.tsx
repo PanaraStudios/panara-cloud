@@ -197,7 +197,7 @@ export function EnvironmentMenu({
 					</form>
 				) : null}
 				<Link
-					href={`/projects/${projectId}/settings#environments`}
+					href={`/projects/${projectId}/settings?section=environments`}
 					onClick={() => setOpen(false)}
 					className="flex items-center gap-1 border-t px-3 py-2.5 text-muted-foreground text-xs hover:text-foreground"
 				>

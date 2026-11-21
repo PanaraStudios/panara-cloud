@@ -34,7 +34,7 @@ export function usePanelSetupStatus(enabled = true) {
 }
 
 export const PANEL_BACKUPS_ID = "panel-backups";
-const PANEL_BACKUPS_URL = `/settings/general#${PANEL_BACKUPS_ID}`;
+const PANEL_BACKUPS_URL = `/settings/general?section=${PANEL_BACKUPS_ID}`;
 
 /** The facts behind each setup step, read from the queries their own
     settings pages use. Only the instance administrator may read them all. */

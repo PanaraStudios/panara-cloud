@@ -218,6 +218,16 @@ export const setImage = mutation({
 	},
 });
 
+export const setOrganizationLogo = mutation({
+	args: { organizationId: v.string(), logo: v.union(v.string(), v.null()) },
+	returns: v.null(),
+	handler: async (ctx, { organizationId, logo }) => {
+		const organization = await requireOrganization(ctx, organizationId);
+		await ctx.db.patch("organization", organization._id, { logo });
+		return null;
+	},
+});
+
 const deleteBatch = async (
 	ctx: MutationCtx,
 	table: "session" | "account" | "passkey" | "twoFactor" | "member",

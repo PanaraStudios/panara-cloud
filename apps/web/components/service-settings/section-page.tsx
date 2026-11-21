@@ -57,18 +57,15 @@ function SectionBlock({
 	service,
 	meta,
 	basics,
-	active,
 }: {
 	service: ServiceRef;
 	meta: SectionMeta;
 	basics: ServiceBasics;
-	active: boolean;
 }) {
 	const pending = useSectionPending(service.kind, service.id, meta.events);
 	return (
 		<SettingsPane
 			id={meta.slug}
-			active={active}
 			title={meta.title}
 			description={
 				meta.slug === "general" && isDatabaseKind(service.kind)
@@ -140,7 +137,6 @@ function ServiceSettingsPage({
 					service={service}
 					meta={section}
 					basics={basics}
-					active={section.slug === active}
 				/>
 			))}
 		</SettingsLayout>

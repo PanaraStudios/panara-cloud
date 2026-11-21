@@ -5,7 +5,9 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
 
 /* `default` is reechlist's segmented toggle: a white pill track with a hairline border, the
-   active tab sits on the page color with a hairline shadow. `line` keeps the accent underline. */
+   active tab sits on the page color with a hairline shadow. `line` keeps the accent underline.
+   In a horizontal list the pill and the underline are one indicator that slides to the
+   active tab; a vertical list marks the tab itself. */
 function Tabs({
 	className,
 	orientation = "horizontal",
@@ -25,7 +27,7 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-	"group/tabs-list inline-flex w-fit items-center justify-start text-muted-foreground group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
+	"group/tabs-list relative isolate inline-flex w-fit items-center justify-start text-muted-foreground group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
 	{
 		variants: {
 			variant: {
@@ -43,6 +45,7 @@ const tabsListVariants = cva(
 function TabsList({
 	className,
 	variant = "default",
+	children,
 	...props
 }: TabsPrimitive.List.Props & VariantProps<typeof tabsListVariants>) {
 	return (
@@ -51,7 +54,18 @@ function TabsList({
 			data-variant={variant}
 			className={cn(tabsListVariants({ variant }), className)}
 			{...props}
-		/>
+		>
+			{children}
+			<TabsPrimitive.Indicator
+				data-slot="tabs-indicator"
+				className={cn(
+					"pointer-events-none absolute left-0 w-(--active-tab-width) translate-x-(--active-tab-left) transition-[translate,width] duration-200 ease-(--ease-out) group-data-vertical/tabs:hidden motion-reduce:transition-none",
+					variant === "line"
+						? "bottom-0 h-0.5 bg-primary"
+						: "top-(--active-tab-top) -z-10 h-(--active-tab-height) rounded-full border border-border bg-surface shadow-xs dark:bg-background",
+				)}
+			/>
+		</TabsPrimitive.List>
 	);
 }
 
@@ -61,9 +75,9 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
 			data-slot="tabs-trigger"
 			className={cn(
 				"relative inline-flex h-full min-h-7 flex-1 shrink-0 items-center justify-center gap-1.5 rounded-full border border-transparent px-3.5 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-45 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5 aria-disabled:pointer-events-none aria-disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
-				"group-data-[variant=default]/tabs-list:data-active:border-border group-data-[variant=default]/tabs-list:data-active:bg-surface group-data-[variant=default]/tabs-list:data-active:text-foreground group-data-[variant=default]/tabs-list:data-active:shadow-xs dark:group-data-[variant=default]/tabs-list:data-active:bg-background",
+				"group-data-[variant=default]/tabs-list:data-active:text-foreground group-data-vertical/tabs:group-data-[variant=default]/tabs-list:data-active:border-border group-data-vertical/tabs:group-data-[variant=default]/tabs-list:data-active:bg-surface group-data-vertical/tabs:group-data-[variant=default]/tabs-list:data-active:shadow-xs dark:group-data-vertical/tabs:group-data-[variant=default]/tabs-list:data-active:bg-background",
 				"group-data-[variant=line]/tabs-list:rounded-md group-data-[variant=line]/tabs-list:px-2 group-data-[variant=line]/tabs-list:text-sm group-data-[variant=line]/tabs-list:font-medium group-data-[variant=line]/tabs-list:data-active:text-foreground",
-				"after:absolute after:bg-primary after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
+				"after:absolute after:bg-primary after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-vertical/tabs:after:w-0.5 group-data-vertical/tabs:group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
 				className,
 			)}
 			{...props}

@@ -21,6 +21,12 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableCell, TableRow } from "@/components/ui/table";
 import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
 	copyToClipboard,
 	EmptyState,
 	MoreMenu,
@@ -106,25 +112,42 @@ function curlOf(entry: LogEntry) {
 function Bars({ stats }: { stats: { hour: string; count: number }[] }) {
 	const max = Math.max(1, ...stats.map((item) => item.count));
 	return (
-		<div
-			className="flex h-7 w-full min-w-0 items-end gap-0.5"
-			role="img"
-			aria-label="Requests per hour"
-		>
-			{stats.slice(-48).map((item) => (
-				<div
-					key={item.hour}
-					title={`${new Date(item.hour).toLocaleString([], {
-						day: "numeric",
-						month: "short",
-						hour: "2-digit",
-						minute: "2-digit",
-					})} · ${item.count.toLocaleString()} requests`}
-					className="max-w-6 flex-1 rounded-[2px] bg-muted-foreground/25"
-					style={{ height: `${Math.max(4, (item.count / max) * 100)}%` }}
-				/>
-			))}
-		</div>
+		<TooltipProvider delay={0}>
+			<div className="flex h-7 w-full min-w-0 items-end gap-0.5">
+				{stats.slice(-48).map((item) => (
+					<Tooltip key={item.hour}>
+						{/* The column is the hover target: an hour with no requests
+						    is a sliver too thin to point at. */}
+						<TooltipTrigger
+							render={
+								<div className="group flex h-full max-w-6 flex-1 items-end" />
+							}
+						>
+							<div
+								className="w-full rounded-[2px] bg-muted-foreground/25 transition-colors group-hover:bg-foreground/70"
+								style={{
+									height: `${Math.max(4, (item.count / max) * 100)}%`,
+								}}
+							/>
+						</TooltipTrigger>
+						<TooltipContent>
+							<span className="font-medium">
+								{item.count.toLocaleString()}{" "}
+								{item.count === 1 ? "request" : "requests"}
+							</span>
+							<span className="opacity-70">
+								{new Date(item.hour).toLocaleString([], {
+									day: "numeric",
+									month: "short",
+									hour: "2-digit",
+									minute: "2-digit",
+								})}
+							</span>
+						</TooltipContent>
+					</Tooltip>
+				))}
+			</div>
+		</TooltipProvider>
 	);
 }
 

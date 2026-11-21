@@ -61,7 +61,6 @@ import {
 	serverUrl,
 	serviceSettingsUrl,
 	serviceTarget,
-	serviceUrl,
 	settingsSectionForEvent,
 } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
@@ -77,6 +76,7 @@ import { ServiceIcon } from "./service-icon";
 import type { PendingChanges, PendingEvent } from "./use-pending-changes";
 import {
 	type DeploymentRow,
+	useFollowDeployment,
 	useServiceDeployments,
 } from "./use-service-deployments";
 
@@ -229,12 +229,12 @@ function DeployingButton({ row }: { row: DeploymentRow | undefined }) {
 
 function PrimaryAction() {
 	const { service, pending } = useService();
-	const router = useRouter();
 	const modifier = useShortcutModifier();
 	const applyPending = useMutation(api.serviceEvents.applyPending);
 	const reloadApplication = useMutation(api.applications.deploy.reload);
 	const redeployApplication = useMutation(api.applications.deploy.redeploy);
 	const deployNow = useDeployNow(service);
+	const follow = useFollowDeployment(service);
 	const { active } = useActiveDeployment(service);
 	const [open, setOpen] = useState(false);
 	const [busy, setBusy] = useState<"primary" | "reload" | null>(null);
@@ -259,33 +259,34 @@ function PrimaryAction() {
 		pending?.primaryAction !== "reload" &&
 		reloadCount > 0;
 
-	// A reload restarts the service without a build, so no deployment is
-	// listed for it.
-	const afterStart = (action?: string) => {
-		setOpen(false);
-		if (service.family !== "database" && action !== "reload") {
-			router.push(serviceUrl(service.ref, "deployments"));
-		}
-	};
+	// A database has no deployments page to open.
+	const start = (run: () => Promise<unknown>) =>
+		service.family === "database" ? run() : follow.track(run);
 
 	const confirm = async () => {
 		setBusy("primary");
 		try {
 			if (hasChanges) {
-				const result = await applyPending({
-					target: serviceTarget(service.kind, service.id),
-				});
+				const apply = () =>
+					applyPending({
+						target: serviceTarget(service.kind, service.id),
+					});
+				const result = await (service.family === "database"
+					? apply()
+					: follow.track(apply));
+				// A reload restarts the service without a build, so no
+				// deployment is listed for it.
+				if (!result || result.action === "reload") follow.cancel();
 				toast.success(
 					result
 						? `${ACTION_LABELS[result.action]} started`
 						: "Nothing to apply",
 				);
-				afterStart(result?.action);
 			} else {
-				await deployNow();
+				await start(deployNow);
 				toast.success("Deploy started");
-				afterStart();
 			}
+			setOpen(false);
 		} catch (error) {
 			toast.error(errorMessage(error));
 		} finally {
@@ -309,10 +310,12 @@ function PrimaryAction() {
 	};
 
 	const redeployWithoutChanges = () =>
-		redeployApplication({
-			applicationId: service.id as Id<"applications">,
-			rebuild: false,
-		})
+		start(() =>
+			redeployApplication({
+				applicationId: service.id as Id<"applications">,
+				rebuild: false,
+			}),
+		)
 			.then(() => toast.success("Redeploy started"))
 			.catch((error) => toast.error(errorMessage(error)));
 
@@ -476,7 +479,7 @@ function PrimaryAction() {
 						{hasChanges && !neverDeployed ? (
 							<DropdownMenuItem
 								onClick={() =>
-									deployNow()
+									start(deployNow)
 										.then(() => toast.success("Deploy started"))
 										.catch((error) => toast.error(errorMessage(error)))
 								}
@@ -583,6 +586,7 @@ function ServiceMenu() {
 	const permissions = usePermissions();
 	const router = useRouter();
 	const actions = useLifecycle(service);
+	const follow = useFollowDeployment(service);
 	const [confirming, setConfirming] = useState<Lifecycle | null>(null);
 	const webhook = useWebhookUrl(service, permissions.service.create);
 	// Nothing runs before the first deploy, so there is nothing to start,
@@ -595,7 +599,12 @@ function ServiceMenu() {
 	const runAction = async (action: Lifecycle) => {
 		const fn = actions[action];
 		if (!fn) return;
-		await fn();
+		// A rebuild is a new deployment; its page opens.
+		if (action === "rebuild" && service.family !== "database") {
+			await follow.track(fn);
+		} else {
+			await fn();
+		}
 		toast.success(
 			{
 				start: "Starting",

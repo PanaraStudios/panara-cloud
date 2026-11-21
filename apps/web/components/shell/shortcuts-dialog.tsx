@@ -11,6 +11,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Kbd } from "@/components/ui/kbd";
+import {
+	ACCOUNT_SHORTCUT,
+	SERVER_SHORTCUTS,
+	SERVICE_SHORTCUTS,
+} from "@/lib/dashboard/shortcuts";
 import { useShortcutModifier } from "@/lib/dashboard/use-shortcut";
 import { orgNav } from "@/lib/navigation";
 
@@ -36,6 +41,11 @@ export function ShortcutsDialog({
 }) {
 	const mod = useShortcutModifier();
 	const [filter, setFilter] = useState("");
+	const go = (rows: readonly (readonly [string, string, unknown])[]) =>
+		rows.map(
+			([letter, title]) =>
+				[title, ["G", letter.toUpperCase()]] as [string, string[]],
+		);
 	const left: Group[] = [
 		{
 			title: "General",
@@ -50,25 +60,43 @@ export function ShortcutsDialog({
 		},
 		{
 			title: "Go to",
-			items: orgNav
-				.filter((item) => item.shortcut)
-				.map((item) => [item.title, ["G", item.shortcut?.toUpperCase() ?? ""]]),
+			items: [
+				...orgNav
+					.filter((item) => item.shortcut)
+					.map(
+						(item) =>
+							[item.title, ["G", item.shortcut?.toUpperCase() ?? ""]] as [
+								string,
+								string[],
+							],
+					),
+				["Your account", ["G", ACCOUNT_SHORTCUT.toUpperCase()]],
+			],
+		},
+		{
+			title: "Tabs and sections",
+			items: [
+				["Open a tab of the page", ["1", "…", "9"]],
+				["Previous settings section", ["["]],
+				["Next settings section", ["]"]],
+			],
 		},
 	];
 	const right: Group[] = [
+		{ title: "Inside a service", items: go(SERVICE_SHORTCUTS) },
+		{ title: "Inside a server", items: go(SERVER_SHORTCUTS) },
 		{
-			title: "Inside a service",
-			items: SERVICE_SECTIONS.map(([letter, title]) => [
-				title,
-				["G", letter.toUpperCase()],
-			]),
-		},
-		{
-			title: "Lists and pages",
+			title: "Lists and forms",
 			items: [
 				["Search / filter", ["/"]],
+				["Next row", ["J"]],
+				["Previous row", ["K"]],
+				["Open the row", ["↵"]],
+				["Select the row", ["X"]],
+				["Delete selected", ["⌫"]],
 				["Create new", ["C"]],
 				["Edit", ["E"]],
+				["Save", [mod, "S"]],
 			],
 		},
 	];
@@ -146,10 +174,3 @@ export function ShortcutsDialog({
 		</Dialog>
 	);
 }
-
-const SERVICE_SECTIONS = [
-	["o", "Overview"],
-	["d", "Deployments"],
-	["l", "Logs"],
-	["m", "Metrics"],
-] as const;

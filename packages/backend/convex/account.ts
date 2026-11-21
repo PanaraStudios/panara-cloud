@@ -4,7 +4,7 @@ import { mutation, type QueryCtx, query } from "./_generated/server";
 import { authComponent } from "./auth";
 import { deliveryMode } from "./email";
 import { requireMember, requireUserId } from "./lib/access";
-import { resolvePermissions } from "./lib/permissions";
+import { requirePermission, resolvePermissions } from "./lib/permissions";
 import { markEmailUnproven } from "./lib/unprovenEmails";
 import { claimUpload, issueUploadUrl } from "./lib/uploads";
 
@@ -149,6 +149,74 @@ export const updateAvatar = mutation({
 			image: next,
 		});
 		return { image: next, error: null };
+	},
+});
+
+const LOGO_UPLOAD = "organization-logo";
+
+export const generateLogoUploadUrl = mutation({
+	args: { organizationId: v.string() },
+	handler: async (ctx, { organizationId }) => {
+		const userId = await requireUserId(ctx);
+		await requirePermission(ctx, organizationId, "organization", "update");
+		return await issueUploadUrl(ctx, userId, LOGO_UPLOAD);
+	},
+});
+
+// Sets an organization's logo to an uploaded image (same limits as an
+// avatar), to an image URL, or to none, removing any previously uploaded
+// file.
+export const updateLogo = mutation({
+	args: {
+		organizationId: v.string(),
+		storageId: v.optional(v.id("_storage")),
+		logo: v.optional(v.union(v.string(), v.null())),
+	},
+	handler: async (ctx, { organizationId, storageId, logo }) => {
+		const userId = await requireUserId(ctx);
+		await requirePermission(ctx, organizationId, "organization", "update");
+		let next: string | null = logo?.trim() || null;
+		if (storageId) {
+			const file = await claimUpload(ctx, userId, LOGO_UPLOAD, storageId);
+			const valid =
+				file.size <= MAX_AVATAR_BYTES &&
+				AVATAR_TYPES.has(file.contentType ?? "");
+			if (!valid) {
+				// Returned rather than thrown, as in updateAvatar.
+				await ctx.storage.delete(storageId);
+				return {
+					logo: null,
+					error:
+						file.size > MAX_AVATAR_BYTES
+							? "Image size must be less than 2MB"
+							: "Use a PNG, JPEG, GIF or WebP image",
+				};
+			}
+			next = await ctx.storage.getUrl(storageId);
+		} else if (
+			next !== null &&
+			(next.length > MAX_IMAGE_REFERENCE_LENGTH || !/^https?:\/\//i.test(next))
+		) {
+			throw new ConvexError("Use an http(s) image URL, or upload the image");
+		}
+		const previous = await ctx.db
+			.query("organizationLogos")
+			.withIndex("by_organizationId", (q) =>
+				q.eq("organizationId", organizationId),
+			)
+			.unique();
+		if (previous && previous.storageId !== storageId) {
+			await ctx.storage.delete(previous.storageId);
+			await ctx.db.delete("organizationLogos", previous._id);
+		}
+		if (storageId && previous?.storageId !== storageId) {
+			await ctx.db.insert("organizationLogos", { organizationId, storageId });
+		}
+		await ctx.runMutation(components.betterAuth.users.setOrganizationLogo, {
+			organizationId,
+			logo: next,
+		});
+		return { logo: next, error: null };
 	},
 });
 

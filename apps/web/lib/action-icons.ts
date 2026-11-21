@@ -92,6 +92,7 @@ const VERBS: Record<string, LucideIcon> = {
 	add: PlusIcon,
 	new: PlusIcon,
 	create: PlusIcon,
+	use: PlusIcon,
 	save: SaveIcon,
 	update: SaveIcon,
 	apply: CheckIcon,

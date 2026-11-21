@@ -494,6 +494,17 @@ const sweepSteps: SweepStep[] = [
 		for (const row of rows) await ctx.db.delete("memberships", row._id);
 		return full(rows);
 	},
+	async (ctx, org) => {
+		const rows = await ctx.db
+			.query("organizationLogos")
+			.withIndex("by_organizationId", (q) => q.eq("organizationId", org))
+			.take(BATCH);
+		for (const row of rows) {
+			await ctx.storage.delete(row.storageId);
+			await ctx.db.delete("organizationLogos", row._id);
+		}
+		return full(rows);
+	},
 ];
 
 const sweep = async (

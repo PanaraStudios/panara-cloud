@@ -46,7 +46,15 @@ export function contentSecurityPolicy({
 			...(dev ? ["'unsafe-eval'"] : []),
 		],
 		"style-src": ["'self'", "'unsafe-inline'"],
-		"img-src": ["'self'", "data:", "blob:", "https:"],
+		// Uploaded avatars and logos are served by Convex, over plain HTTP on
+		// an install without a domain.
+		"img-src": [
+			"'self'",
+			"data:",
+			"blob:",
+			"https:",
+			...origins(convexUrl).filter((origin) => origin.startsWith("http:")),
+		],
 		"font-src": ["'self'", "data:"],
 		"connect-src": [...connect],
 		"worker-src": ["'self'", "blob:"],

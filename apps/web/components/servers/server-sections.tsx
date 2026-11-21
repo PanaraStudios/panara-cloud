@@ -89,11 +89,7 @@ function AppLogs({ app }: { app: string }) {
 								: (selected?.name ?? "none running")}
 						</span>
 					</SelectTrigger>
-					<SelectContent
-						alignItemWithTrigger={false}
-						align="start"
-						className="min-w-72"
-					>
+					<SelectContent align="start" className="min-w-72">
 						{containers.data?.length ? (
 							containers.data.map((container) => {
 								const status = containerStatus(container);

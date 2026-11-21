@@ -528,7 +528,7 @@ describe("notification messages", () => {
 			"You've been invited to join Acme on Panara Cloud",
 		);
 		expect(mail.html).toContain("https://panel.test/invitation?token=inv%201");
-		expect(mail.html).toContain("<strong>Alice</strong>");
+		expect(mail.html).toContain("Alice invited you to Acme");
 		expect(mail.text).toContain("new@panara-cloud.test");
 	});
 });

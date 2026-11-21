@@ -36,6 +36,8 @@ test("an IP install allows the Convex and live ports", () => {
 		"http://203.0.113.5:7100",
 		"ws://203.0.113.5:7100",
 	]);
+	// Uploaded images are served from the Convex port.
+	assert.ok(directive(policy, "img-src")?.includes("http://203.0.113.5:3210"));
 });
 
 test("without a live URL WebSockets stay allowed", () => {

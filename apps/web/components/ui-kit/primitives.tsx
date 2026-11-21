@@ -597,7 +597,13 @@ export function ResourceTable({
 	framed?: boolean;
 }) {
 	return (
-		<div className={cn(framed && "frame", className)}>
+		<div
+			className={cn(
+				"motion-safe:fade-in-0 motion-safe:animate-in motion-safe:duration-200",
+				framed && "frame",
+				className,
+			)}
+		>
 			<div className={cn(framed && "panel", "overflow-hidden p-0")}>
 				<Table>
 					<TableHeader>

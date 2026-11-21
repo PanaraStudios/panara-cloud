@@ -171,7 +171,7 @@ export function ProjectsList() {
 										<SelectValue />
 									</span>
 								</SelectTrigger>
-								<SelectContent align="end" alignItemWithTrigger={false}>
+								<SelectContent align="end">
 									<SelectItem value="activity">Last activity</SelectItem>
 									<SelectItem value="name">Name</SelectItem>
 									<SelectItem value="created">Newest</SelectItem>

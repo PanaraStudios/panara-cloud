@@ -1,12 +1,14 @@
 "use client";
 
 import { api } from "@panara-cloud/backend/api";
+import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import {
 	ArrowRightIcon,
 	Building2Icon,
 	CircleArrowUpIcon,
 	DatabaseBackupIcon,
+	GlobeIcon,
 	ListXIcon,
 	PlusIcon,
 	RefreshCwIcon,
@@ -14,11 +16,14 @@ import {
 	WrenchIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ShowBackups } from "@/components/dashboard/database/backups/show-backups";
 import { AddOrganization } from "@/components/dashboard/organization/handle-organization";
-import { WebDomain } from "@/components/dashboard/settings/web-domain";
+import {
+	PANEL_DOMAIN_ID,
+	WebDomain,
+} from "@/components/dashboard/settings/web-domain";
 import {
 	usePanelStatus,
 	useRunPanelAction,
@@ -55,12 +60,19 @@ import {
 	NestedPage,
 	PageHeader,
 } from "@/components/ui-kit/primitives";
+import {
+	SettingsLayout,
+	useQuerySection,
+} from "@/components/ui-kit/settings-page";
 import { authClient, authResult } from "@/lib/auth/client";
 import { errorMessage } from "@/lib/auth/errors";
 import { useCurrentUser } from "@/lib/current-user";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
 import { FormSection, SettingRow, SettingRows } from "./form-kit";
+
+const LOGO_MAX_BYTES = 2 * 1024 * 1024;
+const LOGO_TYPES = "image/png,image/jpeg,image/gif,image/webp";
 
 function LogoDialog({
 	open,
@@ -70,18 +82,45 @@ function LogoDialog({
 	onOpenChange: (open: boolean) => void;
 }) {
 	const { active } = useOrganization();
-	const [logo, setLogo] = useState(active.logo ?? "");
+	const generateUploadUrl = useMutation(api.account.generateLogoUploadUrl);
+	const updateLogo = useMutation(api.account.updateLogo);
+	const picker = useRef<HTMLInputElement>(null);
+	const [file, setFile] = useState<File | null>(null);
+	const [url, setUrl] = useState("");
 	const [pending, setPending] = useState(false);
-	const save = async (value: string | undefined) => {
+	const picked = useMemo(
+		() => (file ? URL.createObjectURL(file) : null),
+		[file],
+	);
+	useEffect(() => {
+		if (!picked) return;
+		return () => URL.revokeObjectURL(picked);
+	}, [picked]);
+	const typed = /^https?:\/\/\S+$/i.test(url.trim()) ? url.trim() : null;
+	const preview = picked ?? typed ?? active.logo;
+
+	const save = async (remove = false) => {
 		setPending(true);
 		try {
-			await authResult(
-				authClient.organization.update({
-					organizationId: active.id,
-					data: { logo: value ?? "" },
-				}),
-			);
-			toast.success(value ? "Logo updated" : "Logo removed");
+			let storageId: Id<"_storage"> | undefined;
+			if (file && !remove) {
+				const response = await fetch(
+					await generateUploadUrl({ organizationId: active.id }),
+					{
+						method: "POST",
+						headers: { "Content-Type": file.type },
+						body: file,
+					},
+				);
+				if (!response.ok) throw new Error("The upload failed. Try again.");
+				storageId = (await response.json()).storageId;
+			}
+			const result = await updateLogo({
+				organizationId: active.id,
+				...(storageId ? { storageId } : { logo: remove ? null : typed }),
+			});
+			if (result.error) throw new Error(result.error);
+			toast.success(remove ? "Logo removed" : "Logo updated");
 			onOpenChange(false);
 		} catch (error) {
 			toast.error(errorMessage(error));
@@ -95,24 +134,67 @@ function LogoDialog({
 				<DialogHeader>
 					<DialogTitle>Organization logo</DialogTitle>
 					<DialogDescription>
-						An image URL, shown in the sidebar, invitations and emails.
+						Shown in the sidebar, invitations and emails.
 					</DialogDescription>
 				</DialogHeader>
 				<form
 					className="flex flex-col gap-4"
 					onSubmit={(event) => {
 						event.preventDefault();
-						void save(logo.trim() || undefined);
+						void save();
 					}}
 				>
+					<div className="flex items-center gap-3">
+						<span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted font-semibold text-lg text-muted-foreground">
+							{preview ? (
+								<img src={preview} alt="" className="size-full object-cover" />
+							) : (
+								active.name.charAt(0).toUpperCase()
+							)}
+						</span>
+						<div className="flex min-w-0 flex-col items-start gap-1.5">
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								disabled={pending}
+								onClick={() => picker.current?.click()}
+							>
+								{file ? "Upload another image" : "Upload image"}
+							</Button>
+							<p className="truncate text-[13px] text-muted-foreground">
+								{file ? file.name : "PNG, JPEG, GIF or WebP, up to 2 MB."}
+							</p>
+						</div>
+						<input
+							ref={picker}
+							type="file"
+							accept={LOGO_TYPES}
+							className="hidden"
+							onChange={(event) => {
+								const next = event.target.files?.[0];
+								event.target.value = "";
+								if (!next) return;
+								if (next.size > LOGO_MAX_BYTES) {
+									toast.error("Image size must be less than 2MB");
+									return;
+								}
+								setFile(next);
+								setUrl("");
+							}}
+						/>
+					</div>
 					<div className="flex flex-col gap-2">
-						<Label htmlFor="organization-logo">Logo URL</Label>
+						<Label htmlFor="organization-logo">Or use an image URL</Label>
 						<Input
 							id="organization-logo"
 							type="url"
 							placeholder="https://example.com/logo.png"
-							value={logo}
-							onChange={(event) => setLogo(event.target.value)}
+							value={url}
+							onChange={(event) => {
+								setUrl(event.target.value);
+								setFile(null);
+							}}
 						/>
 					</div>
 					<DialogFooter>
@@ -122,12 +204,16 @@ function LogoDialog({
 								variant="ghost"
 								className="mr-auto"
 								disabled={pending}
-								onClick={() => void save(undefined)}
+								onClick={() => void save(true)}
 							>
 								Remove
 							</Button>
 						) : null}
-						<Button type="submit" isLoading={pending}>
+						<Button
+							type="submit"
+							isLoading={pending}
+							disabled={!file && !typed}
+						>
 							Save logo
 						</Button>
 					</DialogFooter>
@@ -153,6 +239,7 @@ function OrganizationSection() {
 
 	return (
 		<FormSection
+			id="organization"
 			title="Organization"
 			icon={Building2Icon}
 			description="Shown in the sidebar, invitations and emails."
@@ -240,17 +327,11 @@ function PanelSection() {
 	const clearQueue = useMutation(api.infra.cleanup.cancelQueuedDeployments);
 	const [reloading, setReloading] = useState(false);
 	const [adding, setAdding] = useState(false);
-	// This section mounts after the page, so a link to its panel backups
-	// (from the panel setup) is scrolled to here.
-	useEffect(() => {
-		if (window.location.hash === `#${PANEL_BACKUPS_ID}`) {
-			document.getElementById(PANEL_BACKUPS_ID)?.scrollIntoView();
-		}
-	}, []);
 	return (
 		<>
 			<WebDomain />
 			<FormSection
+				id="updates"
 				title="Version and updates"
 				icon={CircleArrowUpIcon}
 				description="The panel host's containers, cleanup and Traefik are under Servers → Panel host."
@@ -299,6 +380,7 @@ function PanelSection() {
 				</SettingRows>
 			</FormSection>
 			<FormSection
+				id="panel-actions"
 				title="Panel actions"
 				icon={WrenchIcon}
 				description="Rarely needed. Each one asks before it runs."
@@ -437,16 +519,39 @@ function ConfirmAction({
 	);
 }
 
+const ORGANIZATION = {
+	id: "organization",
+	title: "Organization",
+	icon: Building2Icon,
+};
+// The panel's own sections, for the instance administrator.
+const PANEL = [
+	{ id: PANEL_DOMAIN_ID, title: "Panel domain", icon: GlobeIcon },
+	{ id: "updates", title: "Version and updates", icon: CircleArrowUpIcon },
+	{ id: "panel-actions", title: "Panel actions", icon: WrenchIcon },
+	{ id: PANEL_BACKUPS_ID, title: "Panel backups", icon: DatabaseBackupIcon },
+];
+
 export function GeneralSettings() {
 	const isInstanceAdmin = useQuery(api.infra.webServer.isInstanceAdmin, {});
+	const sections = isInstanceAdmin ? [ORGANIZATION, ...PANEL] : [ORGANIZATION];
+	const [active, href] = useQuerySection(sections.map((item) => item.id));
 	return (
-		<div className="flex w-full max-w-5xl flex-col gap-8 pb-10">
+		<div className="flex w-full flex-col gap-6">
 			<PageHeader
 				title="General"
 				description="Your organization, and the Panara Cloud panel that runs it."
 			/>
-			<OrganizationSection />
-			{isInstanceAdmin ? <PanelSection /> : null}
+			<SettingsLayout
+				label="General sections"
+				active={active}
+				items={sections.map((item) => ({ ...item, href: href(item.id) }))}
+			>
+				<div className="max-w-5xl">
+					<OrganizationSection />
+					{isInstanceAdmin ? <PanelSection /> : null}
+				</div>
+			</SettingsLayout>
 		</div>
 	);
 }

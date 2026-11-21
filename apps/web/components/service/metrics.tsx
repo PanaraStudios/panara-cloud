@@ -102,7 +102,7 @@ function ComposeMetrics() {
 							</span>
 						)}
 					</SelectTrigger>
-					<SelectContent alignItemWithTrigger={false} align="start">
+					<SelectContent align="start">
 						<SelectGroup>
 							<SelectLabel>Containers ({containers?.length ?? 0})</SelectLabel>
 							{(containers ?? []).map((container) => (

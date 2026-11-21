@@ -53,6 +53,7 @@ import {
 	deploymentTitle,
 	deploymentTrigger,
 	shortSha,
+	useFollowDeployment,
 	useServiceDeployments,
 } from "./use-service-deployments";
 
@@ -239,6 +240,7 @@ export function DeploymentDetail() {
 	const [filter, setFilter] = useState("");
 	const [errorsOnly, setErrorsOnly] = useState(false);
 	const [busy, setBusy] = useState<"rebuild" | "redeploy" | null>(null);
+	const follow = useFollowDeployment(service);
 	const running = row?.status === "running" || row?.status === "queued";
 	const now = useNow(running);
 	const redeployApplication = useMutation(api.applications.deploy.redeploy);
@@ -310,9 +312,8 @@ export function DeploymentDetail() {
 	) => {
 		setBusy(kind);
 		try {
-			await fn();
+			await follow.track(fn);
 			toast.success(kind === "rebuild" ? "Rebuild started" : "Deploy started");
-			router.push(back);
 		} catch (error) {
 			toast.error(errorMessage(error));
 		} finally {

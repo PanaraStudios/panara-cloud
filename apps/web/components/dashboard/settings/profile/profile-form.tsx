@@ -4,9 +4,8 @@ import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/stand
 import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation } from "convex/react";
-import { Palette } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -25,12 +24,8 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { authClient } from "@/lib/auth/client";
 import { errorMessage } from "@/lib/auth/errors";
-import {
-	getAvatarType,
-	isSolidColorAvatar,
-	isUploadedAvatar,
-} from "@/lib/avatar-utils";
-import { generateSHA256Hash, getFallbackAvatarInitials } from "@/lib/utils";
+import { getAvatarType, isUploadedAvatar } from "@/lib/avatar-utils";
+import { getFallbackAvatarInitials } from "@/lib/utils";
 
 const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 const UPLOAD_TYPES = "image/png,image/jpeg,image/gif,image/webp";
@@ -41,19 +36,20 @@ const profileSchema = z.object({
 
 type Profile = z.infer<typeof profileSchema>;
 
+// Panara Cloud's own set: small isometric block figures.
 const randomImages = [
-	"/avatars/avatar-1.png",
-	"/avatars/avatar-2.png",
-	"/avatars/avatar-3.png",
-	"/avatars/avatar-4.png",
-	"/avatars/avatar-5.png",
-	"/avatars/avatar-6.png",
-	"/avatars/avatar-7.png",
-	"/avatars/avatar-8.png",
-	"/avatars/avatar-9.png",
-	"/avatars/avatar-10.png",
-	"/avatars/avatar-11.png",
-	"/avatars/avatar-12.png",
+	"/avatars/block-cube.svg",
+	"/avatars/block-tower.svg",
+	"/avatars/block-step.svg",
+	"/avatars/block-stairs.svg",
+	"/avatars/block-slab.svg",
+	"/avatars/block-corner.svg",
+	"/avatars/block-arch.svg",
+	"/avatars/block-pyramid.svg",
+	"/avatars/block-tee.svg",
+	"/avatars/block-bridge.svg",
+	"/avatars/block-pair.svg",
+	"/avatars/block-cross.svg",
 ];
 
 // The profile form, reduced to the avatar: name, email, password, 2FA
@@ -64,19 +60,10 @@ export const ProfileForm = () => {
 	const currentUser = session?.user;
 	const [isUpdating, setIsUpdating] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [gravatarHash, setGravatarHash] = useState<string | null>(null);
-	const colorInputRef = useRef<HTMLInputElement>(null);
 	// The picked file waits here (the form holds its preview) until saved.
 	const pendingUpload = useRef<File | null>(null);
 	const generateUploadUrl = useMutation(api.account.generateAvatarUploadUrl);
 	const updateAvatar = useMutation(api.account.updateAvatar);
-
-	const availableAvatars = useMemo(() => {
-		if (gravatarHash === null) return randomImages;
-		return randomImages.concat([
-			`https://www.gravatar.com/avatar/${gravatarHash}`,
-		]);
-	}, [gravatarHash]);
 
 	const form = useForm<Profile>({
 		defaultValues: {
@@ -86,18 +73,9 @@ export const ProfileForm = () => {
 	});
 
 	const savedImage = currentUser?.image || "";
-	const email = currentUser?.email;
 	useEffect(() => {
 		form.reset({ image: savedImage });
 	}, [form, savedImage]);
-
-	useEffect(() => {
-		if (email) {
-			generateSHA256Hash(email).then((hash) => {
-				setGravatarHash(hash);
-			});
-		}
-	}, [email]);
 
 	const onSubmit = async (values: Profile) => {
 		setIsUpdating(true);
@@ -247,39 +225,7 @@ export const ProfileForm = () => {
 															/>
 														</FormLabel>
 													</FormItem>
-													<FormItem key="color-avatar">
-														<FormLabel className="[&:has([data-checked])>.avatar-option]:ring-2 [&:has([data-checked])>.avatar-option]:ring-foreground [&:has([data-checked])>.avatar-option]:ring-offset-2 [&:has([data-checked])>.avatar-option]:ring-offset-background cursor-pointer relative">
-															<FormControl>
-																<RadioGroupItem
-																	value="color"
-																	className="sr-only absolute!"
-																/>
-															</FormControl>
-															<div
-																className="avatar-option flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-border text-muted-foreground hover:text-foreground"
-																style={{
-																	backgroundColor: isSolidColorAvatar(
-																		field.value,
-																	)
-																		? field.value
-																		: undefined,
-																}}
-																onClick={() => colorInputRef.current?.click()}
-															>
-																{!isSolidColorAvatar(field.value) && (
-																	<Palette className="size-4" />
-																)}
-															</div>
-															<input
-																ref={colorInputRef}
-																type="color"
-																className="pointer-events-none absolute top-0 left-0 size-10 opacity-0"
-																value={field.value}
-																onChange={field.onChange}
-															/>
-														</FormLabel>
-													</FormItem>
-													{availableAvatars.map((image) => (
+													{randomImages.map((image) => (
 														<FormItem key={image}>
 															<FormLabel className="[&:has([data-checked])>.avatar-option]:ring-2 [&:has([data-checked])>.avatar-option]:ring-foreground [&:has([data-checked])>.avatar-option]:ring-offset-2 [&:has([data-checked])>.avatar-option]:ring-offset-background cursor-pointer">
 																<FormControl>

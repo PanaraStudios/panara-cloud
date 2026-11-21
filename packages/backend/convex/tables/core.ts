@@ -88,6 +88,13 @@ export const coreTables = {
 		storageId: v.id("_storage"),
 	}).index("by_userId", ["userId"]),
 
+	// An uploaded organization logo lives in file storage; the organization
+	// record only holds the served URL.
+	organizationLogos: defineTable({
+		organizationId: v.string(),
+		storageId: v.id("_storage"),
+	}).index("by_organizationId", ["organizationId"]),
+
 	// Upload URLs handed out per user and purpose, and the files claimed with
 	// them: a storage id is only accepted from the user it was uploaded for.
 	uploadGrants: defineTable({

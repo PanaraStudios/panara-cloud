@@ -60,3 +60,23 @@ export function actionShortcut(action: string | null, label: string) {
 	if (action === "delete" && /^Delete\b/.test(label)) return "Backspace";
 	return null;
 }
+
+// "G then letter" inside a service or a server:
+// [letter, title, section under its URL].
+export const SERVICE_SHORTCUTS = [
+	["o", "Overview", undefined],
+	["d", "Deployments", "deployments"],
+	["l", "Logs", "logs"],
+	["m", "Metrics", "metrics"],
+	["b", "Backups (databases)", "backups"],
+	["e", "Environment variables", "settings/environment"],
+] as const;
+
+export const SERVER_SHORTCUTS = [
+	["o", "Overview", undefined],
+	["c", "Containers", "containers"],
+	["t", "Terminal", "terminal"],
+	["m", "Monitoring", "monitoring"],
+] as const;
+
+export const ACCOUNT_SHORTCUT = "u";

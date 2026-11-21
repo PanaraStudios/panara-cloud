@@ -125,7 +125,7 @@ function SettingsItem({ item }: { item: NavItem }) {
 			{open ? (
 				<SidebarMenuSub
 					aria-label="Settings pages"
-					className="mt-1 mr-0 gap-0.5 pr-0"
+					className="mt-1 mr-0 gap-0.5 pr-0 motion-safe:fade-in-0 motion-safe:slide-in-from-top-1 motion-safe:animate-in motion-safe:duration-200"
 				>
 					{groups.map((group) => (
 						<Fragment key={group.label}>

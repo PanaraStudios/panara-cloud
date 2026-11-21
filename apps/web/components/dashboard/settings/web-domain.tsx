@@ -72,8 +72,11 @@ const addServerDomain = z
 
 type AddServerDomain = z.infer<typeof addServerDomain>;
 
+export const PANEL_DOMAIN_ID = "panel-domain";
+
 export const WebDomain = () => (
 	<FormSection
+		id={PANEL_DOMAIN_ID}
 		title="Panel domain"
 		icon={GlobeIcon}
 		description="Where people open Panara Cloud. Changing it restarts the panel's router."

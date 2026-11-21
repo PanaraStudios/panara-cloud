@@ -4,8 +4,10 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BadgeTone } from "@/components/ui-kit/primitives";
+import { deploymentUrl, serviceUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
 import type { ServiceInfo } from "./service-context";
@@ -118,3 +120,50 @@ export const deploymentTitle = (row: Pick<DeploymentRow, "title" | "commit">) =>
 
 export const shortSha = (row: Pick<DeploymentRow, "commit"> | undefined) =>
 	row?.commit?.sha.slice(0, 7) ?? null;
+
+const FOLLOW_TIMEOUT_MS = 4000;
+
+/** Opens the page of the deployment a button starts, so its log is on
+    screen. `track` wraps the call that starts it: the deployments known at
+    that moment are remembered, and the first new one is opened. When none
+    shows up (no permission to read them) the deployments list opens instead.
+    `cancel` is for a start that turned out to create no deployment. */
+export function useFollowDeployment(service: ServiceInfo) {
+	const router = useRouter();
+	const deployments = useServiceDeployments(service);
+	const [known, setKnown] = useState<Set<string> | null>(null);
+	const ref = useRef(service.ref);
+	useEffect(() => {
+		ref.current = service.ref;
+	}, [service.ref]);
+	useEffect(() => {
+		if (!known) return;
+		const started = deployments?.find((row) => !known.has(row._id));
+		if (started) {
+			setKnown(null);
+			router.push(deploymentUrl(ref.current, started._id));
+			return;
+		}
+		const timer = window.setTimeout(() => {
+			setKnown(null);
+			router.push(serviceUrl(ref.current, "deployments"));
+		}, FOLLOW_TIMEOUT_MS);
+		return () => window.clearTimeout(timer);
+	}, [known, deployments, router]);
+	const cancel = useCallback(() => setKnown(null), []);
+	const track = useCallback(
+		async <Result>(start: () => Promise<Result>) => {
+			// Remembered before the call: the new row can arrive before the
+			// call returns.
+			setKnown(new Set((deployments ?? []).map((row) => row._id)));
+			try {
+				return await start();
+			} catch (error) {
+				setKnown(null);
+				throw error;
+			}
+		},
+		[deployments],
+	);
+	return { track, cancel };
+}

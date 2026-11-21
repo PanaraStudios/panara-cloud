@@ -265,7 +265,7 @@ export function EnvironmentServices() {
 											<SelectValue />
 										</span>
 									</SelectTrigger>
-									<SelectContent alignItemWithTrigger={false} align="start">
+									<SelectContent align="start">
 										<SelectItem value="all">All</SelectItem>
 										{servers.map(([id, name]) => (
 											<SelectItem key={id} value={id}>

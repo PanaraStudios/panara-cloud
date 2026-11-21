@@ -83,7 +83,7 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
 	return (
 		<SelectPrimitive.Group
 			data-slot="select-group"
-			className={cn("flex scroll-my-1 flex-col gap-1 p-1.5", className)}
+			className={cn("flex scroll-my-1 flex-col gap-1", className)}
 			{...props}
 		/>
 	);
@@ -132,9 +132,10 @@ function SelectContent({
 	children,
 	side = "bottom",
 	sideOffset = 4,
-	align = "center",
+	align = "start",
 	alignOffset = 0,
-	alignItemWithTrigger = true,
+	// The list opens under the field, never over it.
+	alignItemWithTrigger = false,
 	...props
 }: SelectPrimitive.Popup.Props &
 	Pick<
@@ -161,7 +162,9 @@ function SelectContent({
 					{...props}
 				>
 					<SelectScrollUpButton />
-					<SelectPrimitive.List>{children}</SelectPrimitive.List>
+					<SelectPrimitive.List className="p-1.5">
+						{children}
+					</SelectPrimitive.List>
 					<SelectScrollDownButton />
 				</SelectPrimitive.Popup>
 			</SelectPrimitive.Positioner>

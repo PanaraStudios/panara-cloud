@@ -13,6 +13,8 @@ type Binding = {
 	run: (event: KeyboardEvent) => void | boolean;
 	scope?: React.RefObject<HTMLElement | null>;
 	priority?: number;
+	/** Also fires from a text field or an open dialog (Save). */
+	anywhere?: boolean;
 };
 type Registry = { bindings: Set<Binding>; mac: boolean };
 const Shortcuts = React.createContext<Registry | null>(null);
@@ -85,7 +87,7 @@ export function ShortcutProvider({ children }: { children: React.ReactNode }) {
 				if (scope) {
 					if (!(event.target instanceof Node) || !scope.contains(event.target))
 						continue;
-				} else if (typing || overlays.length) continue;
+				} else if ((typing || overlays.length) && !binding.anywhere) continue;
 				const match = binding.keys.includes(" ")
 					? sequence === binding.keys && matchesShortcut(event, key, mac)
 					: sequence === key && matchesShortcut(event, binding.keys, mac);
@@ -123,15 +125,15 @@ export function useShortcut(
 	options: Omit<Binding, "keys" | "run"> & { enabled?: boolean } = {},
 ) {
 	const registry = React.useContext(Shortcuts);
-	const { enabled = true, scope, priority } = options;
+	const { enabled = true, scope, priority, anywhere } = options;
 	React.useEffect(() => {
 		if (!registry || !keys || !enabled) return;
-		const binding = { keys, run, scope, priority };
+		const binding = { keys, run, scope, priority, anywhere };
 		registry.bindings.add(binding);
 		return () => {
 			registry.bindings.delete(binding);
 		};
-	}, [registry, keys, run, enabled, scope, priority]);
+	}, [registry, keys, run, enabled, scope, priority, anywhere]);
 }
 
 export function useShortcutModifier() {

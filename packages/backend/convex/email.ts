@@ -10,6 +10,7 @@ import {
 	query,
 } from "./_generated/server";
 import { encryptSecret } from "./lib/crypto";
+import { renderEmail } from "./lib/emailLayout";
 import { deleteSecret, putSecret, readSecret } from "./lib/secrets";
 import { assertAllowedEndpoint, providerFetch } from "./platform/lib/fetch";
 import { emailProviderKind } from "./tables/email";
@@ -388,7 +389,14 @@ export const sendTest = action({
 				to,
 				subject: "Panara Cloud test email",
 				text: `Email delivery works. Panara Cloud will send account email through ${PROVIDERS[target.provider].label} from ${target.from}.\n`,
-				html: `<p>Email delivery works. Panara Cloud will send account email through ${PROVIDERS[target.provider].label}.</p>`,
+				html: renderEmail({
+					preview: "Email delivery works.",
+					title: "Email delivery works",
+					intro: `Panara Cloud will send account email through ${PROVIDERS[target.provider].label} from ${target.from}.`,
+					status: "success",
+					footer:
+						"You received this email because you pressed Send test email in Panara Cloud.",
+				}),
 			},
 			crypto.randomUUID(),
 		);

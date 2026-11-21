@@ -252,11 +252,13 @@
 	--input: var(--border);
 	--ring: var(--brand);
 
-	--chart-1: #262626;
-	--chart-2: #525252;
+	/* Mid greys: near-black series read too heavy on a white page. The dark
+	   theme sets its own below. */
+	--chart-1: #8f8f8f;
+	--chart-2: #b8b8b8;
 	--chart-3: #a3a3a3;
-	--chart-4: #737373;
-	--chart-5: #d4d4d4;
+	--chart-4: #cfcfcf;
+	--chart-5: #dedede;
 
 	--sidebar: var(--bg);
 	--sidebar-foreground: var(--fg);
@@ -390,7 +392,10 @@
 	--shadow-float: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px rgb(0 0 0 / 0.6);
 	--shadow-lifted: 0 2px 4px rgb(0 0 0 / 0.5), 0 16px 40px rgb(0 0 0 / 0.7);
 
+	--chart-1: #262626;
+	--chart-2: #525252;
 	--chart-3: #525252;
+	--chart-4: #737373;
 	--chart-5: #404040;
 
 	--sidebar: var(--bg-subtle);

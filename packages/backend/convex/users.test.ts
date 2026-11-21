@@ -612,11 +612,11 @@ describe("avatar", () => {
 		});
 		expect(await t.run((ctx) => ctx.storage.getUrl(first))).toBeNull();
 		await asUser(t, member).mutation(api.account.updateAvatar, {
-			image: "/avatars/avatar-1.png",
+			image: "/avatars/block-cube.svg",
 		});
 		expect(await t.run((ctx) => ctx.storage.getUrl(second))).toBeNull();
 		expect((await authRows(t, "user", "_id", member)).page[0]?.image).toBe(
-			"/avatars/avatar-1.png",
+			"/avatars/block-cube.svg",
 		);
 	});
 
@@ -664,5 +664,65 @@ describe("avatar", () => {
 				storageId: mine,
 			}),
 		).rejects.toThrow(/Upload not found/);
+	});
+});
+
+describe("organization logo", () => {
+	const upload = async (t: TestConvex, userId: string, org: string) => {
+		await asUser(t, userId).mutation(api.account.generateLogoUploadUrl, {
+			organizationId: org,
+		});
+		return await t.run((ctx) =>
+			ctx.storage.store(
+				new Blob([new Uint8Array(1024)], { type: "image/png" }),
+			),
+		);
+	};
+	const logoOf = async (t: TestConvex, org: string) =>
+		(await authRows(t, "organization", "_id", org)).page[0]?.logo ?? null;
+
+	test("an uploaded logo is stored, and replaced by a URL or by none", async () => {
+		const { t, owner, org } = await seed();
+		const first = await upload(t, owner, org);
+		const result = await asUser(t, owner).mutation(api.account.updateLogo, {
+			organizationId: org,
+			storageId: first,
+		});
+		expect(result.error).toBeNull();
+		expect(await logoOf(t, org)).toBe(result.logo);
+		await asUser(t, owner).mutation(api.account.updateLogo, {
+			organizationId: org,
+			logo: "https://example.test/logo.png",
+		});
+		expect(await t.run((ctx) => ctx.storage.getUrl(first))).toBeNull();
+		expect(await logoOf(t, org)).toBe("https://example.test/logo.png");
+		await asUser(t, owner).mutation(api.account.updateLogo, {
+			organizationId: org,
+			logo: null,
+		});
+		expect(await logoOf(t, org)).toBeNull();
+		await expect(
+			asUser(t, owner).mutation(api.account.updateLogo, {
+				organizationId: org,
+				logo: "data:image/png;base64,AAAA",
+			}),
+		).rejects.toThrow(/upload/);
+	});
+
+	test("members and other organizations cannot change it", async () => {
+		const { t, member, outsider, org } = await seed();
+		for (const userId of [member, outsider]) {
+			await expect(
+				asUser(t, userId).mutation(api.account.generateLogoUploadUrl, {
+					organizationId: org,
+				}),
+			).rejects.toThrow();
+			await expect(
+				asUser(t, userId).mutation(api.account.updateLogo, {
+					organizationId: org,
+					logo: "https://example.test/logo.png",
+				}),
+			).rejects.toThrow();
+		}
 	});
 });

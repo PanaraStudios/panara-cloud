@@ -3,6 +3,7 @@ import { ConvexError, type Infer, v } from "convex/values";
 import { components, internal } from "./_generated/api";
 import { internalMutation, internalQuery } from "./_generated/server";
 import { deliveryMode, logAuthLinks } from "./email";
+import { renderEmail } from "./lib/emailLayout";
 
 export const authEmailArgs = v.object({
 	to: v.string(),
@@ -26,14 +27,6 @@ export type AuthEmail = Infer<typeof authEmailArgs>;
 export const resend = new Resend(components.resend, {
 	testMode: process.env.RESEND_TEST_MODE !== "false",
 });
-
-const escapeHtml = (value: string) =>
-	value
-		.replaceAll("&", "&amp;")
-		.replaceAll("<", "&lt;")
-		.replaceAll(">", "&gt;")
-		.replaceAll('"', "&quot;")
-		.replaceAll("'", "&#39;");
 
 export const authEmailContent = (email: Omit<AuthEmail, "to">) => {
 	const content = {
@@ -62,7 +55,15 @@ export const authEmailContent = (email: Omit<AuthEmail, "to">) => {
 	return {
 		subject: content.subject,
 		text: `${content.intro}\n\n${content.action}: ${email.url}\n`,
-		html: `<!DOCTYPE html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#fff;padding:0 8px"><div style="max-width:465px;margin:40px auto;border:1px solid #eaeaea;border-radius:8px;padding:24px"><h1 style="font-size:20px;font-weight:600;margin:0 0 16px">${escapeHtml(content.subject)}</h1><p style="font-size:14px;line-height:24px">${escapeHtml(content.intro)}</p><p style="text-align:center;margin:28px 0"><a href="${escapeHtml(email.url)}" style="background:#000;color:#fff;border-radius:6px;padding:12px 20px;font-size:14px;font-weight:600;text-decoration:none;display:inline-block">${escapeHtml(content.action)}</a></p><p style="font-size:12px;line-height:20px;color:#666">Or paste this link into your browser:<br><a href="${escapeHtml(email.url)}" style="color:#2563eb;word-break:break-all">${escapeHtml(email.url)}</a></p></div></body></html>`,
+		html: renderEmail({
+			preview: content.intro,
+			title: content.subject,
+			intro: content.intro,
+			button: { url: email.url, label: content.action },
+			note: "If you didn't expect this email, you can ignore it.",
+			footer:
+				"You received this email because this address was used on a Panara Cloud panel.",
+		}),
 	};
 };
 

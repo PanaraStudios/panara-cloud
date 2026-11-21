@@ -1,4 +1,9 @@
 import { type Infer, v } from "convex/values";
+import {
+	type EmailStatus,
+	escapeHtml,
+	renderEmail,
+} from "../../lib/emailLayout";
 import type {
 	notificationChannel,
 	notificationEventKey,
@@ -219,13 +224,6 @@ export type NotificationMessage = {
 export const formatDate = (ms: number) =>
 	`${new Date(ms).toISOString().slice(0, 19).replace("T", " ")} UTC`;
 
-export const escapeHtml = (value: string) =>
-	value
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;");
-
 const isHighSurrogate = (code: number) => code >= 0xd800 && code <= 0xdbff;
 
 export const formatTelegramErrorMessage = (errorMessage: string) => {
@@ -239,9 +237,6 @@ export const formatTelegramErrorMessage = (errorMessage: string) => {
 	return `${escaped.substring(0, end)}…`;
 };
 
-// Optional public URL of the logo shown at the top of notification emails.
-const logoUrl = () => process.env.PANARA_CLOUD_LOGO_URL;
-
 export type EmailContent = {
 	preview: string;
 	heading: string;
@@ -249,28 +244,24 @@ export type EmailContent = {
 	details: { label: string; value: string }[];
 	reason?: { label: string; text: string };
 	button?: { url: string; label: string };
+	/** Defaults to failed when the email carries an error. */
+	status?: EmailStatus;
 };
 
-// Plain-HTML email templates; inline styles stand in for Tailwind classes.
-export const renderEmailHtml = (content: EmailContent): string => {
-	const details = content.details
-		.map(
-			(d) =>
-				`<p style="margin:4px 0">${escapeHtml(d.label)}: <strong>${escapeHtml(d.value)}</strong></p>`,
-		)
-		.join("");
-	const reason = content.reason
-		? `<div style="margin-top:16px;background:#f4f4f5;border-radius:8px;padding:8px 12px;font-size:14px"><p style="margin:4px 0;font-weight:bold">${escapeHtml(content.reason.label)}:</p><p style="margin:4px 0;font-size:12px;white-space:pre-wrap">${escapeHtml(content.reason.text)}</p></div>`
-		: "";
-	const logoSrc = logoUrl();
-	const logo = logoSrc
-		? `<div style="margin-top:32px;text-align:center"><img src="${escapeHtml(logoSrc)}" width="100" height="50" alt="Panara Cloud" style="margin:0 auto"></div>`
-		: "";
-	const button = content.button
-		? `<div style="text-align:center;margin:32px 0"><a href="${escapeHtml(content.button.url)}" style="background:#000;border-radius:4px;color:#fff;font-size:12px;font-weight:600;text-decoration:none;padding:12px 20px;display:inline-block">${escapeHtml(content.button.label)}</a></div><p style="font-size:14px;line-height:24px">or copy and paste this URL into your browser: <a href="${escapeHtml(content.button.url)}" style="color:#2563eb;text-decoration:none">${escapeHtml(content.button.url)}</a></p>`
-		: "";
-	return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body style="background:#fff;margin:auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:0 8px"><span style="display:none;max-height:0;overflow:hidden">${escapeHtml(content.preview)}</span><div style="border:1px solid #eaeaea;border-radius:8px;margin:40px auto;padding:20px;max-width:465px">${logo}<h1 style="color:#000;font-size:24px;font-weight:normal;text-align:center;margin:30px 0">${escapeHtml(content.heading)}</h1><p style="font-size:14px;line-height:24px">Hello,</p><p style="font-size:14px;line-height:24px">${escapeHtml(content.intro)}</p><div style="background:#f4f4f5;border-radius:8px;padding:8px 12px;font-size:14px"><p style="margin:4px 0;font-weight:bold">Details:</p>${details}</div>${reason}${button}</div></body></html>`;
-};
+const NOTIFICATION_FOOTER =
+	"You received this email because this address is on a notification channel in Panara Cloud.";
+
+export const renderEmailHtml = (content: EmailContent): string =>
+	renderEmail({
+		preview: content.preview,
+		title: content.heading,
+		intro: content.intro,
+		status: content.status ?? (content.reason ? "error" : undefined),
+		details: content.details,
+		reason: content.reason,
+		button: content.button,
+		footer: NOTIFICATION_FOOTER,
+	});
 
 export const invitationEmail = ({
 	email,
@@ -283,13 +274,15 @@ export const invitationEmail = ({
 	organizationName: string;
 	inviterName?: string;
 }) => {
-	const org = escapeHtml(organizationName || "an organization");
-	const link = escapeHtml(inviteLink);
-	const by = inviterName
-		? ` by <strong>${escapeHtml(inviterName)}</strong>`
-		: "";
-	const subject = `You've been invited to join ${organizationName} on Panara Cloud`;
-	const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body style="background:#f4f4f5;margin:auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"><span style="display:none;max-height:0;overflow:hidden">${escapeHtml(subject)}</span><div style="margin:40px auto;max-width:520px"><div style="background:#09090b;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;color:#fff;font-size:22px;font-weight:600">Panara Cloud</div><div style="background:#fff;padding:32px 40px"><h1 style="color:#09090b;font-size:22px;font-weight:600;margin:0 0 8px">You've been invited to join ${org}</h1><p style="color:#71717a;font-size:14px;line-height:22px;margin:0 0 24px">You have been invited${by} to join <strong style="color:#09090b">${org}</strong> on Panara Cloud, the platform for deploying your apps to the cloud. Click the button below to accept the invitation.</p><div style="text-align:center;margin-bottom:24px"><a href="${link}" style="background:#09090b;border-radius:8px;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;display:inline-block">Accept Invitation</a></div><p style="color:#a1a1aa;font-size:13px;line-height:20px;margin:0 0 16px;text-align:center">If the button above doesn't work, copy and paste the following link into your browser:</p><p style="color:#71717a;font-size:12px;line-height:18px;margin:0;text-align:center;word-break:break-all">${link}</p></div><div style="background:#fafafa;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;border-top:1px solid #e4e4e7"><p style="color:#a1a1aa;font-size:12px;line-height:18px;margin:0">This invitation was intended for <span style="color:#71717a">${escapeHtml(email)}</span>. If you were not expecting this invitation, you can safely ignore this email.</p></div></div></body></html>`;
+	const organization = organizationName || "an organization";
+	const subject = `You've been invited to join ${organization} on Panara Cloud`;
+	const html = renderEmail({
+		preview: subject,
+		title: `Join ${organization}`,
+		intro: `${inviterName || "A teammate"} invited you to ${organization} on Panara Cloud, where the team deploys and runs its apps.`,
+		button: { url: inviteLink, label: "Accept invitation" },
+		footer: `This invitation was sent to ${email}. If you weren't expecting it, you can ignore this email.`,
+	});
 	const text = `You have been invited to join ${organizationName} on Panara Cloud.\n\nAccept the invitation: ${inviteLink}\n\nThis invitation was intended for ${email}. If you were not expecting it, you can ignore this email.`;
 	return { subject, html, text };
 };
@@ -345,6 +338,7 @@ export const buildMessage = (
 				email: {
 					subject: "Build success for Panara Cloud",
 					html: renderEmailHtml({
+						status: "success",
 						preview: `Build success for ${event.applicationName}`,
 						heading: `Build success for ${event.applicationName}`,
 						intro: `Your build for ${event.applicationName} was successful.`,
@@ -602,8 +596,9 @@ export const buildMessage = (
 				email: {
 					subject: `Server ${event.metric} alert for ${event.serverName}`,
 					html: renderEmailHtml({
-						preview: `Server ${event.metric} alert for ${event.serverName} ⚠️`,
-						heading: `⚠️ Server ${event.metric} alert for ${event.serverName}`,
+						status: "warning",
+						preview: `Server ${event.metric} alert for ${event.serverName}`,
+						heading: `Server ${event.metric} alert for ${event.serverName}`,
 						intro: `The ${event.metric} usage on ${event.serverName} exceeded the configured threshold.`,
 						details: [
 							{ label: "Server Name", value: event.serverName },
@@ -732,7 +727,16 @@ export const buildTestMessage = (sentAt: number): NotificationMessage => ({
 		message: TEST_TEXT,
 		timestamp: new Date(sentAt).toISOString(),
 	},
-	email: { subject: "Test Email", html: `<p>${TEST_TEXT}</p>` },
+	email: {
+		subject: "Test Email",
+		html: renderEmail({
+			preview: TEST_TEXT,
+			title: "Test notification",
+			intro: TEST_TEXT,
+			status: "success",
+			footer: NOTIFICATION_FOOTER,
+		}),
+	},
 	date: formatDate(sentAt),
 	timestamp: new Date(sentAt).toISOString(),
 });

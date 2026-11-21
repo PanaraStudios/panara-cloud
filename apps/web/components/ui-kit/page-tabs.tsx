@@ -2,9 +2,10 @@
 
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useShortcut } from "@/lib/dashboard/use-shortcut";
 import { activeTab } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,13 @@ export type PageTab = {
 };
 
 const FADE = "1.5rem";
+
+// The number keys open the page's tabs in order.
+function TabShortcut({ index, href }: { index: number; href: string }) {
+	const router = useRouter();
+	useShortcut(String(index + 1), () => router.push(href));
+	return null;
+}
 
 /** The sections of a page as a row of links under its header: one hairline,
     the open section underlined. A page under a section (a deployment, a
@@ -82,6 +90,9 @@ export function PageTabs({
 			value={current}
 			className={cn("gap-0 border-border border-b max-md:-mx-6", className)}
 		>
+			{tabs.slice(0, 9).map((tab, index) => (
+				<TabShortcut key={tab.href} index={index} href={tab.href} />
+			))}
 			<TabsList
 				ref={row}
 				variant="line"

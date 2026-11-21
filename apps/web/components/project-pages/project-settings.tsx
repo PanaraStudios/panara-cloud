@@ -4,18 +4,23 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { format } from "date-fns";
-import { CopyPlusIcon, FolderIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import {
+	ArrowRightLeftIcon,
+	CopyPlusIcon,
+	FolderIcon,
+	LayersIcon,
+	PencilIcon,
+	SlidersHorizontalIcon,
+	Trash2Icon,
+	TriangleAlertIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DuplicateProject } from "@/components/dashboard/project/duplicate-project";
 import { ExportProject } from "@/components/dashboard/project/export-import/export-project";
-import {
-	ActionRow,
-	FormSection,
-	FormSections,
-} from "@/components/shared/form-section";
+import { ActionRow } from "@/components/shared/form-section";
 import { TagSelector } from "@/components/shared/tag-selector";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +41,11 @@ import {
 	Th,
 	TypeToConfirmDialog,
 } from "@/components/ui-kit/primitives";
+import {
+	SettingsLayout,
+	SettingsPane,
+	useQuerySection,
+} from "@/components/ui-kit/settings-page";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
@@ -78,6 +88,33 @@ export function ProjectSettings() {
 	const [description, setDescription] = useState("");
 	const [tagIds, setTagIds] = useState<string[]>([]);
 	const [saving, setSaving] = useState(false);
+	const sections = [
+		{
+			id: "general",
+			title: "General",
+			icon: SlidersHorizontalIcon,
+			shown: permissions.project.create,
+		},
+		{
+			id: "environments",
+			title: "Environments",
+			icon: LayersIcon,
+			shown: true,
+		},
+		{
+			id: "move",
+			title: "Move & copy",
+			icon: ArrowRightLeftIcon,
+			shown: canTransfer,
+		},
+		{
+			id: "danger",
+			title: "Danger zone",
+			icon: TriangleAlertIcon,
+			shown: permissions.project.delete,
+		},
+	].filter((item) => item.shown);
+	const [open, href] = useQuerySection(sections.map((item) => item.id));
 	const loadedId = project?.projectId;
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset only when another project loads
 	useEffect(() => {
@@ -136,10 +173,16 @@ export function ProjectSettings() {
 	};
 
 	return (
-		<div className="flex w-full max-w-5xl flex-col gap-6 pb-16">
-			<FormSections>
+		<>
+			<SettingsLayout
+				label="Project settings sections"
+				active={open}
+				items={sections.map((item) => ({ ...item, href: href(item.id) }))}
+			>
 				{permissions.project.create ? (
-					<FormSection
+					<SettingsPane
+						id="general"
+						className="max-w-5xl"
 						title="General"
 						description="Shown in the projects list and above every page of the project."
 					>
@@ -186,10 +229,10 @@ export function ProjectSettings() {
 								</Button>
 							</div>
 						</form>
-					</FormSection>
+					</SettingsPane>
 				) : null}
 
-				<FormSection
+				<SettingsPane
 					id="environments"
 					title="Environments"
 					description="Each environment has its own services and variables."
@@ -299,10 +342,12 @@ export function ProjectSettings() {
 							);
 						})}
 					</ResourceTable>
-				</FormSection>
+				</SettingsPane>
 
 				{canTransfer ? (
-					<FormSection
+					<SettingsPane
+						id="move"
+						className="max-w-5xl"
 						title="Move & copy"
 						description="Back a project up or recreate it on another Panara Cloud instance."
 					>
@@ -361,11 +406,16 @@ export function ProjectSettings() {
 								</ActionRow>
 							) : null}
 						</div>
-					</FormSection>
+					</SettingsPane>
 				) : null}
 
 				{permissions.project.delete ? (
-					<FormSection title="Danger zone">
+					<SettingsPane
+						id="danger"
+						className="max-w-5xl"
+						title="Danger zone"
+						description="Delete the project."
+					>
 						<div className="flex flex-col">
 							<ActionRow
 								title={`Delete ${project.name}`}
@@ -385,9 +435,9 @@ export function ProjectSettings() {
 								</Button>
 							</ActionRow>
 						</div>
-					</FormSection>
+					</SettingsPane>
 				) : null}
-			</FormSections>
+			</SettingsLayout>
 			<TypeToConfirmDialog
 				open={deleting}
 				onOpenChange={setDeleting}
@@ -471,6 +521,6 @@ export function ProjectSettings() {
 					}
 				}}
 			/>
-		</div>
+		</>
 	);
 }

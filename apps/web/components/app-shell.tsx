@@ -11,6 +11,7 @@ import { ActionFeedback, useAction } from "@/components/account/shared";
 import { AuthPageFrame } from "@/components/auth/page-frame";
 import { TextField } from "@/components/auth/ui";
 import { SearchCommand } from "@/components/dashboard/search-command";
+import { LogoLoader } from "@/components/logo-loader";
 import { AppSidebar } from "@/components/shell/app-sidebar";
 import {
 	ContextBreadcrumb,
@@ -31,10 +32,24 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { authClient, authResult } from "@/lib/auth/client";
-import { ShortcutProvider, useShortcut } from "@/lib/dashboard/use-shortcut";
-import { navLevel, orgNav, serviceUrl } from "@/lib/navigation";
+import {
+	ACCOUNT_SHORTCUT,
+	SERVER_SHORTCUTS,
+	SERVICE_SHORTCUTS,
+} from "@/lib/dashboard/shortcuts";
+import {
+	isVisible,
+	ShortcutProvider,
+	useShortcut,
+} from "@/lib/dashboard/use-shortcut";
+import {
+	hasBackups,
+	navLevel,
+	orgNav,
+	serverUrl,
+	serviceUrl,
+} from "@/lib/navigation";
 import { OrganizationProvider, useOrganizations } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
@@ -250,30 +265,23 @@ function ShellSkeleton() {
 		return () => clearTimeout(timer);
 	}, []);
 	return (
-		<div className="hatch flex min-h-svh" aria-busy="true">
-			<div className="hidden w-64 shrink-0 flex-col gap-2 border-r p-2 md:flex">
-				<Skeleton className="h-10 w-full" />
-				<Skeleton className="mt-2 h-8 w-full" />
-				<Skeleton className="h-8 w-3/4" />
-				<Skeleton className="h-8 w-2/3" />
-			</div>
-			<div className="flex flex-1 flex-col gap-6 bg-background px-6 py-8 md:px-10">
-				<Skeleton className="h-8 w-48" />
-				<Skeleton className="h-40 w-full" />
-				{slow ? (
-					<p className="flex flex-wrap items-center gap-x-3 gap-y-2 text-muted-foreground text-sm">
-						Still connecting to the panel. If this doesn't clear, reload the
-						page.
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => window.location.reload()}
-						>
-							Reload
-						</Button>
-					</p>
-				) : null}
-			</div>
+		<div
+			className="relative flex min-h-svh flex-col items-center justify-center bg-background"
+			aria-busy="true"
+		>
+			<LogoLoader label="Loading Panara Cloud" />
+			{slow ? (
+				<p className="absolute top-[calc(50%+6rem)] flex flex-wrap items-center justify-center gap-x-3 gap-y-2 px-6 text-center text-muted-foreground text-sm">
+					Still connecting to the panel. If this doesn't clear, reload the page.
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => window.location.reload()}
+					>
+						Reload
+					</Button>
+				</p>
+			) : null}
 		</div>
 	);
 }
@@ -290,15 +298,8 @@ function NavigationShortcut({
 	return null;
 }
 
-export const SERVICE_SHORTCUTS = [
-	["o", "Overview", undefined],
-	["d", "Deployments", "deployments"],
-	["l", "Logs", "logs"],
-	["m", "Metrics", "metrics"],
-] as const;
-
 // opensend's "G then letter" navigation, for the pages this account can see;
-// inside a service, G O/D/L/M switch its sections.
+// inside a service or a server the letters switch its sections.
 function NavigationShortcuts() {
 	const permissions = usePermissions();
 	const level = navLevel(usePathname());
@@ -314,11 +315,23 @@ function NavigationShortcuts() {
 						letter={item.shortcut ?? ""}
 					/>
 				))}
+			<NavigationShortcut href="/account/profile" letter={ACCOUNT_SHORTCUT} />
 			{level.level === "service"
-				? SERVICE_SHORTCUTS.map(([letter, , section]) => (
+				? SERVICE_SHORTCUTS.filter(
+						([letter]) => letter !== "b" || hasBackups(level.kind),
+					).map(([letter, , section]) => (
 						<NavigationShortcut
 							key={letter}
 							href={serviceUrl(level, section)}
+							letter={letter}
+						/>
+					))
+				: null}
+			{level.level === "server"
+				? SERVER_SHORTCUTS.map(([letter, , section]) => (
+						<NavigationShortcut
+							key={letter}
+							href={serverUrl(level.serverId, section)}
 							letter={letter}
 						/>
 					))
@@ -338,6 +351,80 @@ function useSearchShortcut() {
 		if (!input) return false;
 		input.focus();
 	});
+}
+
+// J and K walk the rows of the page's table, Enter opens the marked row and
+// X ticks its checkbox.
+function useListShortcuts() {
+	const marked = () =>
+		document.querySelector<HTMLElement>(
+			'main tbody tr[data-keyboard-highlight="true"]',
+		);
+	const move = (by: 1 | -1) => {
+		const rows = Array.from(
+			document.querySelectorAll<HTMLElement>("main tbody tr"),
+		).filter(isVisible);
+		if (rows.length === 0) return false;
+		const current = marked();
+		const index = current ? rows.indexOf(current) : -1;
+		const next =
+			rows[
+				index === -1
+					? by === 1
+						? 0
+						: rows.length - 1
+					: Math.min(rows.length - 1, Math.max(0, index + by))
+			];
+		current?.removeAttribute("data-keyboard-highlight");
+		next?.setAttribute("data-keyboard-highlight", "true");
+		next?.scrollIntoView({ block: "nearest" });
+	};
+	useShortcut("j", () => move(1));
+	useShortcut("k", () => move(-1));
+	useShortcut("Enter", (event) => {
+		// Enter on a focused button or link keeps its own meaning.
+		if (
+			event.target instanceof Element &&
+			event.target.closest("a, button, [role=button], [tabindex]")
+		)
+			return false;
+		const row = marked();
+		const link = row?.querySelector<HTMLElement>("a[href]");
+		if (!row || !link || !isVisible(row)) return false;
+		link.click();
+	});
+	useShortcut("x", () => {
+		const row = marked();
+		const box = row?.querySelector<HTMLElement>('[role="checkbox"]');
+		if (!row || !box || !isVisible(row)) return false;
+		box.click();
+	});
+}
+
+// ⌘S presses the Save button of the form being typed in, else the page's.
+function useSaveShortcut() {
+	useShortcut(
+		"mod+s",
+		(event) => {
+			const from = event.target instanceof Element ? event.target : null;
+			const scope =
+				from?.closest("form") ??
+				from?.closest('[role="dialog"]') ??
+				document.querySelector("main");
+			const button = Array.from(
+				scope?.querySelectorAll<HTMLButtonElement>("button") ?? [],
+			).find(
+				(candidate) =>
+					isVisible(candidate) &&
+					!candidate.disabled &&
+					(candidate.type === "submit" ||
+						/^save\b/i.test(candidate.textContent?.trim() ?? "")),
+			);
+			if (!button) return false;
+			button.click();
+		},
+		{ anywhere: true },
+	);
 }
 
 // The line above a page: on a page under a project, a service or a server
@@ -383,6 +470,8 @@ function DashboardChrome({
 	useShortcut("mod+j", () => setSearchOpen(true));
 	useShortcut("?", () => setShortcutsOpen(true));
 	useSearchShortcut();
+	useListShortcuts();
+	useSaveShortcut();
 	useShortcut("d", () => setTheme(resolvedTheme === "dark" ? "light" : "dark"));
 
 	return (

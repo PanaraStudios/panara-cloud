@@ -60,7 +60,6 @@ export function ServerSettings() {
 					<SettingsPane
 						key={section.slug}
 						id={section.slug}
-						active={section.slug === active}
 						title={section.title}
 						description={section.description}
 						className="max-w-5xl"

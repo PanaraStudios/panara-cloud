@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { EmptyState, PageHeader } from "@/components/ui-kit/primitives";
+import { DetailHeader, EmptyState } from "@/components/ui-kit/primitives";
 import { errorMessage } from "@/lib/auth/errors";
 import { useQueryResult } from "@/lib/host-data";
 import { serverUrl } from "@/lib/navigation";
@@ -403,7 +403,9 @@ export function MonitoringSettingsPage() {
 	}
 	return (
 		<div className="flex w-full max-w-5xl flex-col gap-8 pb-10">
-			<PageHeader
+			<DetailHeader
+				backHref={serverUrl(ref.routeId, "monitoring")}
+				backLabel="Monitoring"
 				title={config?.enabled ? "Monitoring settings" : "Set up monitoring"}
 				description="A small service on the server samples CPU, memory, disk, network and container usage, keeps the history and sends alerts."
 			/>

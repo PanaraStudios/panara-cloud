@@ -3335,5 +3335,12 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         null,
         Name
       >;
+      setOrganizationLogo: FunctionReference<
+        "mutation",
+        "internal",
+        { logo: string | null; organizationId: string },
+        null,
+        Name
+      >;
     };
   };

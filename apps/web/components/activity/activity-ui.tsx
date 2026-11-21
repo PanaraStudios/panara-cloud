@@ -67,7 +67,7 @@ export function FilterSelect({
 					<SelectValue />
 				</span>
 			</SelectTrigger>
-			<SelectContent alignItemWithTrigger={false} align="start">
+			<SelectContent align="start">
 				<SelectItem value="all">{allLabel}</SelectItem>
 				{options.map((option) => (
 					<SelectItem key={option.value} value={option.value}>
