@@ -15,7 +15,6 @@ import {
 	ShieldCheckIcon,
 	XIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { LogViewer } from "@/components/dashboard/docker/logs/log-viewer";
@@ -29,6 +28,7 @@ import { errorMessage } from "@/lib/auth/errors";
 import { useQueryResult } from "@/lib/host-data";
 import { serverUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import { OverviewHeader } from "./overview-header";
 import { FootNote } from "./server-ui";

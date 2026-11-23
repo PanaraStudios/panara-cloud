@@ -1,8 +1,6 @@
 "use client";
 
 import { PlusIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PanelMark } from "@/components/icons/server-icons";
 import { NewProjectDialog } from "@/components/project-pages/new-project-dialog";
@@ -48,6 +46,8 @@ import {
 } from "@/lib/navigation-tree";
 import { useIsInstanceAdmin } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { usePathname } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import { ProjectTree, RowLabel, RowTip } from "./project-tree";
 import { NavigationKeys } from "./shortcuts-dialog";

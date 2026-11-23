@@ -30,12 +30,16 @@ jobs:
         run: pnpm typecheck
       - name: Backend and agent tests
         run: pnpm test
+      - name: Web unit tests
+        run: pnpm --filter @panara-cloud/web test
       - name: Web build
         run: pnpm --filter @panara-cloud/web build
-        env:
-          CONVEX_INTERNAL_URL: http://localhost:3210
-          CONVEX_INTERNAL_SITE_URL: http://localhost:3211
-          CONVEX_PUBLIC_URL: http://localhost:3210
+      - name: Web server tests
+        working-directory: apps/web/server
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets --locked -- -D warnings
+          cargo test --locked
 
   convex-image:
     runs-on: ubuntu-latest

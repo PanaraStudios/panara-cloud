@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui-kit/primitives";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Coming soon" };
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { RebuildDatabase } from "@/components/dashboard/shared/rebuild-database";
 import { TransferService } from "@/components/dashboard/shared/transfer-service";
@@ -9,6 +8,7 @@ import { useService } from "@/components/service/service-context";
 import { Button } from "@/components/ui/button";
 import { isDatabaseKind } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import { useParams, useRouter } from "@/lib/router";
 import { cn } from "@/lib/utils";
 import type { SectionProps } from "./registry";
 

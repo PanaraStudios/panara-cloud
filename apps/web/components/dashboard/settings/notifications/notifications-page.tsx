@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useOrganization } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
 import { ShowNotifications } from "./show-notifications";
 
 // Notification settings page: owners and admins only.

@@ -3,7 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useMutation, useQuery } from "convex/react";
 import { Bell, EllipsisIcon, PlusIcon } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { LogoTile } from "@/components/icons/settings-icons";
@@ -21,6 +20,7 @@ import { PageHeader, ResourceTable, Th } from "@/components/ui-kit/primitives";
 import { SettingsEmpty } from "@/components/ui-kit/settings-list";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { notificationsMap } from "./handle-notifications";
 
 export const ShowNotifications = () => {

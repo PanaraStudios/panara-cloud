@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2Icon, ScrollTextIcon, ServerOffIcon } from "lucide-react";
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { writeParams } from "@/components/dashboard/docker/logs/url-params";
 import {
@@ -24,6 +23,7 @@ import {
 	type ContainerSelection,
 	nextContainerSelection,
 } from "@/lib/container-selection";
+import dynamic from "@/lib/router/dynamic";
 import { FilterPills } from "./filter-pills";
 import { useNotDeployed, useService } from "./service-context";
 

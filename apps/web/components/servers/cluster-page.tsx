@@ -19,8 +19,6 @@ import {
 	TriangleAlertIcon,
 	UnplugIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -54,6 +52,8 @@ import { useDockerInspectQuery } from "@/lib/host-data";
 import { serverUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import { useJoinInfo } from "./cluster-data";
 import {

@@ -1,9 +1,5 @@
-import { redirect } from "next/navigation";
-import {
-	param,
-	type SearchParams,
-	serverIdFrom,
-} from "@/lib/redirects/old-routes";
+import { param, serverIdFrom } from "@/lib/redirects/old-routes";
+import { redirect, useSearchParams } from "@/lib/router";
 
 const SECTIONS: Record<string, string> = {
 	containers: "containers",
@@ -13,13 +9,10 @@ const SECTIONS: Record<string, string> = {
 	networks: "networks",
 };
 
-export default async function Page({
-	searchParams,
-}: {
-	searchParams: SearchParams;
-}) {
-	const server = await serverIdFrom(searchParams);
-	const tab = (await param(searchParams, "tab")) ?? "containers";
+export default function Page() {
+	const searchParams = useSearchParams();
+	const server = serverIdFrom(searchParams);
+	const tab = param(searchParams, "tab") ?? "containers";
 	const section = SECTIONS[tab];
 	redirect(`/servers/${server}${section ? `/${section}` : ""}`);
 }

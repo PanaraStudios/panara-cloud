@@ -6,8 +6,6 @@ import {
 	PanelLeftOpenIcon,
 	SearchIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { BrandMark } from "@/components/logo";
 import { Kbd } from "@/components/ui/kbd";
@@ -26,6 +24,8 @@ import {
 } from "@/components/ui/sidebar";
 import { useShortcut, useShortcutModifier } from "@/lib/dashboard/use-shortcut";
 import { useOrganization } from "@/lib/organization";
+import { usePathname } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { InvitationsBell } from "./invitations-bell";
 import { OrganizationSwitcher } from "./org-switcher";
 import { SidebarNav, SidebarSettings } from "./sidebar-nav";

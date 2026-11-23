@@ -11,8 +11,6 @@ import {
 	TimerIcon,
 	WrenchIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { LogViewer } from "@/components/dashboard/docker/logs/log-viewer";
@@ -29,6 +27,8 @@ import { useQueryResult } from "@/lib/host-data";
 import { serverUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { historyDiskMb } from "@/lib/server-metrics";
 import { IconTitle, ListSkeleton, StatusText } from "./server-ui";
 import { useServerRef } from "./use-server";

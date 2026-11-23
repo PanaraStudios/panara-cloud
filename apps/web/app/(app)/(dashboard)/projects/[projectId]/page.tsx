@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { ProjectRedirect } from "@/components/project-pages/project-redirect";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Project" };
 

@@ -12,7 +12,6 @@ import {
 	Trash2Icon,
 	XIcon,
 } from "lucide-react";
-import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -37,6 +36,7 @@ import {
 } from "@/components/ui-kit/primitives";
 import { errorMessage } from "@/lib/auth/errors";
 import { usePermissions } from "@/lib/permissions";
+import { useParams } from "@/lib/router";
 import { cn } from "@/lib/utils";
 
 type Scope = "project" | "environment";

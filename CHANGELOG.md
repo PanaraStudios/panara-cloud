@@ -5,6 +5,151 @@ What changed in each release of Panara Cloud, newest first. To update, see
 
 ## Unreleased
 
+## 0.1.7 - 2026-11-24
+
+### Changed
+
+- **The web app no longer runs a Node.js server.** The UI is built into static files and
+  served by a small server (one binary, `apps/web/server`) that also proxies the panel's
+  `/api` routes to Convex, so the web image is the build and that binary. Measured on a 4-vCPU,
+  8 GB server against 0.1.6: the web image is 10.8 MB instead of 281 MB (6.0 MB to download
+  instead of 92 MB for amd64; on the panel host, where 0.1.6 shared its Node layers with the
+  agent, it added 63 MB on disk and 12 MB of download, now 10.8 and 6.0); the idle web
+  container holds 1.5 MiB of memory instead of 99 MiB, its CPU stays at about 0.2% of a core.
+  Pages look the same: 82 screenshots of 37 pages in light and dark mode match 0.1.6 pixel for
+  pixel apart from timestamps. Opened from about 160 ms away on a cold cache (median of five),
+  the dashboard's pages showed up in 3.6–4.0 s instead of 4.1 s and transfer about 10% less;
+  the sign-in page appears about 0.15–0.2 s later (1.41 s instead of 1.22 s), because its
+  form now comes with the app's script rather than in the HTML.
+- **The MCP server runs in Convex.** `/api/mcp` answers as before (the same answers, checked
+  against 0.1.6's), now from a Convex HTTP action at the same path that the web server
+  proxies to. It arrives with the functions an update deploys.
+- **No inline scripts on the panel's pages.** The Content-Security-Policy's `script-src` is now
+  `'self'` alone; the theme and the panel's settings no longer need inline scripts.
+- The progress bar along the top shows while a page's code loads for the first time; pages
+  opened before show at once. Old links (`/docker`, `/monitoring`, `?tab=` on a service…) are
+  forwarded once the panel has loaded instead of by the server, and a visitor who is already
+  signed in sees the sign-in form for a moment before going on.
+
+- **A deploy names the volumes it stopped using.** When an earlier deploy of the same stack
+  created volumes the compose file no longer names (a renamed volume key, a variable in a
+  volume name such as Harbor's instance id, or "Randomize names"), the deploy log lists
+  each one with a warning: its data is kept but not mounted.
+- **Writable mounts of the server's own folders are refused.** A compose file that
+  bind-mounts `/`, `/var`, `/var/lib`, `/run` or anything in `/root`, `/home`, `/etc`,
+  `/boot`, `/usr`, `/bin`, `/sbin`, `/lib`, `/var/lib/docker` or `/var/lib/containerd`
+  without `:ro` no longer deploys or starts, even for the instance administrator (the
+  service's own folder under `/etc/panara-cloud/compose` is allowed): the Trilium Next
+  template mounted `/root`, its container took ownership of it, and SSH (and with it the
+  panel) was locked out of the server. Read-only mounts, data folders such as `/srv` or
+  `/opt`, and the Docker socket still work. Named volumes whose driver options bind such a
+  folder (`type: none`, `o: bind`, `device: /root`) count too, and a compose file docker
+  compose cannot read now fails the deploy with docker compose's error instead of skipping
+  the check.
+- **A deploy or Start checks where its mounts really lead, just before Docker runs.** In
+  the same script that starts the containers, every bind mount, env file and config file
+  is resolved on the server: one in the service's folder that leads out of it (a symlink a
+  container planted) is refused, and so is a writable mount that lands in one of the
+  folders above.
+- **A custom command of the instance administrator runs on the deploy's snapshot.** It may
+  name the service's own compose file and `.env` (as the default command does); another
+  file in the service's folder (`-f override.yml`, `--env-file other.env`, `-v ./x:/x`) is
+  refused, because the service's containers can change it. Pull such files in with
+  `include:` or `extends:`, which the snapshot resolves.
+- **A git-sourced compose file that bind-mounts its own checkout gets a warning**: the
+  checkout is replaced on every deploy, so data written there is lost. The check reads the
+  file as docker compose resolves it, so included and extended files count too.
+
+### Fixed
+
+- **A redeploy no longer empties `./` bind mounts.** Every deploy of a compose service
+  written in the panel (all templates) cleared its project folder first, so data a
+  template keeps through a `./data`-style bind mount was gone after each redeploy, an
+  environment change or a domain change. Eleven catalogue templates keep data this way
+  (tolgee, focalboard, roundcube, scrutiny, datalens, kutt, homebridge, seanime,
+  reef-keygen, appflowy, nakama). The folder is now kept. The agent records each deploy's
+  source in its own state folder and clears the folder only on the first deploy from
+  the panel after a deploy from git. For a service deployed before this version nothing
+  is recorded, so the folder is kept and the log says so (a `.git` folder in it proves
+  nothing: a container can make one).
+- **Deleting a service without "Also delete volumes" keeps its bind-mounted data.** The
+  dialog promised the volumes were kept, but the service folder went, and with it data
+  that 45 templates keep under `../files/` (Supabase's database, Etherpad, ToolJet,
+  Checkmate, Linkding and others). `files/` and what `./` mounts of a panel-written
+  compose file wrote now stay; the compose file, its `.env` with the secrets and a git
+  checkout go (also for a compose file in a subfolder of the repository). With "Also
+  delete volumes" the whole folder goes. The dialog says so, and for a compose service
+  the option is there even when it has no volumes (its data may live only in `files/`,
+  as Linkding's does): it reads "Also delete files/ data" (or "Also delete volumes and
+  files/ data") and asks for the name to be typed, like deleting volumes.
+- **Start works again after Stop for templates that need the administrator.** Start ran
+  without the trust a deploy by the same administrator gets, so 112 templates (data under
+  `files/`, the Docker socket or other host paths) deployed fine and then refused to
+  start: "host path … is outside the service's directory". A trusted Start never runs the
+  compose file in the service's `code/` folder, which containers can write to: it runs the
+  snapshot of the last deploy that succeeded (so `include:` and `extends:` work). A service
+  last deployed by an older version has none yet: one written in the panel is rendered
+  from the panel's copy, one from git asks to be deployed once. Start is trusted only on
+  an agent of this version (an older agent, during an update, starts as before).
+- **"Randomize names" works, and asks first once the stack is deployed.** The switch never
+  worked (it sent no suffix and the backend refused). It now makes a suffix. Because it
+  renames every volume, turning it (or the suffix, or isolated volumes) on or off for a
+  deployed stack now needs a confirmation that says the data stays in the old volumes.
+  Domains saved before the switch now follow the renamed service (`web` ↔ `web-<suffix>`);
+  before, the next deploy failed with "Domain … is attached to service "web" which does not
+  exist in the compose".
+
+- **Importing a template stores what its review showed.** The review listed generated
+  passwords, but the import generated new ones; it now stores the reviewed values (in a
+  service's Import and in a project's Import), and the dialog says that a database already
+  holding data keeps its old password.
+- **An instance administrator's deploy never runs a file its containers can change.**
+  Deploys (also pulls, builds and webhook deploys) ran `docker compose` or `docker stack
+  deploy` on the compose file in the service's `code/` folder, which a container with a
+  `./` mount can rewrite, for example to add `privileged: true` or the Docker socket
+  before the next deploy or Start. Every deploy now runs a snapshot kept in the agent's
+  own state folder: for compose, the file as `docker compose config` resolves it
+  (included and extended files merged); for a stack, the rendered file with its relative
+  paths made absolute. A file written in the panel is also no longer read back from
+  `code/` after it is written there.
+- **The snapshot is built only from the commit and the panel.** A git source is cloned
+  into the agent's state folder, its compose file and every file that file pulls in
+  (`include:`, `extends:`, `label_file:` and the env files they use) are copied from
+  there, and only then does the checkout replace `code/`; a Redeploy without a fresh
+  clone uses those copies again (a service last deployed by an older version is cloned
+  afresh). `docker compose config` reads only these copies, the panel's file mounts and
+  the panel's variables: a pulled-in file outside `code/` and `../files/`, or with a
+  variable in its path that has no value, is refused with a message naming it. A raw
+  compose file can pull in the service's file mounts (`../files/…`) only. With "Create
+  .env file" off, a git source's committed `.env` is used for interpolation as before,
+  and a raw one gets none. A stack file with `include:`, `extends:` or `label_file:`
+  (which `docker stack deploy` does not support) now fails with that message. The
+  `source.yml` older versions kept in the service's folder is removed.
+- **The run-time mount check never guesses.** When a path cannot be resolved as root
+  (no `sudo -n`) and a folder on the way cannot be searched by the agent's user, the
+  deploy or Start is refused with that reason instead of trusting a partial answer, and
+  a server whose `realpath` has no `-m` option (BusyBox) gets a message saying so.
+- **A volume name that is nothing but a variable no longer hides the deploy's warnings
+  about volumes it stopped using**; such a volume is matched by its compose key instead.
+
+### Upgrading
+
+Nothing to do: an update or `install.sh upgrade` moves the `panara-cloud-web` service to the
+new image with the settings it has (checked from 0.1.6, and back to 0.1.6). The panel is
+unreachable for about a second while the web service restarts, as before.
+
+Rolling back to 0.1.6 (`PANARA_CLOUD_VERSION=0.1.6 install.sh upgrade`) works after jobs
+of this version ran: everything it stores keeps a shape 0.1.6's schema accepts (a test
+checks it against 0.1.6's schema). Whether a Start is trusted is decided when the agent
+picks the job up, and a removal takes the source type from the agent's record of the last
+deploy (for a service last deployed by 0.1.6, a real `.git` folder in `code/`).
+
+Two things to know if you roll back. On 0.1.6, Start still refuses services that need the
+administrator (data under `files/`, the Docker socket); use Redeploy there, as before. And
+if you deploy a compose service on 0.1.6 and then come back to this version, redeploy it
+once before using Start: Start runs the configuration of the service's last deploy by this
+version, so without that redeploy it would bring back the settings from before the rollback.
+
 ## 0.1.6 - 2026-11-23
 
 ### Changed

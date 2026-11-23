@@ -1,7 +1,6 @@
 "use client";
 
 import { BookOpenIcon, PlusIcon } from "lucide-react";
-import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { ShowApiKeys } from "@/components/dashboard/settings/api/show-api-keys";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui-kit/primitives";
 import { claudeCodeCommand, mcpServersJson, mcpUrl } from "@/lib/api-reference";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 
 const REFERENCE_URL = "/settings/api-keys/reference";
 

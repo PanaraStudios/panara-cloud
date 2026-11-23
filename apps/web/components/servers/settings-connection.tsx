@@ -3,7 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DeleteServerModal } from "@/components/dashboard/settings/servers/delete-server-modal";
@@ -23,6 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { SettingRow, SettingsBlock } from "./server-settings";

@@ -8,8 +8,6 @@ import {
 	SearchIcon,
 	ServerOffIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { DockerMark } from "@/components/icons/server-icons";
 import { Button } from "@/components/ui/button";
@@ -31,6 +29,8 @@ import {
 } from "@/components/ui-kit/primitives";
 import { isActive } from "@/lib/navigation";
 import { optionMarks } from "@/lib/option-icons";
+import { usePathname } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 /** Route links under a page header (Logs · Terminal · Inspect), as the same

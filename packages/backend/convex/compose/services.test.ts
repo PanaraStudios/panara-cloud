@@ -189,6 +189,47 @@ describe("compose settings", () => {
 		).toBeUndefined();
 	});
 
+	test("randomize gets a suffix, and renaming a deployed stack's volumes needs a confirmation", async () => {
+		const s = await seed();
+		await s.alice.mutation(api.compose.crud.update, {
+			composeId: s.composeId,
+			randomize: true,
+		});
+		const randomized = await s.t.run((ctx) =>
+			ctx.db.get("compose", s.composeId),
+		);
+		expect(randomized?.suffix).toMatch(/^[0-9a-f]{8}$/);
+		await s.t.run((ctx) =>
+			ctx.db.patch("compose", s.composeId, { status: "done" }),
+		);
+		for (const fields of [
+			{ randomize: false },
+			{ suffix: "other" },
+			{ isolatedDeployment: true, isolatedDeploymentsVolume: true },
+		]) {
+			await expect(
+				s.alice.mutation(api.compose.crud.update, {
+					composeId: s.composeId,
+					...fields,
+				}),
+			).rejects.toThrow(/renames the stack's volumes/);
+		}
+		// Settings that keep the volume names need no confirmation.
+		await s.alice.mutation(api.compose.crud.update, {
+			composeId: s.composeId,
+			isolatedDeployment: false,
+			pullImages: true,
+		});
+		await s.alice.mutation(api.compose.crud.update, {
+			composeId: s.composeId,
+			randomize: false,
+			confirmVolumeRename: true,
+		});
+		expect(
+			(await s.t.run((ctx) => ctx.db.get("compose", s.composeId)))?.randomize,
+		).toBe(false);
+	});
+
 	test("git sources keep a safe build path", async () => {
 		const s = await seed();
 		const source = (buildPath: string) => ({

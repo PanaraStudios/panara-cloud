@@ -11,8 +11,6 @@ import {
 	GitBranch,
 	PlusIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -42,6 +40,8 @@ import { SettingsEmpty } from "@/components/ui-kit/settings-list";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { usePathname, useRouter, useSearchParams } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { DEFAULT_GITHUB_URL } from "@/utils/github-utils";
 import { goToAuthorization } from "./authorize";
 import { EditBitbucketProvider } from "./bitbucket/edit-bitbucket-provider";

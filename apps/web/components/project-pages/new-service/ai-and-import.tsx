@@ -4,8 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useAction, useQuery } from "convex/react";
 import { ArrowRightIcon, FileInputIcon, SparkleIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AddImport } from "@/components/dashboard/project/add-import";
@@ -27,6 +25,8 @@ import { EmptyState } from "@/components/ui-kit/primitives";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { Field, FlowFooter, FlowHeader, Steps, useFlowContext } from "./shared";
 
 const STEPS = ["Describe", "Pick a plan", "Review", "Deploy"];

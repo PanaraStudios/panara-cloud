@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useOrganization } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
 import { ShowVaultProviders } from "./show-vault-providers";
 
 // Secrets settings page: members are sent home.

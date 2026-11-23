@@ -1,13 +1,10 @@
-import type { Metadata } from "next";
 import { ScheduleRunsView } from "@/components/activity/schedule-runs-view";
+import type { Metadata } from "@/lib/router";
+import { useParams } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Schedule" };
 
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ scheduleId: string }>;
-}) {
-	const { scheduleId } = await params;
+export default function Page() {
+	const { scheduleId } = useParams<{ scheduleId: string }>();
 	return <ScheduleRunsView scheduleId={scheduleId} />;
 }

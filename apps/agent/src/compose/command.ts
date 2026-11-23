@@ -21,16 +21,35 @@ export type ComposeLayout = {
 	// Agent-only files, outside `base` because containers may bind and
 	// rewrite anything under it.
 	state: string;
-	// Untransformed copy of the source compose file, so redeploys without a
-	// fresh clone don't transform twice.
-	pristineFile: string;
-	// Where older agents kept the pristine copy.
+	// Where a git source is cloned before it replaces `code`, out of the
+	// containers' reach.
+	checkout: string;
+	// The commit's copies of the compose file and of the files it pulls in
+	// (include, extends, label_file, env files), by path relative to `code`,
+	// taken from the clone before any container could change them. A
+	// redeploy without a fresh clone reads them again.
+	capture: string;
+	// Where older agents kept the untransformed compose file: in `base`, so
+	// a container could have rewritten it. Removed, never read.
 	legacyPristineFile: string;
+	// Files of earlier versions of this agent in `state`, removed on deploy.
+	obsoleteFiles: string[];
+	// What `docker compose config` of a trusted deploy reads: the host's
+	// paths under this folder (`<mirror>/etc/panara-cloud/compose/<app>/…`),
+	// so relative paths resolve exactly as they do in `base`.
+	mirror: string;
+	// Interpolation variables when the service has no env file.
+	emptyEnvFile: string;
 	stackEnvFile: string;
 	// Interpolation variables for `docker compose config` of stacks.
 	configEnvFile: string;
-	// The checked `docker compose config` output untrusted deploys run.
+	// The snapshot a compose deploy runs: `docker compose config` output.
 	resolvedFile: string;
+	// The snapshot a trusted stack deploy runs: the rendered YAML.
+	stackFile: string;
+	// The snapshots of the last deploy that succeeded, which Start runs.
+	deployedFile: string;
+	deployedStackFile: string;
 };
 
 export const assertAppName = (appName: string) => {
@@ -71,11 +90,18 @@ export const composeLayout = (input: {
 		composeFileRelative,
 		envFile: posix.join(code, envFileRelative),
 		envFileRelative,
-		pristineFile: `${state}/source.yml`,
+		checkout: `${state}/checkout`,
+		capture: `${state}/repo`,
 		legacyPristineFile: `${base}/source.yml`,
+		obsoleteFiles: [`${state}/source.yml`, `${state}/rendered.yml`],
+		mirror: `${state}/root`,
+		emptyEnvFile: `${state}/empty.env`,
 		stackEnvFile: `${state}/stack.env`,
 		configEnvFile: `${state}/config.env`,
 		resolvedFile: `${state}/compose.json`,
+		stackFile: `${state}/stack.yml`,
+		deployedFile: `${state}/deployed.json`,
+		deployedStackFile: `${state}/deployed-stack.yml`,
 	};
 };
 
@@ -196,29 +222,10 @@ export const composePlan = (
 	};
 };
 
-// The deploy command; arguments after `docker`. Without a plan it is the
-// one command that pulls, builds and starts.
-export const deployCommand = (
-	input: CommandInput,
-	layout: ComposeLayout,
-	plan?: ComposePlan,
-): string => {
-	if (input.command.trim()) return sanitizeCommand(input.command);
-	if (input.composeType === "stack") {
-		return `stack deploy -c ${quote(layout.composeFileRelative)} ${quote(input.appName)} --prune --with-registry-auth`;
-	}
-	return `compose ${composeFlags(input, layout)} ${upArgs(input.pullImages, plan)}`;
-};
-
 export const upArgs = (pullImages: boolean, plan?: ComposePlan) =>
 	plan
 		? `up -d --remove-orphans ${plan.up}`
 		: `up -d --build --remove-orphans${pullImages ? " --pull always" : ""}`;
-
-export const startCommand = (
-	input: CommandInput,
-	layout: ComposeLayout,
-): string => `compose ${composeFlags(input, layout)} up -d`;
 
 // The compose .env content: APP_NAME and
 // COMPOSE_PROJECT_NAME first, then the service env with project /

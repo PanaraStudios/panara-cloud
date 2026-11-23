@@ -1,7 +1,7 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { isServiceKind, type ServiceRef } from "@/lib/navigation";
+import { useParams } from "@/lib/router";
 
 /** The service of the current `…/services/[kind]/[id]/…` route. */
 export function useServiceRef(): ServiceRef | null {

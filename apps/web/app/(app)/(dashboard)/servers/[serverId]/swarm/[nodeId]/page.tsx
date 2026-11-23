@@ -1,10 +1,9 @@
-import { redirect } from "next/navigation";
+import { redirect, useParams } from "@/lib/router";
 
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ serverId: string; nodeId: string }>;
-}) {
-	const { serverId, nodeId } = await params;
+export default function Page() {
+	const { serverId, nodeId } = useParams<{
+		serverId: string;
+		nodeId: string;
+	}>();
 	redirect(`/servers/${serverId}/cluster/${nodeId}`);
 }

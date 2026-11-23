@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
 	type ErrorBoundaryProps,
 	useServerError,
 } from "@/hooks/use-server-error";
+import Link from "@/lib/router/link";
 
 export default function RootError(props: ErrorBoundaryProps) {
 	const retry = useServerError(props);

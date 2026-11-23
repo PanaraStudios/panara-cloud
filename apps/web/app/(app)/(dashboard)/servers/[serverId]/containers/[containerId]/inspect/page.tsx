@@ -1,13 +1,10 @@
-import type { Metadata } from "next";
 import { ContainerInspectPage } from "@/components/servers/container-pages";
+import type { Metadata } from "@/lib/router";
+import { useParams } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Container inspect" };
 
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ containerId: string }>;
-}) {
-	const { containerId } = await params;
+export default function Page() {
+	const { containerId } = useParams<{ containerId: string }>();
 	return <ContainerInspectPage containerId={decodeURIComponent(containerId)} />;
 }

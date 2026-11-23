@@ -29,7 +29,6 @@ import {
 	Undo2Icon,
 	WebhookIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useMemo } from "react";
 import { useJobLogs } from "@/components/dashboard/application/deployments/use-deployments";
 import { parseLogs } from "@/components/dashboard/docker/logs/utils";
@@ -46,6 +45,7 @@ import {
 } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { ComposeOverview } from "./compose-overview";

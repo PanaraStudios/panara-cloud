@@ -4,8 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { ArrowLeftIcon, ClockIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useJobLogs } from "@/components/dashboard/application/deployments/use-deployments";
@@ -28,6 +26,8 @@ import {
 } from "@/components/ui-kit/primitives";
 import { errorMessage } from "@/lib/auth/errors";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import {
 	describeCron,

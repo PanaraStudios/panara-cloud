@@ -14,8 +14,6 @@ import {
 	Trash2Icon,
 	TriangleAlertIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DuplicateProject } from "@/components/dashboard/project/duplicate-project";
@@ -50,6 +48,8 @@ import {
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useParams, useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 
 type EnvDialog =
 	| { kind: "new" }

@@ -4,7 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { AlignLeftIcon, ArrowRightIcon, CheckIcon } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { parse, stringify } from "yaml";
@@ -24,6 +23,7 @@ import { CodeEditor } from "@/components/shared/code-editor";
 import { errorMessage } from "@/lib/auth/errors";
 import { serviceSettingsUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 const VAR_REF = /\$\{([A-Za-z_][A-Za-z0-9_]*)(?:[:?-][^}]*)?\}/g;

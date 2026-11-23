@@ -13,8 +13,6 @@ import {
 	SquareIcon,
 	Trash2Icon,
 } from "lucide-react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DuplicateProject } from "@/components/dashboard/project/duplicate-project";
@@ -57,6 +55,8 @@ import {
 } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useParams, useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import {
 	bulkActionState,
 	type ServiceAction as RuleAction,

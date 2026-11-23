@@ -15,8 +15,6 @@ import {
 	SquareTerminalIcon,
 	Trash2Icon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DeleteServerModal } from "@/components/dashboard/settings/servers/delete-server-modal";
@@ -43,6 +41,8 @@ import { errorMessage } from "@/lib/auth/errors";
 import { LOCAL_SERVER_ID, serverUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import {
 	FilterPills,

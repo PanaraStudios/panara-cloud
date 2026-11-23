@@ -3,7 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useConvex, useMutation } from "convex/react";
 import { LayersIcon } from "lucide-react";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -24,6 +23,7 @@ import { cleanupAction } from "@/lib/docker-cleanup";
 import { waitForJob } from "@/lib/host-data";
 import { serverUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import {
 	type ImageRow,

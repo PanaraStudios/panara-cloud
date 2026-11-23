@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import type { Metadata } from "@/lib/router";
+import Link from "@/lib/router/link";
 
 export const metadata: Metadata = {
 	title: "Page not found",

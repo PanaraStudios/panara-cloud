@@ -13,8 +13,6 @@ import {
 	Trash2,
 	WebhookIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -57,6 +55,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 
 const notificationBaseSchema = z.object({
 	name: z.string().min(1, {

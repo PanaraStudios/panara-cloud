@@ -19,6 +19,7 @@ const FILES = [
 	"apps/agent/package.json",
 	"apps/web/package.json",
 	"packages/backend/package.json",
+	"apps/web/server/Cargo.toml",
 	"CHANGELOG.md",
 	"scripts/check-version.mjs",
 ];
@@ -71,6 +72,18 @@ describe("release version", () => {
 		expect(result.status).toBe(1);
 		expect(result.output).toContain(
 			`apps/agent/package.json: version is 0.1.0, package.json says ${version}`,
+		);
+	});
+
+	test("the web server's crate left behind fails", () => {
+		const result = check((file) =>
+			file("apps/web/server/Cargo.toml", (text) =>
+				text.replace(`version = "${version}"`, 'version = "0.1.0"'),
+			),
+		);
+		expect(result.status).toBe(1);
+		expect(result.output).toContain(
+			`apps/web/server/Cargo.toml: version is 0.1.0, package.json says ${version}`,
 		);
 	});
 

@@ -1,0 +1,42 @@
+/* The faces next/font/google served before, self-hosted from Fontsource:
+   Bricolage Grotesque (variable, with its opsz axis), Geist Mono 400/500 and
+   the italic Instrument Serif. The fallback faces carry next/font's metric
+   overrides so text keeps its place while the web fonts load. */
+@import "@fontsource-variable/bricolage-grotesque/opsz.css";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/500.css";
+@import "@fontsource/instrument-serif/400-italic.css";
+
+@font-face {
+	font-family: "Bricolage Grotesque Fallback";
+	src: local("Arial");
+	ascent-override: 88.21%;
+	descent-override: 25.61%;
+	line-gap-override: 0%;
+	size-adjust: 105.43%;
+}
+
+@font-face {
+	font-family: "Geist Mono Fallback";
+	src: local("Arial");
+	ascent-override: 74.67%;
+	descent-override: 21.92%;
+	line-gap-override: 0%;
+	size-adjust: 134.59%;
+}
+
+@font-face {
+	font-family: "Instrument Serif Fallback";
+	src: local("Times New Roman");
+	ascent-override: 117.94%;
+	descent-override: 36.93%;
+	line-gap-override: 0%;
+	size-adjust: 83.94%;
+}
+
+:root {
+	--font-geist-sans:
+		"Bricolage Grotesque Variable", "Bricolage Grotesque Fallback";
+	--font-geist-mono: "Geist Mono", "Geist Mono Fallback";
+	--font-instrument-serif: "Instrument Serif", "Instrument Serif Fallback";
+}

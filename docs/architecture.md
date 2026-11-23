@@ -6,7 +6,9 @@ Panara Cloud has three runtime parts:
   state, auth, permissions and the job queue.
 - `apps/agent`: a Node process that claims jobs from Convex and does all host work over
   the local Docker socket or SSH, and serves live logs, terminals and stats.
-- `apps/web`: the Next.js UI, talking to Convex directly.
+- `apps/web`: the UI, talking to Convex directly. A Vite build of the React pages under `app/`
+  with its own router (`lib/router`, the App Router's file conventions), served as static files
+  by `apps/web/server`, a small Rust server that also proxies the panel's `/api` routes to Convex.
 
 `apps/monitoring` is the Go metrics collector the agent runs on each host.
 
@@ -201,7 +203,8 @@ HTTP routes and crons: fill in `register<D>Routes(http)` in `convex/<d>/http.ts`
 fails on any finding. For the web app and the agent it reports files no entry point reaches,
 exports nothing imports and dependencies nothing uses; for the backend, unused dependencies.
 
-- Entry points: the Next.js special files under `app/`, `proxy.ts` and the config files; the
+- Entry points: the page, layout, error and not-found files under `app/`, `index.html` and the
+  config files; the
   agent's `src/index.ts`, `src/panelSetup.ts` and `src/dev/*`; every Convex module; tests.
 - An export used only inside its own file is not reported.
 - `ignoreIssues` in `knip.json` lists what is kept on purpose: unused parts of the UI kit
@@ -272,6 +275,19 @@ Agent (`apps/agent/src/lib`):
   bind only inside `/etc/panara-cloud/applications/<appName>` on the panel host and nothing
   in the protected list elsewhere (symlinks resolved on the host). Every path that creates or
   scales an application/database service calls one of them.
+- `compose/snapshot.ts`: every compose deploy and Start runs a snapshot in the agent's state
+  folder (`/etc/panara-cloud/compose-state/<appName>`), never a file under the service's
+  folder, which its containers may rewrite: `docker compose config` output for compose, the
+  rendered YAML with absolute paths for stacks. A git source is cloned into
+  `<state>/checkout`; the compose file and what it pulls in (`compose/sourceFiles.ts`:
+  include, extends, label_file, env files) are copied to `<state>/repo` before the checkout
+  replaces `code/`. A trusted compose deploy lays those copies, the panel's file mounts and
+  the rendered file out under `<state>/root` at the host paths they stand for and runs
+  `config` there (explicit `--env-file` always), then maps the paths back (`fromMirror`),
+  so relative paths resolve as in the service's folder and nothing in it is read. The last successful deploy's snapshot is
+  what a trusted Start runs. `runtimeGuard` resolves every mounted or read host path in the
+  script that runs docker; `bindTrustedCommand` points an administrator's custom command at
+  the snapshot.
 - `swarm.ts` `generateMounts`, `writeFileMounts`, `calculateResources`, `generateServiceConfig`,
   `panaraLabels` (add to every container you create), `upsertService`, `removeService`,
   `scaleService`.
@@ -485,25 +501,47 @@ Agent env (`apps/agent/.env.local` in development):
 | `CONVEX_SELF_HOSTED_URL`, `CONVEX_SELF_HOSTED_ADMIN_KEY_FILE` (or `CONVEX_SELF_HOSTED_ADMIN_KEY`), `PANARA_CLOUD_CONVEX_ENV_FILE`, `PANARA_CLOUD_AGENT_SECRET_FILE`, `PANARA_CLOUD_WEB_SERVER` | Read only by the `migrate` command of the migrate image and the `create-admin`, `reset-password` and `setup-link` commands of the agent image (`packages/backend/scripts/install.mjs`, whose header describes them): the backend and its admin key, a `KEY=value` file applied as Convex env, where to write the panel agent's secret when it is enrolled, and the panel's domain settings as JSON |
 | `DEV_SSH_HOST`, `DEV_SSH_PORT`, `DEV_SSH_USER`, `DEV_SSH_KEY`, `DEV_SSH_HOST_KEY` | Development only: the server `src/dev/runHandler.ts` runs a handler against |
 
-Web app env (`apps/web/.env.local` in development; see `apps/web/README.md`):
+Web app env (the web service; for `vite` in development the same variables in the shell, see
+`apps/web/README.md`):
 
 | Variable | Purpose |
 |---|---|
-| `CONVEX_INTERNAL_URL`, `CONVEX_INTERNAL_SITE_URL` | Required. Convex and its HTTP actions as the Next.js server reaches them; `/api/auth`, `/api/connect` and the public API are proxied to the site URL |
-| `CONVEX_PUBLIC_URL` | Required. Convex as browsers reach it, passed to the page at request time |
+| `CONVEX_INTERNAL_SITE_URL` | Required. Convex's HTTP actions as the web server reaches them; `/api/auth`, `/api/v1`, `/api/mcp` and `/api/connect` are proxied there. `http` or `https` |
+| `CONVEX_PUBLIC_URL` | Required. Convex as browsers reach it; the server writes it into `index.html` (a JSON block, `lib/runtime-config.ts` reads it) |
 | `PANARA_CLOUD_LIVE_URL` | Optional; the agent's live endpoint (same value as on Convex), allowed in the Content-Security-Policy. Without it any `ws:`/`wss:` origin is allowed |
 | `PANARA_CLOUD_PROXY_SECRET` | Optional; same value as on Convex (see above) |
 | `PANARA_CLOUD_VERSION` | Baked into the release image. The OpenAPI document and the MCP server report the API's own version (`1`), never this one |
 | `PORT` | Port the server listens on (the installer sets it to `PANARA_CLOUD_PORT`) |
+| `PANARA_CLOUD_WEB_ROOT` | The build the server serves (the image sets `/srv/panara-cloud-web`) |
+| `CONVEX_INTERNAL_URL` | Read by the Node server up to 0.1.6 only; the installer still sets it so a rollback to 0.1.6 works |
+
+The web server (`apps/web/server`, one binary, no Node.js at run time) answers every page route
+with `index.html`, serves the build's files (the `.br`/`.gz` copies `scripts/compress-dist.mjs`
+writes, when the browser takes them; hashed `assets/` for a year) and 404s a missing asset.
+Pages get `Content-Security-Policy` (`src/csp.rs`: scripts only from the panel's origin, no
+inline scripts; Convex and the live endpoint in `connect-src`) and, behind HTTPS
+(`X-Forwarded-Proto`), HSTS; every response gets `X-Frame-Options: DENY`, `Referrer-Policy` and
+`nosniff`. `panara-cloud-web health` is the image's health check.
 
 Web app routes besides the UI: `/api/health` (polled after reloads/updates), `/api/connect/<token>`
 (the one-line server connect command; proxies to Convex `/infra/connect/<token>`, which serves the
 install script and registers the server under the caller's IP), `/api/v1/*` (the public API,
-proxied to Convex's HTTP router), `/api/v1/openapi.json` and `/api/mcp` (see "Public API" below).
-`/api/auth`, `/api/v1/*` and `/api/mcp` send Convex the client address (the last
-`X-Forwarded-For` entry, the one the panel's own reverse proxy added; `lib/client-ip.ts`) with
+proxied to Convex's HTTP router; the key is required and the body limited to 4 MB before anything
+is forwarded), `/api/v1/openapi.json` (written into the build) and `/api/mcp` (proxied to the
+Convex HTTP action of the same path; see "Public API" below). `/api/auth`, `/api/v1/*` and
+`/api/mcp` send Convex the client address (the last `X-Forwarded-For` entry, the one the panel's
+own reverse proxy added, else the connecting address; `src/headers.rs`) with
 `PANARA_CLOUD_PROXY_SECRET` as proof; Convex ignores the address without it. `CF-Connecting-IP`
-is not trusted: anyone reaching the origin directly can send it.
+is not trusted: anyone reaching the origin directly can send it. In development `vite` serves the
+same routes from `apps/web/dev-server.ts`.
+
+The client router (`apps/web/lib/router`) keeps Next.js's App Router behaviour so pages did not
+change: route groups, `[param]`, `[...catchAll]`, a static segment before a dynamic one before a
+catch-all (`lib/route-match.ts`); layouts stay mounted while their segment stays the same;
+`error.tsx` and `not-found.tsx` boundaries; `metadata.title` with templates; `usePathname`,
+`useSearchParams`, `useParams`, `useRouter`, `redirect()`, `notFound()`, `Link` and `dynamic()`.
+Each page and layout loads as its own chunk the first time it is opened. The dashboard's session
+check runs once when the dashboard loads (`lib/auth/gate.ts`), as the server did before rendering.
 
 ## Public API
 
@@ -524,8 +562,10 @@ one user and one organization. Three things are built on it:
   bare 500.
 - **Hand-written REST routes** (`/api/v1/me`, `/api/v1/projects`, ...) backed by internal
   functions that take the organization and user explicitly.
-- **OpenAPI document and MCP server**, served by the web app (`apps/web/lib/public-api.ts`,
-  `app/api/v1/openapi.json`, `app/api/mcp`) from the function catalog. MCP tool calls go through
+- **OpenAPI document and MCP server**, from the function catalog: the document is written into the
+  web build (`apps/web/dev-server.ts`), the MCP server is a Convex HTTP action at `/api/mcp`
+  (`platform/lib/mcp.ts`, stateless Streamable HTTP with JSON responses; `mcp.test.ts` pins its
+  answers to the ones the MCP TypeScript SDK gave up to 0.1.6). MCP tool calls go through
   the gateway.
 
 Rules that keep it safe:

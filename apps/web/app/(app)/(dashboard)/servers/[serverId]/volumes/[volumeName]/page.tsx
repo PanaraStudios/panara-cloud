@@ -1,13 +1,10 @@
-import type { Metadata } from "next";
 import { VolumeBrowsePage } from "@/components/servers/volumes-browse";
+import type { Metadata } from "@/lib/router";
+import { useParams } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Volume files" };
 
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ volumeName: string }>;
-}) {
-	const { volumeName } = await params;
+export default function Page() {
+	const { volumeName } = useParams<{ volumeName: string }>();
 	return <VolumeBrowsePage volumeName={decodeURIComponent(volumeName)} />;
 }

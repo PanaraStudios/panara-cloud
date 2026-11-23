@@ -3,9 +3,9 @@
 import { api } from "@panara-cloud/backend/api";
 import { useQuery } from "convex/react";
 import { ArrowUpRightIcon } from "lucide-react";
-import Link from "next/link";
 import { SourceIcon } from "@/components/icons/service-icons";
 import { useOrganization } from "@/lib/organization";
+import Link from "@/lib/router/link";
 import { isGitProvider, SOURCE_LABELS } from "@/lib/service-source";
 
 const labelled = <Value extends string>(...values: Value[]) =>

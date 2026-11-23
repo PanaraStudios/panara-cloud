@@ -6,8 +6,6 @@ import type { Id } from "@panara-cloud/backend/dataModel";
 import { useAction, useQuery } from "convex/react";
 import type { FunctionArgs } from "convex/server";
 import { PlusIcon, SquareDashedIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -38,6 +36,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { errorMessage } from "@/lib/auth/errors";
 import { LOCAL_SERVER_ID, serverUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 
 type SandboxTemplateName = NonNullable<
 	FunctionArgs<typeof api.live.sandboxes.create>["template"]

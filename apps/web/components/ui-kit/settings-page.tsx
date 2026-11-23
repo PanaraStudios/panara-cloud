@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
 import type { ComponentType } from "react";
 import { createContext, useContext, useState } from "react";
 import {
@@ -11,6 +10,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useShortcut } from "@/lib/dashboard/use-shortcut";
+import { usePathname, useSearchParams } from "@/lib/router";
 import { cn } from "@/lib/utils";
 
 // A Settings page with sections (a service's, a server's): the list of

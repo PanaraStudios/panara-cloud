@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { PanelSetup } from "@/components/dashboard/setup/panel-setup";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Set up your panel" };
 

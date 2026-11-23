@@ -5,7 +5,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { DatabaseZap, Dices, RefreshCw, X } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -48,6 +47,7 @@ import {
 } from "@/components/ui/tooltip";
 import { errorMessage } from "@/lib/auth/errors";
 import { rendersNativeButton } from "@/lib/native-button";
+import Link from "@/lib/router/link";
 import {
 	INVALID_HOSTNAME_MESSAGE,
 	VALID_HOSTNAME_REGEX,

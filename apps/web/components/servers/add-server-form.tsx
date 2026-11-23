@@ -11,8 +11,6 @@ import {
 	type LucideIcon,
 	RocketIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -30,6 +28,8 @@ import { Switch } from "@/components/ui/switch";
 import { errorMessage } from "@/lib/auth/errors";
 import { LOCAL_SERVER_ID, serverUrl } from "@/lib/navigation";
 import { useIsInstanceAdmin, useOrganization } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import { ChoiceCards, CommandWell, FilterPills } from "./server-ui";
 import { LOCAL_SERVER_NAME } from "./use-server";

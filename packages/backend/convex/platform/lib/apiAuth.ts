@@ -77,3 +77,20 @@ export const jsonError = (error: unknown): Response => {
 	console.error("API request failed", error);
 	return Response.json({ error: "Internal error" }, { status: 500 });
 };
+
+// `/api/v1/me`: who the key acts as.
+export const whoAmI = async (
+	ctx: Pick<ActionCtx, "runMutation">,
+	req: Request,
+): Promise<Response> => {
+	try {
+		const principal = await requireApiKey(ctx, req);
+		return Response.json({
+			userId: principal.userId,
+			organizationId: principal.organizationId,
+			role: principal.role,
+		});
+	} catch (error) {
+		return jsonError(error);
+	}
+};

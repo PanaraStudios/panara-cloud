@@ -4,9 +4,9 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useQuery } from "convex/react";
 import { FolderIcon } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { NotFoundState } from "@/components/ui-kit/primitives";
+import { useParams, useRouter } from "@/lib/router";
 
 /** `/projects/[projectId]` opens the project's default environment. */
 export function ProjectRedirect() {

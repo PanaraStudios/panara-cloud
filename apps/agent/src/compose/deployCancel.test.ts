@@ -5,11 +5,11 @@ import { FailedAfterHandoff } from "../lib/handoff";
 import {
 	type ComposeVersion,
 	composePlan,
-	deployCommand,
 	parseComposeVersion,
 } from "./command";
 import {
 	type ComposeJobInput,
+	deployArgs,
 	deployScripts,
 	layoutOf,
 	preparationArgs,
@@ -60,11 +60,12 @@ const scriptsFor = (
 	return deployScripts(input, layout, {
 		preparation: preparationArgs(
 			input,
-			layout,
+			layout.resolvedFile,
 			composePlan(input.compose.pullImages, version),
 		),
 		args: "UP",
 		freshVolumes,
+		guard: [],
 	});
 };
 
@@ -75,10 +76,10 @@ describe("what a compose deploy runs before and after it hands the project to do
 			true,
 		);
 		expect(prepare).toContain(
-			"compose -p shop-abc123 --env-file .env -f docker-compose.yml pull --ignore-pull-failures --policy missing 2>&1 || true",
+			"compose -p shop-abc123 -f /etc/panara-cloud/compose-state/shop-abc123/compose.json pull --ignore-pull-failures --policy missing 2>&1 || true",
 		);
 		expect(prepare).toContain(
-			'compose -p shop-abc123 --env-file .env -f docker-compose.yml build 2>&1 || { echo "Error: ❌ Docker command failed"; exit 1; }',
+			'compose -p shop-abc123 -f /etc/panara-cloud/compose-state/shop-abc123/compose.json build 2>&1 || { echo "Error: ❌ Docker command failed"; exit 1; }',
 		);
 		expect(prepare.indexOf(" pull ")).toBeLessThan(prepare.indexOf(" build "));
 		for (const touches of [" up", "down --volumes", "network"]) {
@@ -104,7 +105,7 @@ describe("what a compose deploy runs before and after it hands the project to do
 		expect(prepare).toContain(" build 2>&1");
 	});
 
-	test("an untrusted deploy prepares the checked file it runs", () => {
+	test("trusted or not, a deploy prepares the snapshot it runs", () => {
 		const { prepare } = scriptsFor(composeInput({}, false));
 		expect(prepare).toContain(
 			"compose -p shop-abc123 -f /etc/panara-cloud/compose-state/shop-abc123/compose.json build",
@@ -225,18 +226,11 @@ describe("a cancel of a compose deploy", () => {
 });
 
 describe("what `up` is left with after the pulls and builds", () => {
-	const layout = layoutOf(composeInput());
 	const up = (pullImages: boolean, version: ComposeVersion | null) =>
-		deployCommand(
-			{
-				appName: "shop-abc123",
-				composeType: "docker-compose",
-				command: "",
-				createEnvFile: true,
-				pullImages,
-				hasMounts: false,
-			},
-			layout,
+		deployArgs(
+			composeInput({ pullImages }),
+			layoutOf(composeInput()),
+			"snapshot.json",
 			composePlan(pullImages, version),
 		);
 
@@ -252,7 +246,7 @@ describe("what `up` is left with after the pulls and builds", () => {
 
 	test("with pull images it pulls nothing the strict pull already did", () => {
 		expect(up(true, CURRENT)).toBe(
-			"compose -p shop-abc123 --env-file .env -f docker-compose.yml up -d --remove-orphans --no-build --pull never",
+			"compose -p shop-abc123 -f snapshot.json up -d --remove-orphans --no-build --pull never",
 		);
 		expect(up(true, [2, 15, 0])).toMatch(/--pull never$/);
 		expect(up(true, [5, 6, 0])).toMatch(/--pull never$/);
@@ -268,7 +262,7 @@ describe("what `up` is left with after the pulls and builds", () => {
 
 	test("without pull images `up` pulls only what is still missing", () => {
 		expect(up(false, CURRENT)).toBe(
-			"compose -p shop-abc123 --env-file .env -f docker-compose.yml up -d --remove-orphans --no-build",
+			"compose -p shop-abc123 -f snapshot.json up -d --remove-orphans --no-build",
 		);
 		expect(composePlan(false, [2, 22, 0]).pull).toEqual({
 			args: "pull --ignore-pull-failures --policy missing",

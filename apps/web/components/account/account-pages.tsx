@@ -3,7 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useRouter } from "next/navigation";
 import { useId, useRef, useState } from "react";
 import { TextField } from "@/components/auth/ui";
 import { ProfileForm } from "@/components/dashboard/settings/profile/profile-form";
@@ -20,6 +19,7 @@ import {
 	MIN_PASSWORD_LENGTH,
 	passwordProblem,
 } from "@/lib/password";
+import { useRouter } from "@/lib/router";
 import { PasskeysCard } from "./passkeys-card";
 import { ActionDialog, ActionFeedback, useAction } from "./shared";
 import { TwoFactorCard } from "./two-factor-card";

@@ -5,9 +5,9 @@ import type { Doc, Id } from "@panara-cloud/backend/dataModel";
 import { isConnectionFailure } from "@panara-cloud/backend/serverState";
 import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useParams } from "next/navigation";
 import { LOCAL_SERVER_ID } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import { useParams } from "@/lib/router";
 
 export const LOCAL_SERVER_NAME = "Panara Cloud host";
 

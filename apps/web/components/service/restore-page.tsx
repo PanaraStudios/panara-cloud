@@ -3,8 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useAction, useMutation, useQuery } from "convex/react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -29,6 +27,8 @@ import {
 	serviceUrl,
 } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter, useSearchParams } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import { useDatabaseBackups } from "./database-overview";
 import { errorDetail } from "./logs";

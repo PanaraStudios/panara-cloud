@@ -49,6 +49,10 @@ export const composeJobSpecs = [
 		freshVolumes: v.optional(v.boolean()),
 		trusted: v.optional(v.boolean()),
 	}),
+	// Stored job specs must stay in the shape the previous release accepts,
+	// or rolling back fails schema validation on the jobs table (the newest
+	// job of each kind is kept). Start's trust is decided when the agent
+	// reads the job (compose/agent.ts), the removal's source by the agent.
 	v.object({ kind: v.literal("compose.start"), composeId }),
 	v.object({ kind: v.literal("compose.stop"), composeId }),
 	// The compose row is already gone when this runs, so it carries what

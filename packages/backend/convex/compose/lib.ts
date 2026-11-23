@@ -46,6 +46,30 @@ export const generateRefreshToken = () => randomString(24);
 export const generateSuffix = () =>
 	randomString(8, "0123456789abcdef").toLowerCase();
 
+// How a deploy names the compose file's volumes (see applyCollisionTransforms
+// in the agent): plain `<appName>_<key>`, `<key>-<suffix>` when randomized,
+// `<key>-<appName>` for an isolated deployment with its own volumes.
+export const volumeNaming = (
+	compose: Pick<
+		Doc<"compose">,
+		| "appName"
+		| "randomize"
+		| "suffix"
+		| "isolatedDeployment"
+		| "isolatedDeploymentsVolume"
+	>,
+): string => {
+	if (compose.isolatedDeployment) {
+		return compose.isolatedDeploymentsVolume
+			? `isolated:${compose.appName}`
+			: "";
+	}
+	return compose.randomize && compose.suffix ? `suffix:${compose.suffix}` : "";
+};
+
+export const VOLUME_RENAME =
+	"This renames the stack's volumes: the data deployed so far stays in the old volumes, and the next deploy starts with new, empty ones. Confirm to go ahead.";
+
 export const loadCompose = async <R extends Resource>(
 	ctx: QueryCtx,
 	composeId: Id<"compose">,

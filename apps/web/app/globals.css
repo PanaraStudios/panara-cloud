@@ -404,7 +404,7 @@
 /* ───────────────────────── tailwind theme ───────────────────────── */
 
 @theme inline {
-	/* fonts (exposed by next/font in app/layout.tsx) */
+	/* fonts (faces and variables in app/fonts.css) */
 	--font-sans:
 		var(--font-geist-sans), "Bricolage Grotesque", ui-sans-serif, system-ui,
 		sans-serif;

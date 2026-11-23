@@ -4,6 +4,7 @@ import {
 	type ComposeJobInput,
 	composeServiceNames,
 	deployCompose,
+	hasCapture,
 	layoutOf,
 	prepareSource,
 	readSourceCompose,
@@ -16,7 +17,6 @@ import {
 import { withHost } from "../../host";
 import type { Host } from "../../host/types";
 import { FailedAfterHandoff } from "../../lib/handoff";
-import { quote } from "../../lib/shell";
 import type { HandlerMap } from "../index";
 import {
 	type Claim,
@@ -107,10 +107,6 @@ type ReportFields = {
 const report = (ctx: JobContext, fields: ReportFields) =>
 	ctx.convex.mutation(api.compose.agent.report, { ...lease(ctx), ...fields });
 
-const codeExists = async (host: Host, input: ComposeJobInput) =>
-	(await host.exec(`test -d ${quote(`${layoutOf(input).code}/.git`)}`)).code ===
-	0;
-
 const sourcePlan = async (
 	ctx: JobContext,
 	host: Host,
@@ -121,7 +117,7 @@ const sourcePlan = async (
 	if (input.compose.sourceType === "raw") {
 		return { type: "raw", composeFile: context.composeFile ?? "" };
 	}
-	if (reuseCode && (await codeExists(host, input))) return { type: "existing" };
+	if (reuseCode && (await hasCapture(host, input))) return { type: "existing" };
 	if (!context.compose.gitSource) {
 		throw new JobFailure("The compose service has no git source");
 	}
@@ -200,7 +196,10 @@ const loadSource = async (
 	if (input.compose.sourceType === "raw") return context.composeFile ?? "";
 	const plan = await sourcePlan(ctx, host, context, input, !fetch);
 	if (plan.type === "clone") {
-		await prepareSource(host, layoutOf(input), plan, ctx.log, ctx.signal);
+		await prepareSource(host, input, plan, ctx.log, {
+			signal: ctx.signal,
+			patches: context.patches,
+		});
 	}
 	return await readSourceCompose(host, layoutOf(input));
 };

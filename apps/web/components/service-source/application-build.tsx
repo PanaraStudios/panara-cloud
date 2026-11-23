@@ -4,7 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { ArrowRightIcon, ArrowUpRightIcon } from "lucide-react";
-import Link from "next/link";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import type { ApplicationView } from "@/components/dashboard/application/use-application";
@@ -24,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
+import Link from "@/lib/router/link";
 import {
 	BUILD_TYPE_LABELS,
 	BUILD_TYPES,

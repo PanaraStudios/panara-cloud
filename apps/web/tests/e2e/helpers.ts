@@ -361,9 +361,8 @@ export async function addVirtualAuthenticator(
 	return cdp;
 }
 
-// Next.js renders an empty role="alert" route announcer on every page.
 export function alert(page: Page) {
-	return page.locator('[role="alert"]:not(#__next-route-announcer__)');
+	return page.locator('[role="alert"]');
 }
 
 const backendDir = path.resolve(

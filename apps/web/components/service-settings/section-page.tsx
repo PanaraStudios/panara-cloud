@@ -1,6 +1,5 @@
 "use client";
 
-import { notFound, usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { usePendingSections } from "@/components/service/use-pending-changes";
 import {
@@ -18,6 +17,7 @@ import {
 	settingsSectionsFor,
 } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import { notFound, usePathname } from "@/lib/router";
 import { PendingNotice, SettingsBody } from "./chrome";
 import { SectionBody } from "./sections/registry";
 import { useSectionPending } from "./use-section-pending";

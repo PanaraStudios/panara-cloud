@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { ServerContainersList } from "@/components/servers/containers-list";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Containers" };
 

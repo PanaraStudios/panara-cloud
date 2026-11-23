@@ -1,11 +1,7 @@
-import { redirect } from "next/navigation";
+import { redirect, useParams } from "@/lib/router";
 
 // The tab was called Swarm; its links keep working.
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ serverId: string }>;
-}) {
-	const { serverId } = await params;
+export default function Page() {
+	const { serverId } = useParams<{ serverId: string }>();
 	redirect(`/servers/${serverId}/cluster`);
 }

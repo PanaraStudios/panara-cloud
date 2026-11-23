@@ -3,8 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useMutation } from "convex/react";
 import { ArrowRightIcon, ArrowUpRightIcon, CheckIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PanelDomainForm } from "@/components/dashboard/settings/web-domain";
@@ -18,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MonoValue, PageHeader } from "@/components/ui-kit/primitives";
 import { errorMessage } from "@/lib/auth/errors";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import {
 	type PanelSetup as PanelSetupData,

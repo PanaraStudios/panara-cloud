@@ -1,6 +1,5 @@
 "use client";
 
-import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageTabs } from "@/components/ui-kit/page-tabs";
@@ -16,6 +15,7 @@ import {
 	visibleItems,
 } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import { useParams, usePathname, useRouter } from "@/lib/router";
 import { ServiceProvider, useService, useServiceInfo } from "./service-context";
 import { ServiceHeader } from "./service-header";
 

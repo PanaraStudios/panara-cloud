@@ -2,11 +2,11 @@
 
 import { api } from "@panara-cloud/backend/api";
 import { useConvexAuth, useQuery } from "convex/react";
-import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { isActive, isVisible, settingsNav } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import type { Permissions } from "@/lib/permissions";
+import { usePathname, useRouter } from "@/lib/router";
 
 // Members only see the Settings pages their permissions allow; a hidden
 // page's URL goes to the hub (or home when nothing on it is theirs).

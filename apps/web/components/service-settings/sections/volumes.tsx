@@ -8,7 +8,6 @@ import {
 	Trash2Icon,
 	XIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -37,6 +36,7 @@ import {
 import { errorMessage } from "@/lib/auth/errors";
 import { serviceSettingsUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import { isRowPending } from "../use-section-pending";
 import { useServiceRef } from "../use-service-ref";

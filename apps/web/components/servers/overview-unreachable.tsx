@@ -14,12 +14,12 @@ import {
 	SquareTerminalIcon,
 	XIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { ServiceIcon } from "@/components/service/service-icon";
 import { Button } from "@/components/ui/button";
 import { copyToClipboard, Section } from "@/components/ui-kit/primitives";
 import { serverUrl, serviceUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import { OverviewHeader } from "./overview-header";
 import { FootNote, Notice, SectionNote, SectionRow } from "./server-ui";

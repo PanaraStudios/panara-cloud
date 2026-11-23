@@ -3,7 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -21,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { errorMessage } from "@/lib/auth/errors";
 import { environmentUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
 
 /** Two fields, so a dialog (P-02). Tags are set on Project settings. */
 export function NewProjectDialog({

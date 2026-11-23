@@ -16,7 +16,6 @@ import {
 	Undo2Icon,
 	XIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useApplication } from "@/components/dashboard/application/use-application";
@@ -48,6 +47,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { MoreMenu, ResourceTable, Th } from "@/components/ui-kit/primitives";
 import { environmentUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import { useServiceRef } from "../use-service-ref";
 import {

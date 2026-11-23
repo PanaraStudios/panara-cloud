@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import {
 	BitbucketIcon,
 	GiteaIcon,
@@ -9,6 +8,7 @@ import {
 } from "@/components/icons/data-tools-icons";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BackLink } from "@/components/ui-kit/primitives";
+import { useRouter, useSearchParams } from "@/lib/router";
 import { AddBitbucketProvider } from "./bitbucket/add-bitbucket-provider";
 import { AddGiteaProvider } from "./gitea/add-gitea-provider";
 import { AddGithubProvider } from "./github/add-github-provider";

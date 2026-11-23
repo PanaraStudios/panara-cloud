@@ -1,13 +1,13 @@
 "use client";
 
 import { CheckIcon, ClockIcon, MailIcon } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useEmailEnabled } from "@/components/email/copy-link";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { authClient, authResult } from "@/lib/auth/client";
 import { authMessage } from "@/lib/auth/errors";
+import { useSearchParams } from "@/lib/router";
 import {
 	AuthHeading,
 	AuthStateIcon,

@@ -3,7 +3,6 @@
 import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/standard-schema";
 import { api } from "@panara-cloud/backend/api";
 import { useAction, useMutation, useQuery } from "convex/react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -22,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
+import Link from "@/lib/router/link";
 import { useAuthorizeAfterSave } from "../authorize";
 
 const Schema = z.object({

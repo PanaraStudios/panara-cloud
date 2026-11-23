@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import {
 	Select,
@@ -11,6 +10,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import dynamic from "@/lib/router/dynamic";
 import { cn } from "@/lib/utils";
 import { useAppContainers } from "./host-containers";
 

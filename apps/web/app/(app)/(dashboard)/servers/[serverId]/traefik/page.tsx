@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { TraefikConfigFiles } from "@/components/servers/traefik-config";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Traefik" };
 

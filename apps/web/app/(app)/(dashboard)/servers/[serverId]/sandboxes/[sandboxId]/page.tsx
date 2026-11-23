@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
 import { SandboxView } from "@/components/servers/sandbox-view";
+import type { Metadata } from "@/lib/router";
+import { useParams } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Sandbox" };
 
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ serverId: string; sandboxId: string }>;
-}) {
-	const { serverId, sandboxId } = await params;
+export default function Page() {
+	const { serverId, sandboxId } = useParams<{
+		serverId: string;
+		sandboxId: string;
+	}>();
 	return (
 		<SandboxView
 			sandboxId={sandboxId}

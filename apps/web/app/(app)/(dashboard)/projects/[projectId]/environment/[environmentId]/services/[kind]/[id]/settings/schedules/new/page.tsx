@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { SettingsSubPage } from "@/components/service-settings/sub-page";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Settings" };
 

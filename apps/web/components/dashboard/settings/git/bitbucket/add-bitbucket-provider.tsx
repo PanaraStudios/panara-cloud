@@ -3,8 +3,6 @@
 import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/standard-schema";
 import { api } from "@panara-cloud/backend/api";
 import { useAction } from "convex/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -22,6 +20,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 
 const Schema = z.object({
 	name: z.string().min(1, { message: "Name is required" }),

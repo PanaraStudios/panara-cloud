@@ -22,6 +22,7 @@ import {
 	requireServicePermission,
 } from "../lib/permissions";
 import { deleteSecret, putSecret, readSecret } from "../lib/secrets";
+import { hasDeployed } from "../lib/serviceActivity";
 import {
 	recordEnvEvent,
 	recordServiceEvent,
@@ -46,15 +47,18 @@ import {
 	DEFAULT_COMPOSE_PATH,
 	enqueueComposeJob,
 	generateRefreshToken,
+	generateSuffix,
 	group,
 	isAdmin,
 	loadCompose,
 	owner,
 	publicCompose,
+	VOLUME_RENAME,
 	validateCommand,
 	validateComposeFile,
 	validateComposePath,
 	validateSuffix,
+	volumeNaming,
 } from "./lib";
 
 const MAX_LIST = 500;
@@ -356,8 +360,10 @@ export const update = mutation({
 		isolatedDeployment: v.optional(v.boolean()),
 		isolatedDeploymentsVolume: v.optional(v.boolean()),
 		serviceNetworks: v.optional(v.array(composeServiceNetwork)),
+		// Needed to change how a deployed stack's volumes are named.
+		confirmVolumeRename: v.optional(v.boolean()),
 	},
-	handler: async (ctx, { composeId, ...fields }) => {
+	handler: async (ctx, { composeId, confirmVolumeRename, ...fields }) => {
 		const { compose, userId } = await loadCompose(
 			ctx,
 			composeId,
@@ -398,9 +404,19 @@ export const update = mutation({
 			);
 		}
 		const randomize = patch.randomize ?? compose.randomize;
+		if (patch.randomize && !(patch.suffix ?? compose.suffix)) {
+			patch.suffix = generateSuffix();
+		}
 		const suffix = patch.suffix ?? compose.suffix;
 		if (randomize && !suffix) {
 			throw new ConvexError("A suffix is required to randomize the compose");
+		}
+		if (
+			!confirmVolumeRename &&
+			volumeNaming({ ...compose, ...patch }) !== volumeNaming(compose) &&
+			(compose.status === "done" || (await hasDeployed(ctx, group(composeId))))
+		) {
+			throw new ConvexError(VOLUME_RENAME);
 		}
 		await ctx.db.patch("compose", composeId, patch);
 		await recordSettingsEvents(

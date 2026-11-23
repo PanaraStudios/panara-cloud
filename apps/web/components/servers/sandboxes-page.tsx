@@ -11,7 +11,6 @@ import {
 	TimerResetIcon,
 	Trash2Icon,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -40,6 +39,7 @@ import { errorMessage } from "@/lib/auth/errors";
 import { serverUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import {
 	formatCountdown,

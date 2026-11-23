@@ -165,6 +165,7 @@ import type * as platform_lib_cron from "../platform/lib/cron.js";
 import type * as platform_lib_dnsClients from "../platform/lib/dnsClients.js";
 import type * as platform_lib_fetch from "../platform/lib/fetch.js";
 import type * as platform_lib_legacyExport from "../platform/lib/legacyExport.js";
+import type * as platform_lib_mcp from "../platform/lib/mcp.js";
 import type * as platform_lib_notificationMessages from "../platform/lib/notificationMessages.js";
 import type * as platform_lib_panel from "../platform/lib/panel.js";
 import type * as platform_lib_providerConfig from "../platform/lib/providerConfig.js";
@@ -397,6 +398,7 @@ declare const fullApi: ApiFromModules<{
   "platform/lib/dnsClients": typeof platform_lib_dnsClients;
   "platform/lib/fetch": typeof platform_lib_fetch;
   "platform/lib/legacyExport": typeof platform_lib_legacyExport;
+  "platform/lib/mcp": typeof platform_lib_mcp;
   "platform/lib/notificationMessages": typeof platform_lib_notificationMessages;
   "platform/lib/panel": typeof platform_lib_panel;
   "platform/lib/providerConfig": typeof platform_lib_providerConfig;

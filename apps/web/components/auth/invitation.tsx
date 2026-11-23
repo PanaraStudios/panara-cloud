@@ -2,14 +2,14 @@
 
 import { useConvexAuth } from "convex/react";
 import { ArrowRightIcon } from "lucide-react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { authClient, authResult } from "@/lib/auth/client";
 import { authMessage } from "@/lib/auth/errors";
 import { withNext } from "@/lib/next-path";
+import { useSearchParams } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { SignupForm } from "./signup-form";
 import { AuthHeading, FormError, FormSuccess } from "./ui";
 

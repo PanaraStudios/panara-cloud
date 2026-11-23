@@ -3,7 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useConvex, useConvexConnectionState, useQuery } from "convex/react";
 import { LogInIcon } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useEmailEnabled } from "@/components/email/copy-link";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ import {
 	MIN_PASSWORD_LENGTH,
 	passwordProblem,
 } from "@/lib/password";
+import { useSearchParams } from "@/lib/router";
 import {
 	BACKEND_WAIT_MS,
 	backendReach,

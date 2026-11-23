@@ -12,7 +12,6 @@ import {
 	type LucideIcon,
 	MemoryStickIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ShowDiskUsage } from "@/components/dashboard/docker/disk-usage/show-disk-usage";
 import { ShowDockerEvents } from "@/components/dashboard/docker/events/show-docker-events";
@@ -30,6 +29,7 @@ import { Section, StatStrip } from "@/components/ui-kit/primitives";
 import { useSnapshot } from "@/lib/host-data";
 import { serverUrl, serviceUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { containerStatus, isSystemContainer } from "./containers-data";
 import { OverviewHeader } from "./overview-header";
 import { SetupOverview } from "./overview-setup";

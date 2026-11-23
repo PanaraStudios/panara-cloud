@@ -18,8 +18,6 @@ import {
 	MoreHorizontalIcon,
 	XIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
 import {
@@ -111,6 +109,8 @@ import {
 	useShortcut,
 	useShortcutModifier,
 } from "@/lib/dashboard/use-shortcut";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 /** Status tones a badge, a dot or a chart stroke can take. */

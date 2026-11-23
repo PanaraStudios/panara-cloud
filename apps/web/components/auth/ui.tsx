@@ -6,8 +6,6 @@ import {
 	CopyIcon,
 	type LucideIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -19,6 +17,8 @@ import {
 } from "@/components/ui/input-otp";
 import { safeNext } from "@/lib/next-path";
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "@/lib/password";
+import { useSearchParams } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 export function useNext() {

@@ -10,7 +10,6 @@ import {
 	EyeOffIcon,
 	RefreshCwIcon,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ServiceIcon } from "@/components/service/service-icon";
@@ -35,6 +34,7 @@ import { copyToClipboard } from "@/components/ui-kit/primitives";
 import { errorMessage } from "@/lib/auth/errors";
 import { serviceUrl } from "@/lib/navigation";
 import { generateRandomPassword } from "@/lib/password-utils";
+import { useRouter, useSearchParams } from "@/lib/router";
 import { cn } from "@/lib/utils";
 import { ENGINES } from "./chooser";
 import {

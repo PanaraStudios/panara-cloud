@@ -12,7 +12,6 @@ import {
 	PlusIcon,
 	Trash2Icon,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ScheduleRuns } from "@/components/activity/schedule-runs";
@@ -35,6 +34,7 @@ import { waitForJob } from "@/lib/host-data";
 import { serviceSettingsUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { useServiceRef } from "../use-service-ref";

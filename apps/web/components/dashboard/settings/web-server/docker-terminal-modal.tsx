@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import dynamic from "next/dynamic";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +24,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { rendersNativeButton } from "@/lib/native-button";
+import dynamic from "@/lib/router/dynamic";
 import { badgeStateColor } from "../../application/logs/show";
 import { useAppContainers } from "./host-containers";
 

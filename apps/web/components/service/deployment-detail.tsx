@@ -9,8 +9,6 @@ import {
 	Loader2Icon,
 	RocketIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useJobLogs } from "@/components/dashboard/application/deployments/use-deployments";
@@ -31,6 +29,8 @@ import { LATE_CANCEL_LABEL } from "@/lib/cancel-outcome";
 import { useShortcut } from "@/lib/dashboard/use-shortcut";
 import { serviceUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import { useParams, useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { relativeTime } from "@/lib/time";
 import { STRIP_ODD_LAST } from "./overview";
 import { useService } from "./service-context";

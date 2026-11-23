@@ -5,7 +5,6 @@ import { api } from "@panara-cloud/backend/api";
 import { useAction } from "convex/react";
 import copy from "copy-to-clipboard";
 import { CopyIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -40,6 +39,7 @@ import { Switch } from "@/components/ui/switch";
 import { BackLink } from "@/components/ui-kit/primitives";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization, useOrganizations } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
 
 const API_KEY_NAME_MAX_LENGTH = 32;
 

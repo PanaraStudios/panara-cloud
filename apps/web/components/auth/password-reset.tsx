@@ -1,8 +1,6 @@
 "use client";
 
 import { ArrowLeftIcon, CircleCheckIcon, ClockIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useEmailEnabled } from "@/components/email/copy-link";
 import { Button } from "@/components/ui/button";
@@ -15,6 +13,8 @@ import {
 	MIN_PASSWORD_LENGTH,
 	passwordProblem,
 } from "@/lib/password";
+import { useRouter, useSearchParams } from "@/lib/router";
+import Link from "@/lib/router/link";
 import {
 	AuthHeading,
 	AuthStateIcon,

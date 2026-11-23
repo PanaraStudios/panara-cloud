@@ -1,13 +1,10 @@
-import type { Metadata } from "next";
 import { HandleAi } from "@/components/dashboard/settings/handle-ai";
+import type { Metadata } from "@/lib/router";
+import { useParams } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Edit AI provider" };
 
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}) {
-	const { id } = await params;
+export default function Page() {
+	const { id } = useParams<{ id: string }>();
 	return <HandleAi asPage aiId={id} />;
 }

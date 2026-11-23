@@ -4,8 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { ArrowUpRightIcon, BookmarkIcon, ChevronDownIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CatalogLogo } from "@/components/icons/service-icons";
@@ -28,6 +26,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { errorMessage } from "@/lib/auth/errors";
 import { serviceUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
+import { useRouter, useSearchParams } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import {
 	Field,

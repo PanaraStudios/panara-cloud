@@ -4,7 +4,6 @@ import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/stand
 import { api } from "@panara-cloud/backend/api";
 import { useAction, useQuery } from "convex/react";
 import { CircleCheckIcon, InfoIcon, PlusIcon } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -41,6 +40,7 @@ import {
 } from "@/components/ui/select";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
+import Link from "@/lib/router/link";
 
 const MIN_PASSWORD_LENGTH = 12;
 const BUILT_IN_PROVIDER = "built-in";

@@ -1,13 +1,10 @@
-import type { Metadata } from "next";
 import { JobLogView } from "@/components/activity/job-log-view";
+import type { Metadata } from "@/lib/router";
+import { useParams } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Job output" };
 
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ jobId: string }>;
-}) {
-	const { jobId } = await params;
+export default function Page() {
+	const { jobId } = useParams<{ jobId: string }>();
 	return <JobLogView jobId={jobId} />;
 }

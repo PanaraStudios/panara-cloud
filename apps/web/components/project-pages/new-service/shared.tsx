@@ -4,8 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useQuery } from "convex/react";
 import { ArrowLeftIcon } from "lucide-react";
-import Link from "next/link";
-import { useParams } from "next/navigation";
 import { useServerNames } from "@/components/servers/use-server-states";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,6 +14,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useParams } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 export const LOCAL_SERVER = "local";

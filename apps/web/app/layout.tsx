@@ -1,35 +1,15 @@
-import type { Metadata, Viewport } from "next";
 import { AppProviders } from "@/components/providers/theme";
-import { fontClassName } from "@/lib/fonts";
+import type { Metadata } from "@/lib/router";
+import "./fonts.css";
 import "./globals.css";
 
+// The document itself (language, theme colours, icons, robots) is index.html.
 export const metadata: Metadata = {
 	title: { default: "Panara Cloud", template: "%s · Panara Cloud" },
-	applicationName: "Panara Cloud",
-	robots: { index: false, follow: false },
-};
-
-/* Matches the page background so the browser chrome blends in on mobile. */
-export const viewport: Viewport = {
-	themeColor: [
-		{ media: "(prefers-color-scheme: light)", color: "#fafafa" },
-		{ media: "(prefers-color-scheme: dark)", color: "#000000" },
-	],
 };
 
 export default function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
-	return (
-		<html
-			lang="en"
-			suppressHydrationWarning
-			data-scroll-behavior="smooth"
-			className={fontClassName}
-		>
-			<body>
-				<AppProviders>{children}</AppProviders>
-			</body>
-		</html>
-	);
+	return <AppProviders>{children}</AppProviders>;
 }

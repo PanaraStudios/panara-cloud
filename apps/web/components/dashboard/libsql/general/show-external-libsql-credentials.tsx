@@ -2,7 +2,6 @@
 
 import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/standard-schema";
 import { api } from "@panara-cloud/backend/api";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -26,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { errorMessage } from "@/lib/auth/errors";
+import Link from "@/lib/router/link";
 
 const DockerProviderSchema = z.object({
 	externalPort: z.preprocess((a) => {

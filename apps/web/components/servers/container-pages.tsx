@@ -20,8 +20,6 @@ import {
 	TagIcon,
 	UploadIcon,
 } from "lucide-react";
-import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useContainerConfig } from "@/components/dashboard/docker/config/use-container-config";
@@ -54,6 +52,8 @@ import { errorMessage } from "@/lib/auth/errors";
 import { waitForJob } from "@/lib/host-data";
 import { serverUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import dynamic from "@/lib/router/dynamic";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import {
 	type ContainerRow,

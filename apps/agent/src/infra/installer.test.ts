@@ -498,6 +498,69 @@ describe("install.sh dry run", { timeout: 60_000 }, () => {
 		expect(run.saved).toContain("PANARA_CLOUD_PORT=3000\n");
 		expect(run.saved).toContain("PANARA_CLOUD_DOMAIN=\n");
 	});
+	// Since 0.1.7 the web image is a static build and a small server instead
+	// of Node.js. It reads the same settings and checks its own health, so
+	// an existing web service moves to it like any other image, and the
+	// settings stay the 0.1.6 server's (which a rollback still needs).
+	describe("the web service", () => {
+		const WEB_ENV = [
+			"PORT=3000",
+			"CONVEX_INTERNAL_URL=http://panara-cloud-convex:3210",
+			"CONVEX_INTERNAL_SITE_URL=http://panara-cloud-convex:3211",
+			"CONVEX_PUBLIC_URL=http://203.0.113.10:3210",
+			"PANARA_CLOUD_LIVE_URL=ws://203.0.113.10:7100",
+			"PANARA_CLOUD_PROXY_SECRET=s3cret",
+		];
+		const withSecret = () => {
+			const home = mkdtempSync(join(tmpdir(), "install-web-"));
+			mkdirSync(join(home, "etc", "secrets"), { recursive: true });
+			writeFileSync(join(home, "etc", "secrets", "proxy-secret"), "s3cret");
+			return home;
+		};
+
+		test("a new one gets every setting its server reads and no health command of its own", () => {
+			const home = withSecret();
+			const run = dryRun(["install"], {
+				home,
+				env: { PANARA_CLOUD_VERSION: "0.1.7" },
+			});
+			rmSync(home, { recursive: true, force: true });
+			expect(run.status).toBe(0);
+			const web = run.service("panara-cloud-web");
+			expect(web).toContain(`${WEB}:0.1.7`);
+			for (const setting of WEB_ENV) expect(web).toContain(setting);
+			expect(web).toContain("--publish published=3000,target=3000,mode=host");
+			expect(web).not.toMatch(/--health-|--entrypoint|--args|--user /);
+		});
+
+		test("an upgrade from 0.1.6 changes its image and nothing else", () => {
+			const home = withSecret();
+			const run = dryRun(["upgrade"], {
+				home,
+				config: ipConfig({ PANARA_CLOUD_VERSION: "0.1.6" }),
+				services: {
+					...ipServices("0.1.6"),
+					"panara-cloud-web": {
+						image: `${WEB}:0.1.6`,
+						env: WEB_ENV,
+						ports: ["3000,3000,host"],
+					},
+				},
+				env: { PANARA_CLOUD_VERSION: "0.1.7" },
+				adminExists: true,
+			});
+			rmSync(home, { recursive: true, force: true });
+			expect(run.stderr).not.toContain("error:");
+			expect(run.status).toBe(0);
+			expect(run.service("panara-cloud-web")).toBe(
+				`service update --quiet --detach=false --with-registry-auth --image ${WEB}:0.1.7 panara-cloud-web`,
+			);
+			expect(run.steps).toContain(
+				"run http://panara-cloud-web:3000/api/health",
+			);
+		});
+	});
+
 	test("upgrade keeps hand-set Convex values and restarts Convex between migrate and the roll", () => {
 		const run = dryRun(["upgrade"], {
 			config: ipConfig(),

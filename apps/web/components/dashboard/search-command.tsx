@@ -18,7 +18,6 @@ import {
 	ServerIcon,
 	VariableIcon,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import {
 	SETUP_URL,
@@ -62,6 +61,7 @@ import {
 } from "@/lib/navigation";
 import { useIsInstanceAdmin, useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { usePathname, useRouter } from "@/lib/router";
 import { serviceActionState } from "@/lib/service-actions";
 import { StatusTooltip } from "../shared/status-tooltip";
 

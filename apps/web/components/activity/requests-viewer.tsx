@@ -9,7 +9,6 @@ import {
 	ScrollTextIcon,
 	TerminalIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import {
 	Block,
@@ -52,6 +51,7 @@ import {
 	splitPath,
 	statusClass,
 } from "@/lib/requests";
+import Link from "@/lib/router/link";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import type { DirectoryService } from "./use-directory";

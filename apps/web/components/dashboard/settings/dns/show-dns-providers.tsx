@@ -3,7 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useMutation, useQuery } from "convex/react";
 import { Globe } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { dnsProviderIcons } from "@/components/icons/dns-provider-icons";
@@ -19,6 +18,7 @@ import {
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 
 const providerLabels: Record<string, string> = {
 	cloudflare: "Cloudflare",

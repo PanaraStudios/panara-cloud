@@ -1,7 +1,7 @@
 import { QuoteIcon } from "lucide-react";
-import Link from "next/link";
 import { RandomQuote } from "@/components/auth/random-quote";
 import { Logo } from "@/components/logo";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 // opensend's auth layout (components/auth/page-frame.tsx): the form on the

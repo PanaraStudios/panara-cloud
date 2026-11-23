@@ -7,7 +7,6 @@ import {
 	PlusIcon,
 	Trash2Icon,
 } from "lucide-react";
-import Link from "next/link";
 import { DialogAction } from "@/components/shared/dialog-action";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +16,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PageHeader } from "@/components/ui-kit/primitives";
+import Link from "@/lib/router/link";
 
 /** Header of a Settings list page: title, one line, the primary add link. */
 export function SettingsListHeader({

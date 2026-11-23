@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Settings" };
 

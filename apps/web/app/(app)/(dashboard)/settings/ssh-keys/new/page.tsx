@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { HandleSSHKeys } from "@/components/dashboard/settings/ssh-keys/handle-ssh-keys";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Add SSH key" };
 

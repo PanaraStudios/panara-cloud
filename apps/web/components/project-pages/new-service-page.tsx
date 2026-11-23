@@ -1,6 +1,6 @@
 "use client";
 
-import { notFound } from "next/navigation";
+import { notFound } from "@/lib/router";
 import { AiGeneratorPage, ImportPage } from "./new-service/ai-and-import";
 import { NewApplicationPage } from "./new-service/new-application";
 import { NewComposePage } from "./new-service/new-compose";

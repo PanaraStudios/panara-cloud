@@ -2,7 +2,6 @@
 
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { ArrowLeftIcon, ScrollTextIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LogViewer } from "@/components/dashboard/docker/logs/log-viewer";
 import { useLogText } from "@/components/dashboard/docker/logs/use-log-buffer";
@@ -14,6 +13,7 @@ import {
 	ToneBadge,
 } from "@/components/ui-kit/primitives";
 import { useShortcut } from "@/lib/dashboard/use-shortcut";
+import { useRouter } from "@/lib/router";
 import { relativeTime } from "@/lib/time";
 import { formatShortDuration } from "./use-directory";
 

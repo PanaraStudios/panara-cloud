@@ -10,7 +10,6 @@ import {
 	RocketIcon,
 	SquareTerminalIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useMemo } from "react";
 import { parse } from "yaml";
 import { useComposeContainers } from "@/components/dashboard/compose/use-compose";
@@ -21,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Section, StatCell, StatStrip } from "@/components/ui-kit/primitives";
 import { deploymentUrl, SOURCE_SECTION, serviceUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import {

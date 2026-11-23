@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { AddVolumes } from "@/components/dashboard/application/advanced/volumes/add-volumes";
 import { UpdateVolume } from "@/components/dashboard/application/advanced/volumes/update-volume";
 import { useServiceMounts } from "@/components/dashboard/application/advanced/volumes/use-mounts";
 import { AddDomain } from "@/components/dashboard/application/domains/handle-domain";
 import { HandleSchedules } from "@/components/dashboard/application/schedules/handle-schedules";
 import { serviceSettingsUrl } from "@/lib/navigation";
+import { useRouter } from "@/lib/router";
 import { SubPageHeader } from "./sections/kit";
 import { useServiceRef } from "./use-service-ref";
 

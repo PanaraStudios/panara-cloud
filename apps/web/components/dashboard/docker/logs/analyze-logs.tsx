@@ -12,7 +12,6 @@ import {
 	Settings,
 	X,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -33,6 +32,7 @@ import { errorMessage } from "@/lib/auth/errors";
 import { entryText, type LogEntry } from "@/lib/log-entries";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 
 interface Props {
 	logs: readonly LogEntry[];

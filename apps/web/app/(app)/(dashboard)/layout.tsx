@@ -1,20 +1,21 @@
-import type { Metadata } from "next";
-import { cookies } from "next/headers";
-import { AppShell } from "@/components/app-shell";
-import { requireAccount } from "@/lib/auth/server";
+import { AppShell, ShellSkeleton } from "@/components/app-shell";
+import { useAccount } from "@/lib/auth/gate";
 
-export const metadata: Metadata = { robots: { index: false, follow: false } };
+// The sidebar (components/ui/sidebar.tsx) writes this cookie when it is
+// collapsed or expanded; reading it here keeps the choice across reloads.
+const sidebarOpen = () =>
+	!document.cookie
+		.split("; ")
+		.some((cookie) => cookie === "sidebar_state=false");
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
-	const account = await requireAccount();
-	// The sidebar (components/ui/sidebar.tsx) writes this cookie when it is
-	// collapsed or expanded; reading it here keeps the choice across reloads.
-	const sidebarOpen = (await cookies()).get("sidebar_state")?.value !== "false";
+	const account = useAccount();
+	if (!account) return <ShellSkeleton />;
 	return (
 		<AppShell
-			sidebarOpen={sidebarOpen}
+			sidebarOpen={sidebarOpen()}
 			account={{
 				name: account.name,
 				email: account.email,

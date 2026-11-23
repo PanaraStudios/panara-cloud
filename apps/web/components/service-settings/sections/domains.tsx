@@ -11,8 +11,6 @@ import {
 	SearchCheckIcon,
 	Trash2Icon,
 } from "lucide-react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DnsHelperModal } from "@/components/dashboard/application/domains/dns-helper-modal";
@@ -36,6 +34,8 @@ import { errorMessage } from "@/lib/auth/errors";
 import { waitForOp } from "@/lib/host-data";
 import { serviceSettingsUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import { useSearchParams } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { NotDeployedBadge } from "../chrome";
 import { isRowPending } from "../use-section-pending";
 import { useServiceRef } from "../use-service-ref";

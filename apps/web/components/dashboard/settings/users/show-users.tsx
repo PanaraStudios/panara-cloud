@@ -4,7 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import { useMutation, useQuery } from "convex/react";
 import { format } from "date-fns";
 import { MoreHorizontal, SearchIcon, Users } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { StatusDot } from "@/components/settings/form-kit";
@@ -36,6 +35,7 @@ import {
 } from "@/lib/member-confirmations";
 import { useIsInstanceAdmin, useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { AddInvitation } from "./add-invitation";
 import { ChangeRole } from "./change-role";
 import { ResetPasswordLink } from "./reset-password-link";

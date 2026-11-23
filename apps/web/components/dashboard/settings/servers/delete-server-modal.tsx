@@ -4,7 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { ExternalLink, Loader2, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -27,6 +26,7 @@ import { errorMessage } from "@/lib/auth/errors";
 import { rendersNativeButton } from "@/lib/native-button";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { useWaitForJob } from "./host-jobs";
 
 interface Props {

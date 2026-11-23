@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { ServerHostTerminalPage } from "@/components/servers/terminal-page";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Terminal" };
 

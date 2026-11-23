@@ -9,8 +9,6 @@ import {
 	FolderIcon,
 	SettingsIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ExportProject } from "@/components/dashboard/project/export-import/export-project";
 import { ImportProject } from "@/components/dashboard/project/export-import/import-project";
@@ -41,6 +39,8 @@ import {
 import { isServiceKind, serviceUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { NewProjectDialog } from "./new-project-dialog";
 import { type ServiceStatus, StatusDot } from "./service-status";
 import { TimeAgo } from "./time-ago";

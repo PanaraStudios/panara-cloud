@@ -7,11 +7,12 @@
 		},
 		"apps/web": {
 			"entry": [
-				"app/**/{page,layout,route,loading,error,not-found,template,default,global-error,icon,apple-icon}.{ts,tsx}",
+				"app/**/{page,layout,error,not-found,global-error}.tsx",
 				"lib/*.test.ts",
+				"scripts/*.mjs",
 				"tests/e2e/**/*.ts"
 			],
-			"project": ["**/*.{ts,tsx,mjs,css}"]
+			"project": ["**/*.{ts,tsx,mjs,css}", "!server/**"]
 		},
 		"apps/agent": {
 			"entry": [

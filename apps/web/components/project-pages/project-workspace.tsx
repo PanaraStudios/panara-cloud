@@ -3,8 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useConvexAuth, useQuery } from "convex/react";
 import { PlusIcon } from "lucide-react";
-import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageTabs } from "@/components/ui-kit/page-tabs";
@@ -17,6 +15,8 @@ import {
 } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useParams, usePathname } from "@/lib/router";
+import Link from "@/lib/router/link";
 
 const count = (services: number) =>
 	services === 1 ? "1 service" : `${services} services`;

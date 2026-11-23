@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { ServiceMetrics } from "@/components/service/metrics";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Metrics" };
 

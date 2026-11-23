@@ -1,8 +1,6 @@
 "use client";
 
 import { KeyRoundIcon, MailCheckIcon, UserPlusIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useEmailEnabled } from "@/components/email/copy-link";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -10,6 +8,8 @@ import { FieldGroup } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { AuthError, authClient, authResult } from "@/lib/auth/client";
 import { authMessage } from "@/lib/auth/errors";
+import { useRouter, useSearchParams } from "@/lib/router";
+import Link from "@/lib/router/link";
 import {
 	AuthHeading,
 	AuthTextLink,

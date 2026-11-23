@@ -29,6 +29,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { errorMessage } from "@/lib/auth/errors";
+import { previewedImport, type ReviewedTemplate } from "@/lib/template-import";
 import { FormActions, FormSection } from "../../form-kit";
 
 const ImportSchema = z.object({
@@ -48,22 +49,9 @@ export const ShowImport = ({ composeId }: Props) => {
 		filePath: string;
 		content: string;
 	} | null>(null);
-	const [templateInfo, setTemplateInfo] = useState<{
-		compose: string;
-		template: {
-			domains: Array<{
-				serviceName: string;
-				port: number;
-				path?: string;
-				host?: string;
-			}>;
-			envs: string[];
-			mounts: Array<{
-				filePath: string;
-				content: string;
-			}>;
-		};
-	} | null>(null);
+	const [templateInfo, setTemplateInfo] = useState<ReviewedTemplate | null>(
+		null,
+	);
 
 	const importTemplate = useAction(api.compose.templates.importTemplate);
 	const processTemplate = useAction(api.compose.templates.processTemplate);
@@ -96,6 +84,7 @@ export const ShowImport = ({ composeId }: Props) => {
 			await importTemplate({
 				composeId: composeId as Id<"compose">,
 				base64,
+				...previewedImport(templateInfo),
 			});
 			toast.success("Template imported successfully");
 			setIsImportSuccess(true);
@@ -142,7 +131,7 @@ export const ShowImport = ({ composeId }: Props) => {
 		<>
 			<FormSection
 				title="Import"
-				description="Load a base64 template. Importing replaces this service's environment variables, mounts and domains."
+				description="Load a base64 template. Importing replaces this service's environment variables, mounts and domains, with newly generated passwords and keys."
 			>
 				<Form {...form}>
 					<form
@@ -183,7 +172,10 @@ export const ShowImport = ({ composeId }: Props) => {
 									<DialogTitle>Template information</DialogTitle>
 									<DialogDescription>
 										Review before importing. This replaces the service's
-										environment variables, mounts and domains.
+										environment variables, mounts and domains with what is shown
+										here, including the new passwords and keys: a database that
+										already holds data keeps its old password, so copy the old
+										values into the environment before you deploy.
 									</DialogDescription>
 								</DialogHeader>
 

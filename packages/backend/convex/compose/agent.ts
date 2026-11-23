@@ -20,6 +20,7 @@ import { composeStatus } from "../tables/compose";
 import { readComposeFile } from "./crud";
 import {
 	COMPOSE_ENV_KIND,
+	composeJobTrusted,
 	enqueueDeploy,
 	group,
 	MAX_SERVICES,
@@ -45,12 +46,20 @@ const composeOf = async (
 	return compose;
 };
 
+const runsSnapshots = async (ctx: QueryCtx, agentId: Id<"agents">) =>
+	(
+		await ctx.db
+			.query("agentPresence")
+			.withIndex("by_agentId", (q) => q.eq("agentId", agentId))
+			.unique()
+	)?.capabilities.includes("compose.snapshots") ?? false;
+
 // Everything a compose job needs, with env decrypted. null when the compose
 // was deleted after the job was queued.
 export const getContext = query({
 	args: lease,
 	handler: async (ctx, { jobId, leaseId }) => {
-		const { job } = await requireLease(ctx, jobId, leaseId);
+		const { agent, job } = await requireLease(ctx, jobId, leaseId);
 		const compose = await composeOf(ctx, job);
 		if (!compose) return null;
 		const [project, environment] = await Promise.all([
@@ -99,9 +108,17 @@ export const getContext = query({
 				isolatedDeploymentsVolume: compose.isolatedDeploymentsVolume,
 				pullImages: compose.pullImages,
 			},
+			// A deploy's trust is decided when it is queued; a Start's when it
+			// runs, from who asked (its spec stays in the shape older releases
+			// store), and only for an agent that starts from the deploy's
+			// snapshot: an older one runs the file in the service's folder.
 			trusted:
-				(spec.kind === "compose.deploy" || spec.kind === "compose.redeploy") &&
-				spec.trusted === true,
+				spec.kind === "compose.deploy" || spec.kind === "compose.redeploy"
+					? spec.trusted === true
+					: spec.kind === "compose.start"
+						? (await runsSnapshots(ctx, agent._id)) &&
+							(await composeJobTrusted(ctx, compose, job.requestedBy))
+						: false,
 			projectName: project?.name ?? "",
 			environmentName: environment?.name ?? "",
 			composeFile:

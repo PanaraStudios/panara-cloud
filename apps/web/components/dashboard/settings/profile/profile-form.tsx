@@ -4,7 +4,6 @@ import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/stand
 import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation } from "convex/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -25,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { authClient } from "@/lib/auth/client";
 import { errorMessage } from "@/lib/auth/errors";
 import { getAvatarType, isUploadedAvatar } from "@/lib/avatar-utils";
+import { useRouter } from "@/lib/router";
 import { getFallbackAvatarInitials } from "@/lib/utils";
 
 const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;

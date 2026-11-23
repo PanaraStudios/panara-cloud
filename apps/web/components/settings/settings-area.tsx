@@ -1,8 +1,6 @@
 "use client";
 
 import { SearchIcon, SearchXIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
 	InputGroup,
@@ -19,6 +17,8 @@ import { useShortcut } from "@/lib/dashboard/use-shortcut";
 import { type NavItem, settingsNav, visibleItems } from "@/lib/navigation";
 import { useIsInstanceAdmin } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { usePathname, useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 // Settings is a hub: `/settings` lists every page the member can open, and a

@@ -4142,6 +4142,12 @@
 							}
 						},
 						"optional": true
+					},
+					"confirmVolumeRename": {
+						"fieldType": {
+							"type": "boolean"
+						},
+						"optional": true
 					}
 				}
 			},
@@ -4779,7 +4785,7 @@
 		{
 			"name": "compose.templates.importTemplate",
 			"kind": "action",
-			"description": "Imports a template: replaces an existing compose service's file, env, domains and file mounts with a base64 `{ compose, config }` template.",
+			"description": "Imports a template: replaces an existing compose service's file, env, domains and file mounts with a base64 `{ compose, config }` template. With `previewed` (what processTemplate returned and the user reviewed) it stores exactly that, so the generated passwords shown are the ones used; without it the values are generated here. Either way the caller may only set what it could set by editing the service.",
 			"args": {
 				"type": "object",
 				"value": {
@@ -4795,6 +4801,87 @@
 							"type": "string"
 						},
 						"optional": false
+					},
+					"previewed": {
+						"fieldType": {
+							"type": "object",
+							"value": {
+								"compose": {
+									"fieldType": {
+										"type": "string"
+									},
+									"optional": false
+								},
+								"envs": {
+									"fieldType": {
+										"type": "array",
+										"value": {
+											"type": "string"
+										}
+									},
+									"optional": false
+								},
+								"domains": {
+									"fieldType": {
+										"type": "array",
+										"value": {
+											"type": "object",
+											"value": {
+												"serviceName": {
+													"fieldType": {
+														"type": "string"
+													},
+													"optional": false
+												},
+												"port": {
+													"fieldType": {
+														"type": "number"
+													},
+													"optional": false
+												},
+												"path": {
+													"fieldType": {
+														"type": "string"
+													},
+													"optional": true
+												},
+												"host": {
+													"fieldType": {
+														"type": "string"
+													},
+													"optional": true
+												}
+											}
+										}
+									},
+									"optional": false
+								},
+								"mounts": {
+									"fieldType": {
+										"type": "array",
+										"value": {
+											"type": "object",
+											"value": {
+												"filePath": {
+													"fieldType": {
+														"type": "string"
+													},
+													"optional": false
+												},
+												"content": {
+													"fieldType": {
+														"type": "string"
+													},
+													"optional": false
+												}
+											}
+										}
+									},
+									"optional": false
+								}
+							}
+						},
+						"optional": true
 					}
 				}
 			},

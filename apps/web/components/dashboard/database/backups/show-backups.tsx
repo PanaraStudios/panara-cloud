@@ -4,7 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { ClipboardList, DatabaseBackup, Play, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -32,6 +31,7 @@ import {
 import { EmptyState } from "@/components/ui-kit/primitives";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import { ShowDeploymentsModal } from "../../application/deployments/show-deployments-modal";
 import { useDatabase } from "../use-database";

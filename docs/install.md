@@ -711,7 +711,7 @@ applications you deploy:
 | Name | Kind | What |
 |---|---|---|
 | `panara-cloud-convex` | Swarm service | Self-hosted Convex backend (`panara-cloud-convex` image: the unmodified upstream binary on a smaller base, see [The Convex image](convex-image.md)), run with the [Convex settings](#convex-settings); data in the `panara-cloud-convex-data` volume |
-| `panara-cloud-web` | Swarm service | The web app (`panara-cloud-web` image) |
+| `panara-cloud-web` | Swarm service | The web app (`panara-cloud-web` image): the UI's static files and a small server that serves them and proxies the panel's `/api` routes to Convex (a Node.js server up to 0.1.6) |
 | `panara-cloud-agent` | Swarm service | The job runner (`panara-cloud-agent` image). Runs as root with the Docker socket and `/etc/panara-cloud` |
 | `panara-cloud-convex-dashboard` | Swarm service, optional | Convex dashboard (`PANARA_CLOUD_DASHBOARD=true`) |
 | `panara-cloud-monitoring` | Swarm service, optional | Metrics collector (`panara-cloud-monitoring` image), created by the agent when monitoring is enabled, on the panel host and on each monitored server. Its port is never published: on the panel host it is on `panara-cloud-network`, on servers it listens on 127.0.0.1 and the agent reaches it through SSH |
@@ -728,8 +728,12 @@ Convex image (0.1.5: the upstream `ghcr.io/convex/convex-backend`, 0.1.6:
 `panara-cloud-convex`, the same binary on a smaller base: [The Convex image](convex-image.md)).
 "Packed" is what a host downloads; Docker's containerd image store (the default of a new
 Docker 29 install) keeps the packed layers next to the unpacked ones, the older overlay2
-store only the unpacked ones. Layers that images share are counted once: the web, agent and
-migrate images are built on the same Node image.
+store only the unpacked ones. Layers that images share are counted once: up to 0.1.6 the web,
+agent and migrate images were built on the same Node image.
+
+Since 0.1.7 the web image is the UI's static files and one binary, 10.8 MB unpacked and
+6.0 MB packed for amd64 (0.1.6: 281 MB and 92 MB alone, 63 MB and 12 MB on top of the agent's
+shared layers), and its idle container holds about 1.5 MiB of memory (0.1.6: about 99 MiB).
 
 | | 0.1.5 unpacked | 0.1.5 packed | 0.1.6 unpacked | 0.1.6 packed |
 |---|---|---|---|---|

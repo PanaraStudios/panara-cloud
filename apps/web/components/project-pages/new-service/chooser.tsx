@@ -6,12 +6,12 @@ import {
 	type LucideIcon,
 	SparkleIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { ServiceIcon } from "@/components/service/service-icon";
 import { Toolbar, ToolbarSearch } from "@/components/shared/list-toolbar";
 import { PageHeader } from "@/components/ui-kit/primitives";
 import { isDatabaseKind, type ServiceKind } from "@/lib/navigation";
+import Link from "@/lib/router/link";
 import { useFlowContext } from "./shared";
 
 export const ENGINES = [

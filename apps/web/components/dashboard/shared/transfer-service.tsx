@@ -5,7 +5,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation } from "convex/react";
 import { ArrowRightLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -39,6 +38,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { errorMessage } from "@/lib/auth/errors";
+import { useRouter } from "@/lib/router";
 import { type JobId, useJobStatus } from "./job-logs";
 
 const LOCAL_SERVER = "panara-cloud";

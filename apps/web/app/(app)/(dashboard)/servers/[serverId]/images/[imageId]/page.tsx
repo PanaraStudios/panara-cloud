@@ -1,13 +1,10 @@
-import type { Metadata } from "next";
 import { ImageInspectPage } from "@/components/servers/images-inspect";
+import type { Metadata } from "@/lib/router";
+import { useParams } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Image" };
 
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ imageId: string }>;
-}) {
-	const { imageId } = await params;
+export default function Page() {
+	const { imageId } = useParams<{ imageId: string }>();
 	return <ImageInspectPage imageId={decodeURIComponent(imageId)} />;
 }

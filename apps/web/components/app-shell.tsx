@@ -3,8 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useConvexAuth, useQuery } from "convex/react";
 import { SearchIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { ActionFeedback, useAction } from "@/components/account/shared";
@@ -54,6 +52,8 @@ import {
 } from "@/lib/navigation";
 import { OrganizationProvider, useOrganizations } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { usePathname, useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 function PendingInvitationRow({
@@ -261,7 +261,7 @@ function NoOrganization() {
 // of pulsing forever.
 const SLOW_START_MS = 8_000;
 
-function ShellSkeleton() {
+export function ShellSkeleton() {
 	const [slow, setSlow] = useState(false);
 	useEffect(() => {
 		const timer = setTimeout(() => setSlow(true), SLOW_START_MS);

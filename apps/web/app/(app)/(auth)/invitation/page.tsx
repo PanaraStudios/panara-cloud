@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Invitation } from "@/components/auth/invitation";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Invitation" };
 

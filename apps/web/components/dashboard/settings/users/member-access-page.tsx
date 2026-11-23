@@ -3,7 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useQuery } from "convex/react";
 import { UserIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui-kit/primitives";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
 import { MemberAccess } from "./add-permissions";
 import { ChangeRole } from "./change-role";
 import { initials } from "./show-users";

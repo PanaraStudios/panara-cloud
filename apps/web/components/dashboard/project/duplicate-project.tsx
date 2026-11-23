@@ -4,7 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useAction, useQuery } from "convex/react";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ServiceIcon } from "@/components/service/service-icon";
@@ -31,6 +30,7 @@ import {
 import { errorMessage } from "@/lib/auth/errors";
 import { SERVICE_KIND_LABELS } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
 
 export type Services = {
 	serverId?: string | null;

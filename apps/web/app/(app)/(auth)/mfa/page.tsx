@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { MfaForm } from "@/components/auth/mfa-form";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Two-factor authentication" };
 

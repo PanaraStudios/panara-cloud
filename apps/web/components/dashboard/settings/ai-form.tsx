@@ -3,7 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useMutation, useQuery } from "convex/react";
 import { SparkleIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { aiBrand, BrandTile } from "@/components/icons/settings-icons";
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui-kit/settings-list";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
 import { HandleAiProviders } from "./handle-ai-providers";
 
 // AI settings page: owners and admins only.

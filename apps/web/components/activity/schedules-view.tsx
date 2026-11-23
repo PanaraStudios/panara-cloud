@@ -9,8 +9,6 @@ import {
 	useQuery,
 } from "convex/react";
 import { ClockIcon, PlusIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { HandleSchedules } from "@/components/dashboard/application/schedules/handle-schedules";
@@ -41,6 +39,8 @@ import { errorMessage } from "@/lib/auth/errors";
 import { nameMark } from "@/lib/option-icons";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { ActivityPage, TwoLine } from "./activity-ui";
 import {
 	describeCron,

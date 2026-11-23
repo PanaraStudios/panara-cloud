@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { HandleVaultProvider } from "@/components/dashboard/settings/vault/handle-vault-provider";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Connect vault" };
 

@@ -7,7 +7,6 @@ import { useMutation, useQuery } from "convex/react";
 import copy from "copy-to-clipboard";
 import debounce from "lodash/debounce";
 import { CheckIcon, ChevronsUpDown, Copy, RotateCcw } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -48,6 +47,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
 import { cn } from "@/lib/utils";
 import { formatBytes } from "../../database/backups/restore-backup";
 import {

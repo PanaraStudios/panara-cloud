@@ -12,8 +12,6 @@ import {
 	TimerResetIcon,
 	Trash2Icon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { ExtendSandboxTimeout } from "@/components/dashboard/sandbox/extend-sandbox-timeout";
@@ -31,6 +29,8 @@ import {
 import { errorMessage } from "@/lib/auth/errors";
 import { useQueryResult } from "@/lib/host-data";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import {
 	type ConsoleLine,
 	consoleText,

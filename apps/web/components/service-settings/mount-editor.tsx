@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -20,6 +18,8 @@ import { Label } from "@/components/ui/label";
 import { errorMessage } from "@/lib/auth/errors";
 import { serviceSettingsUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter, useSearchParams } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { FRAMED_EDITOR, Note, SaveKey, SubPageHeader } from "./sections/kit";
 import { lineCount } from "./sections/volumes";
 import { useServiceRef } from "./use-service-ref";

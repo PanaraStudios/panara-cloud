@@ -7,7 +7,6 @@ import {
 	MoonIcon,
 	SunIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { AddOrganization } from "@/components/dashboard/organization/handle-organization";
@@ -28,6 +27,7 @@ import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { ConfirmDialog } from "@/components/ui-kit/primitives";
 import { accountNav } from "@/lib/navigation";
 import { useIsInstanceAdmin, useOrganization } from "@/lib/organization";
+import Link from "@/lib/router/link";
 
 export type MenuAccount = { name: string; email: string; image: string | null };
 

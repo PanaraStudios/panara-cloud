@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { SessionsPage } from "@/components/account/sessions-card";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Sessions" };
 

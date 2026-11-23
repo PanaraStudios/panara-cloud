@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { HandleRegistry } from "@/components/dashboard/settings/cluster/registry/handle-registry";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Add registry" };
 

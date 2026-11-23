@@ -132,10 +132,33 @@ function DeleteServicesForm({
 	const single = services.length === 1 ? services[0] : undefined;
 	const plan = volumePlan(services, volumesAtSubmit ?? liveVolumes);
 	const hasVolumes = plan?.hasVolumes;
-	const withVolumes = deleteVolumes && hasVolumes === true;
+	const hasCompose = services.some((service) => service.type === "compose");
+	// A compose service's folder on the server (files/, and what its `./`
+	// mounts wrote) holds data even with no volume, and goes with them.
+	const canDeleteData = plan !== undefined && (hasVolumes || hasCompose);
+	const withVolumes = deleteVolumes && canDeleteData;
 	const phrase = single ? single.name.trim() : "delete";
 	const ready = !withVolumes || typed.trim() === phrase;
 	const their = single ? "Its" : "Their";
+	const theirs = their.toLowerCase();
+	const optionLabel = !hasCompose
+		? "Also delete volumes"
+		: hasVolumes === false
+			? "Also delete files/ data"
+			: "Also delete volumes and files/ data";
+	const optionDescription = !canDeleteData
+		? plan === undefined
+			? "The data in them is lost for good."
+			: single
+				? "This service has no volumes."
+				: "These services have no volumes."
+		: !hasCompose
+			? "The data in them is lost for good."
+			: hasVolumes === false
+				? single
+					? "This service has no volumes, but its folder on the server (files/, and what ./ mounts wrote) holds data: it is removed, and the data in it is lost for good."
+					: "These services have no volumes, but their folders on the server (files/, and what ./ mounts wrote) hold data: they are removed, and the data in them is lost for good."
+				: "The volumes, and the compose services' folders on the server (files/, and what ./ mounts wrote), are removed: the data in them is lost for good.";
 
 	const submit = async () => {
 		if (!ready || pending) return;
@@ -192,10 +215,10 @@ function DeleteServicesForm({
 					</AlertDialogTitle>
 					<AlertDialogDescription>
 						{withVolumes
-							? `${their} containers and configuration are removed, and ${their.toLowerCase()} volumes unless something else still uses them.`
-							: hasVolumes === false
+							? `${their} containers, configuration and folders on the server are removed${hasVolumes ? `, and ${theirs} volumes unless something else still uses them` : ""}.`
+							: hasVolumes === false && !hasCompose
 								? `${their} containers and configuration are removed.`
-								: `${their} containers and configuration are removed; ${their.toLowerCase()} volumes are kept.`}{" "}
+								: `${their} containers and configuration are removed; ${hasVolumes === false ? "" : `${theirs} volumes and `}the data in ${theirs} folders on the server ${hasVolumes === false ? "is" : "are"} kept.${hasCompose ? " A compose service keeps its files/ folder, but its git checkout is removed (every deploy replaces it)." : ""}`}{" "}
 						This cannot be undone.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
@@ -205,30 +228,24 @@ function DeleteServicesForm({
 					</p>
 				) : null}
 				<FieldGroup>
-					<Field orientation="horizontal" data-disabled={hasVolumes === false}>
+					<Field orientation="horizontal" data-disabled={!canDeleteData}>
 						<Checkbox
 							id={`${id}-volumes`}
 							checked={withVolumes}
-							disabled={!hasVolumes || pending}
+							disabled={!canDeleteData || pending}
 							onCheckedChange={(checked) => {
 								setDeleteVolumes(checked === true);
 								setTyped("");
 							}}
 						/>
 						<FieldContent>
-							<FieldLabel htmlFor={`${id}-volumes`}>
-								Also delete volumes
-							</FieldLabel>
-							<FieldDescription>
-								{hasVolumes === false
-									? single
-										? "This service has no volumes."
-										: "These services have no volumes."
-									: "The data in them is lost for good."}
-							</FieldDescription>
+							<FieldLabel htmlFor={`${id}-volumes`}>{optionLabel}</FieldLabel>
+							<FieldDescription>{optionDescription}</FieldDescription>
 						</FieldContent>
 					</Field>
-					{withVolumes && plan ? <VolumePlanList plan={plan} /> : null}
+					{withVolumes && plan?.hasVolumes ? (
+						<VolumePlanList plan={plan} />
+					) : null}
 					{withVolumes ? (
 						<Field>
 							<FieldLabel htmlFor={`${id}-phrase`} className="font-normal">

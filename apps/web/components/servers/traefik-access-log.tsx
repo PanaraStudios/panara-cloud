@@ -2,7 +2,6 @@
 
 import { api } from "@panara-cloud/backend/api";
 import { ArrowRightIcon, ScrollTextIcon } from "lucide-react";
-import Link from "next/link";
 import { RequestsLog } from "@/components/activity/requests-log";
 import { Button } from "@/components/ui/button";
 import { AccessDeniedState, EmptyState } from "@/components/ui-kit/primitives";
@@ -11,6 +10,7 @@ import { useQueryResult } from "@/lib/host-data";
 import { canReadRequests } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { FootNote } from "./server-ui";
 import { useServerRef } from "./use-server";
 

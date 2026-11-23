@@ -1,8 +1,6 @@
 "use client";
 
 import { ChevronRightIcon, PlusIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Monogram } from "@/components/icons/service-icons";
 import {
@@ -34,6 +32,8 @@ import {
 	treeStatus,
 } from "@/lib/navigation-tree";
 import { usePermissions } from "@/lib/permissions";
+import { usePathname } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 // The organization's projects as a tree: a project opens to its services,

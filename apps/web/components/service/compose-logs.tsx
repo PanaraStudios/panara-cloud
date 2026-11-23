@@ -1,9 +1,6 @@
 "use client";
 
 import { ArrowRightIcon } from "lucide-react";
-import dynamic from "next/dynamic";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useServiceContainers } from "@/components/dashboard/docker/logs/use-service-containers";
 import {
@@ -16,6 +13,9 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { SOURCE_SECTION, serviceUrl } from "@/lib/navigation";
+import { useSearchParams } from "@/lib/router";
+import dynamic from "@/lib/router/dynamic";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import { composeServices, useComposeFile } from "./compose-overview";
 import { HostUnreachable, LogsSkeleton, NoLogsYet, ServiceLogs } from "./logs";

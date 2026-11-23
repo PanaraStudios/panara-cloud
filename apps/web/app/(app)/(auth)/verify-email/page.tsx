@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { VerifyEmail } from "@/components/auth/verify-email";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Verify your email" };
 

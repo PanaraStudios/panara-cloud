@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { ApiKeysPage } from "@/components/settings/api-keys-page";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "API keys" };
 

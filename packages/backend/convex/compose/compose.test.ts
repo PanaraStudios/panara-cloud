@@ -260,8 +260,8 @@ describe("compose CRUD and authorization", () => {
 			}),
 		).rejects.toThrow(/Invalid compose path/);
 		await expect(
-			s.alice.mutation(api.compose.crud.update, { composeId, randomize: true }),
-		).rejects.toThrow(/suffix/);
+			s.alice.mutation(api.compose.crud.update, { composeId, suffix: "a b" }),
+		).rejects.toThrow(/suffix/i);
 		await s.alice.mutation(api.compose.crud.update, {
 			composeId,
 			randomize: true,
@@ -852,5 +852,77 @@ content = "<host>\${main_domain}</host>"
 			owner: { kind: "compose", id: composeId },
 		});
 		expect(domains.map((d) => d.serviceName)).toEqual(["plausible"]);
+	});
+
+	test("importTemplate stores the values the preview showed", async () => {
+		const s = await seed();
+		const composeId = await createCompose(s);
+		const base64 = btoa(
+			JSON.stringify({
+				compose: "services:\n  plausible:\n    image: plausible\n",
+				config: TOML,
+			}),
+		);
+		const preview = await s.alice.action(
+			api.compose.templates.processTemplate,
+			{ composeId, base64 },
+		);
+		await s.alice.action(api.compose.templates.importTemplate, {
+			composeId,
+			base64,
+			previewed: { compose: preview.compose, ...preview.template },
+		});
+		expect(await s.alice.query(api.compose.crud.getEnv, { composeId })).toBe(
+			preview.template.envs.join("\n"),
+		);
+		await expect(
+			s.mallory.action(api.compose.templates.importTemplate, {
+				composeId,
+				base64,
+				previewed: { compose: preview.compose, ...preview.template },
+			}),
+		).rejects.toThrow(/Not a member/);
+	});
+
+	test("a project import stores the values its preview showed", async () => {
+		// Projects → Import: preview for the typed app name, create the
+		// service, then import what the review showed.
+		const s = await seed();
+		const base64 = btoa(
+			JSON.stringify({
+				compose: "services:\n  plausible:\n    image: plausible\n",
+				config: TOML,
+			}),
+		);
+		const preview = await s.alice.action(api.platform.templatesSync.preview, {
+			organizationId: "org1",
+			appName: "shop-plausible",
+			base64,
+		});
+		const composeId = await s.alice.mutation(api.compose.crud.create, {
+			environmentId: s.environmentId,
+			name: "Plausible",
+			appName: "shop-plausible",
+			composeType: "docker-compose",
+		});
+		await s.alice.action(api.compose.templates.importTemplate, {
+			composeId,
+			base64,
+			previewed: {
+				compose: preview.composeFile,
+				envs: preview.envs,
+				domains: preview.domains,
+				mounts: preview.mounts,
+			},
+		});
+		const env = await s.alice.query(api.compose.crud.getEnv, { composeId });
+		expect(env).toBe(preview.envs.join("\n"));
+		expect(env).toMatch(/^SECRET=.{16}$/m);
+		const domains = await s.alice.query(api.infra.domains.listByOwner, {
+			owner: { kind: "compose", id: composeId },
+		});
+		expect(domains.map((d) => d.host)).toEqual(
+			preview.domains.map((d) => d.host),
+		);
 	});
 });

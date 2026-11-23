@@ -4,11 +4,9 @@ import type { RoutingDomain } from "../infra/traefik";
 import {
 	composeEnvPairs,
 	composeLayout,
-	deployCommand,
 	envFileContent,
 	sanitizeCommand,
 	shellEnvContent,
-	startCommand,
 } from "./command";
 import {
 	addSuffixToAllProperties,
@@ -156,6 +154,65 @@ describe("randomize (collision suffixing)", () => {
 			"other_config-x1",
 		]);
 		expect(Object.keys(spec.secrets as object)).toEqual(["token-x1"]);
+	});
+
+	test("a domain saved before Randomize names was switched still routes", () => {
+		const labelsOf = (
+			spec: ReturnType<typeof resolveComposeSpec>,
+			name: string,
+		) => JSON.stringify(spec.services?.[name]?.labels ?? []);
+		// Saved as `web`, deployed randomized: follows to `web-1a2b3c4d`.
+		const on = resolveComposeSpec(
+			parseCompose(FIXTURE),
+			input({ randomize: true, suffix: "1a2b3c4d", domains: [domain()] }),
+		);
+		expect(labelsOf(on, "web-1a2b3c4d")).toContain("Host(`app.example.com`)");
+		// Saved as `web-1a2b3c4d`, randomize switched off again: follows back.
+		const off = resolveComposeSpec(
+			parseCompose(FIXTURE),
+			input({
+				randomize: false,
+				suffix: "1a2b3c4d",
+				domains: [domain({ serviceName: "web-1a2b3c4d" })],
+			}),
+		);
+		expect(labelsOf(off, "web")).toContain("Host(`app.example.com`)");
+		// A service that exists under neither name still fails clearly.
+		expect(() =>
+			resolveComposeSpec(
+				parseCompose(FIXTURE),
+				input({ domains: [domain({ serviceName: "nope" })] }),
+			),
+		).toThrow(/does not exist/);
+	});
+
+	test("a removed service is never mistaken for another one", () => {
+		// The user's own suffix `api`, randomize off, `worker-api` removed from
+		// the file: the domain must not move to `worker`.
+		expect(() =>
+			resolveComposeSpec(
+				parseCompose(FIXTURE),
+				input({
+					randomize: false,
+					suffix: "api",
+					domains: [domain({ serviceName: "worker-api" })],
+				}),
+			),
+		).toThrow(/"worker-api" which does not exist/);
+		// Isolated deployments keep plain names: a domain saved while the
+		// suffix applied goes back to the plain service.
+		const isolated = resolveComposeSpec(
+			parseCompose(FIXTURE),
+			input({
+				randomize: true,
+				suffix: "1a2b3c4d",
+				isolatedDeployment: true,
+				domains: [domain({ serviceName: "web-1a2b3c4d" })],
+			}),
+		);
+		expect(JSON.stringify(isolated.services?.web?.labels)).toContain(
+			"Host(`app.example.com`)",
+		);
 	});
 
 	test("listServices reflects randomization but not isolation", () => {
@@ -405,47 +462,6 @@ describe("commands and files", () => {
 		expect(() =>
 			composeLayout({ appName: "../x", sourceType: "raw", composePath: "" }),
 		).toThrow(/Invalid appName/);
-	});
-
-	test("deploy and start commands", () => {
-		const layout = composeLayout({
-			appName: "shop-abc123",
-			sourceType: "git",
-			composePath: "deploy/compose.yml",
-		});
-		expect(deployCommand(commandInput, layout)).toBe(
-			"compose -p shop-abc123 --env-file deploy/.env -f deploy/compose.yml up -d --build --remove-orphans",
-		);
-		expect(
-			deployCommand(
-				{
-					...commandInput,
-					hasMounts: true,
-					pullImages: true,
-					createEnvFile: false,
-				},
-				layout,
-			),
-		).toBe(
-			"compose -p shop-abc123 --project-directory /etc/panara-cloud/compose/shop-abc123/code -f deploy/compose.yml up -d --build --remove-orphans --pull always",
-		);
-		expect(
-			deployCommand({ ...commandInput, composeType: "stack" }, layout),
-		).toBe(
-			"stack deploy -c deploy/compose.yml shop-abc123 --prune --with-registry-auth",
-		);
-		expect(startCommand(commandInput, layout)).toBe(
-			"compose -p shop-abc123 --env-file deploy/.env -f deploy/compose.yml up -d",
-		);
-		expect(
-			deployCommand(
-				{
-					...commandInput,
-					command: 'compose -p x "up" -d && docker compose -p x ps',
-				},
-				layout,
-			),
-		).toBe("compose -p x up -d && docker compose -p x ps");
 	});
 
 	test("a custom command written like the default the panel shows runs once through docker", () => {

@@ -280,6 +280,14 @@ describe("deployCompose", () => {
 			label: "fake",
 			exec: async (command: string, options?: ExecOptions) => {
 				commands.push(command, options?.input ?? "");
+				if (command.includes(" config --no-env-resolution")) {
+					return {
+						code: 0,
+						output: JSON.stringify({
+							services: { a: { image: "alpine", privileged: true } },
+						}),
+					};
+				}
 				return {
 					code: 0,
 					output: command.includes("realpath") ? yaml : "",

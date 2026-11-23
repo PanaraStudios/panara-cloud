@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { startTransition, useEffect } from "react";
+import { useRouter } from "@/lib/router";
 
 export type ErrorBoundaryProps = {
 	error: Error & { digest?: string };

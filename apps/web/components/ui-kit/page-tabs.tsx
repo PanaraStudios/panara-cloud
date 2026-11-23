@@ -1,8 +1,6 @@
 "use client";
 
 import { CheckIcon, ChevronDownIcon, type LucideIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useLayoutEffect, useRef, useState } from "react";
 import {
 	DropdownMenu,
@@ -13,6 +11,8 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useShortcut } from "@/lib/dashboard/use-shortcut";
 import { activeTab } from "@/lib/navigation";
+import { usePathname, useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 export type PageTab = {

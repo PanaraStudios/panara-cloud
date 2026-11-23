@@ -4,7 +4,6 @@ import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/stand
 import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -31,6 +30,7 @@ import { errorMessage } from "@/lib/auth/errors";
 import { useQueryResult } from "@/lib/host-data";
 import { LOCAL_SERVER_ID, serverUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
+import Link from "@/lib/router/link";
 import {
 	FormActions,
 	FormNote,

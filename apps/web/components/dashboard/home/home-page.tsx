@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
 	SETUP_URL,
 	usePanelSetupStatus,
 } from "@/components/dashboard/setup/use-panel-setup";
 import { ProjectsList } from "@/components/project-pages/projects-list";
+import { useRouter } from "@/lib/router";
 
 // The org home: the projects list. On a fresh installation the instance
 // administrator starts on the panel setup instead, until they finish or

@@ -1,11 +1,8 @@
-import { redirect } from "next/navigation";
-import { param, type SearchParams } from "@/lib/redirects/old-routes";
+import { param } from "@/lib/redirects/old-routes";
+import { redirect, useSearchParams } from "@/lib/router";
 
-export default async function Page({
-	searchParams,
-}: {
-	searchParams: SearchParams;
-}) {
-	const tab = await param(searchParams, "tab");
+export default function Page() {
+	const searchParams = useSearchParams();
+	const tab = param(searchParams, "tab");
 	redirect(tab === "deployments" ? "/activity/deployments" : "/");
 }

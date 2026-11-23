@@ -14,8 +14,6 @@ export type LogoProps = {
 	theme?: LogoTheme;
 };
 
-export const BRAND_VIOLET = "#623E96";
-
 const themeClass = {
 	auto: "text-foreground",
 	// A lighter tint on dark pages, where the violet itself is too dim.

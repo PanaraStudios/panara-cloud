@@ -2,6 +2,7 @@
 
 import { api } from "@panara-cloud/backend/api";
 import { useMutation } from "convex/react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
 	composeIdOf,
@@ -9,6 +10,7 @@ import {
 } from "@/components/dashboard/compose/use-compose";
 import { FilterPills } from "@/components/service/filter-pills";
 import { Label } from "@/components/ui/label";
+import { ConfirmDialog } from "@/components/ui-kit/primitives";
 import { errorMessage } from "@/lib/auth/errors";
 import { usePermissions } from "@/lib/permissions";
 import { SettingsBlock } from "../chrome";
@@ -21,6 +23,12 @@ export function ComposeStack({ id }: { id: string }) {
 	const canEdit = usePermissions().service.create;
 	const compose = useCompose(id);
 	const update = useMutation(api.compose.crud.update);
+	// A change the backend refused because it renames the deployed volumes,
+	// waiting for the user to confirm it.
+	const [rename, setRename] = useState<{
+		fields: Parameters<typeof update>[0];
+		message: string;
+	} | null>(null);
 	if (!compose) return null;
 
 	const composeId = composeIdOf(id);
@@ -28,7 +36,12 @@ export function ComposeStack({ id }: { id: string }) {
 		try {
 			await update(fields);
 		} catch (error) {
-			toast.error(errorMessage(error));
+			const message = errorMessage(error);
+			if (message.includes("renames the stack's volumes")) {
+				setRename({ fields, message });
+			} else {
+				toast.error(message);
+			}
 		}
 	};
 
@@ -70,6 +83,20 @@ export function ComposeStack({ id }: { id: string }) {
 					onCheckedChange={(randomize) => patch({ composeId, randomize })}
 				/>
 			</div>
+			<ConfirmDialog
+				open={rename !== null}
+				onOpenChange={(open) => {
+					if (!open) setRename(null);
+				}}
+				title="Rename the volumes?"
+				description={rename?.message ?? ""}
+				confirmLabel="Rename volumes"
+				onConfirm={async () => {
+					if (!rename) return;
+					await update({ ...rename.fields, confirmVolumeRename: true });
+					setRename(null);
+				}}
+			/>
 		</SettingsBlock>
 	);
 }

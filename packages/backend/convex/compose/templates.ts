@@ -264,28 +264,56 @@ export const applyTemplate = internalMutation({
 	},
 });
 
+const MAX_IMPORTED_ENV = 256 * 1024;
+
 // Imports a template: replaces an existing compose service's file,
 // env, domains and file mounts with a base64 `{ compose, config }` template.
+// With `previewed` (what processTemplate returned and the user reviewed) it
+// stores exactly that, so the generated passwords shown are the ones used;
+// without it the values are generated here. Either way the caller may only
+// set what it could set by editing the service.
 export const importTemplate = action({
-	args: { composeId: v.id("compose"), base64: v.string() },
-	handler: async (ctx, { composeId, base64 }): Promise<null> => {
+	args: {
+		composeId: v.id("compose"),
+		base64: v.string(),
+		previewed: v.optional(
+			v.object({
+				compose: v.string(),
+				envs: v.array(v.string()),
+				domains: v.array(templateDomain),
+				mounts: v.array(templateMount),
+			}),
+		),
+	},
+	handler: async (ctx, { composeId, base64, previewed }): Promise<null> => {
 		const target = await ctx.runQuery(
 			internal.compose.templates.composeContext,
 			{ composeId },
 		);
-		const prepared = await ctx.runAction(
-			internal.platform.templatesSync.prepareCustomTemplate,
-			{
-				organizationId: target.organizationId,
-				base64,
-				appName: target.appName,
-				serverId: target.serverId,
-			},
-		);
+		const prepared = previewed
+			? {
+					composeFile: previewed.compose,
+					envs: previewed.envs,
+					domains: previewed.domains,
+					mounts: previewed.mounts,
+				}
+			: await ctx.runAction(
+					internal.platform.templatesSync.prepareCustomTemplate,
+					{
+						organizationId: target.organizationId,
+						base64,
+						appName: target.appName,
+						serverId: target.serverId,
+					},
+				);
+		const env = prepared.envs.join("\n");
+		if (env.length > MAX_IMPORTED_ENV) {
+			throw new ConvexError("Environment is too large");
+		}
 		await ctx.runMutation(internal.compose.templates.applyTemplate, {
 			composeId,
 			composeFile: prepared.composeFile,
-			env: await encryptSecret(prepared.envs.join("\n")),
+			env: await encryptSecret(env),
 			domains: prepared.domains,
 			mounts: prepared.mounts,
 		});

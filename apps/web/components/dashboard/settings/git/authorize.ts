@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { errorMessage } from "@/lib/auth/errors";
+import { useRouter } from "@/lib/router";
 
 // Authorizing happens on the provider's own site. This tab goes there: a tab
 // opened once the URL has arrived is what popup blockers swallow.

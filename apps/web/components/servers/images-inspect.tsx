@@ -10,8 +10,6 @@ import {
 	SlidersHorizontalIcon,
 	Trash2Icon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -26,6 +24,8 @@ import { errorMessage } from "@/lib/auth/errors";
 import { useDockerInspectQuery, waitForJob } from "@/lib/host-data";
 import { serverUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { containerStatus } from "./containers-data";
 import { containerHref } from "./containers-list";
 import { splitReference, useServerImages } from "./images-data";

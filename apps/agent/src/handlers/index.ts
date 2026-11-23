@@ -25,6 +25,10 @@ const handlers: HandlerMap = {
 	...liveHandlers,
 };
 
-export const capabilities = Object.keys(handlers);
+// The job kinds this agent runs, and what it does differently from older
+// agents that the panel must know: "compose.snapshots" says a trusted
+// compose Start runs the last deploy's snapshot, never the service folder's
+// file (packages/backend/convex/compose/agent.ts).
+export const capabilities = [...Object.keys(handlers), "compose.snapshots"];
 
 export const handlerFor = (kind: JobKind): Handler => handlers[kind];

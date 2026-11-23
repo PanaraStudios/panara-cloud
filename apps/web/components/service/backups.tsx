@@ -11,7 +11,6 @@ import {
 	HistoryIcon,
 	Trash2Icon,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ShowVolumeBackups } from "@/components/dashboard/application/volume-backups/show-volume-backups";
@@ -38,6 +37,7 @@ import {
 } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import {

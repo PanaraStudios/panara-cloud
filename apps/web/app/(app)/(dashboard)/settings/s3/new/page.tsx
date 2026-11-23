@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { HandleDestinations } from "@/components/dashboard/settings/destination/handle-destinations";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Add destination" };
 

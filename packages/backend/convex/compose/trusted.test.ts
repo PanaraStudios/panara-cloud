@@ -79,6 +79,82 @@ describe("compose deploys carry the trusted flag only for the instance admin", (
 		expect(context?.trusted).toBe(true);
 	});
 
+	test("a start carries the same trust as a deploy, decided when it runs", async () => {
+		const { t } = await seed();
+		const composeId = await createCompose(t, "admin", "org1");
+		await t.run((ctx) =>
+			ctx.db.patch("compose", composeId, { status: "done" }),
+		);
+		const start = await asUser(t, "admin").mutation(api.compose.deploy.start, {
+			composeId,
+		});
+		// Decided when the agent reads the job: the stored spec keeps the
+		// shape older releases accept.
+		expect(await specOf(t, start)).toEqual({
+			kind: "compose.start",
+			composeId,
+		});
+		const agentId = await addAgent(t);
+		const agent = asAgent(t, agentId);
+		await agent.mutation(api.agent.hello, {
+			version: "0.1.7",
+			capabilities: ["compose.start", "compose.snapshots"],
+		});
+		const claim = await agent.mutation(api.agent.claimNext, {});
+		const context = await agent.query(api.compose.agent.getContext, {
+			jobId: claim?.jobId as Id<"jobs">,
+			leaseId: claim?.leaseId as string,
+		});
+		expect(context?.trusted).toBe(true);
+	});
+
+	test("an older agent, which would start from the service's folder, is never told a start is trusted", async () => {
+		const { t } = await seed();
+		const composeId = await createCompose(t, "admin", "org1");
+		await t.run((ctx) =>
+			ctx.db.patch("compose", composeId, { status: "done" }),
+		);
+		await asUser(t, "admin").mutation(api.compose.deploy.start, {
+			composeId,
+		});
+		const agent = asAgent(t, await addAgent(t));
+		await agent.mutation(api.agent.hello, {
+			version: "0.1.6",
+			capabilities: ["compose.start"],
+		});
+		const claim = await agent.mutation(api.agent.claimNext, {});
+		const context = await agent.query(api.compose.agent.getContext, {
+			jobId: claim?.jobId as Id<"jobs">,
+			leaseId: claim?.leaseId as string,
+		});
+		expect(context?.trusted).toBe(false);
+	});
+
+	test("a member's start is not trusted", async () => {
+		const { t } = await seed();
+		const composeId = await createCompose(t, "admin", "org1");
+		await grantMember(t, "org1", "bob", { services: [composeId] });
+		await t.run((ctx) =>
+			ctx.db.patch("compose", composeId, { status: "done" }),
+		);
+		const start = await asUser(t, "bob").mutation(api.compose.deploy.start, {
+			composeId,
+		});
+		expect(await specOf(t, start)).not.toHaveProperty("trusted");
+		const agent = asAgent(t, await addAgent(t));
+		await agent.mutation(api.agent.hello, {
+			version: "0.1.7",
+			capabilities: ["compose.start", "compose.snapshots"],
+		});
+		const claim = await agent.mutation(api.agent.claimNext, {});
+		expect(claim?.jobId).toBe(start);
+		const context = await agent.query(api.compose.agent.getContext, {
+			jobId: claim?.jobId as Id<"jobs">,
+			leaseId: claim?.leaseId as string,
+		});
+		expect(context?.trusted).toBe(false);
+	});
+
 	test("root organization members are not trusted", async () => {
 		const { t } = await seed();
 		const composeId = await createCompose(t, "admin", "org1");

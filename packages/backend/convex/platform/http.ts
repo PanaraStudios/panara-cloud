@@ -1,8 +1,12 @@
 import type { HttpRouter } from "convex/server";
+import catalogJson from "../../api/catalog.json";
 import { internal } from "../_generated/api";
 import { type ActionCtx, httpAction } from "../_generated/server";
-import { jsonError, requireApiKey } from "./lib/apiAuth";
+import { CLIENT_IP_HEADER, PROXY_SECRET_HEADER } from "../authLimits";
+import { jsonError, requireApiKey, whoAmI } from "./lib/apiAuth";
 import { CALL_PREFIX, handleApiCall } from "./lib/apiGateway";
+import { type Catalog, mcpTools, toolName } from "./lib/apiSpec";
+import { type ApiResult, handleMcp, type McpBackend } from "./lib/mcp";
 
 const API_PREFIX = "/api/v1";
 
@@ -19,6 +23,58 @@ const apiRoute = (
 	});
 const DEFAULT_PAGE_SIZE = 100;
 
+const catalog = catalogJson as Catalog;
+const functionByTool = new Map(
+	catalog.functions.map((fn) => [toolName(fn.name), fn.name]),
+);
+
+const toResult = async (response: Response): Promise<ApiResult> => ({
+	status: response.status,
+	body: await response.json().catch(() => null),
+	retryAfter: response.headers.get("retry-after"),
+});
+
+// MCP tool calls go through the same handlers as the REST routes, with the
+// MCP request's API key and the client address the web server vouched for.
+const gatewayBackend = (ctx: ActionCtx, req: Request): McpBackend => {
+	const origin = new URL(req.url).origin;
+	const headers = (apiKey: string) => {
+		const out: Record<string, string> = { "x-api-key": apiKey };
+		for (const name of [PROXY_SECRET_HEADER, CLIENT_IP_HEADER]) {
+			const value = req.headers.get(name);
+			if (value) out[name] = value;
+		}
+		return out;
+	};
+	return {
+		whoAmI: async (apiKey) =>
+			toResult(
+				await whoAmI(
+					ctx,
+					new Request(`${origin}${API_PREFIX}/me`, {
+						headers: headers(apiKey),
+					}),
+				),
+			),
+		call: async (apiKey, name, args) =>
+			toResult(
+				await handleApiCall(
+					ctx,
+					new Request(`${origin}${CALL_PREFIX}${encodeURIComponent(name)}`, {
+						method: "POST",
+						headers: {
+							...headers(apiKey),
+							"content-type": "application/json",
+						},
+						body: JSON.stringify(args),
+					}),
+				),
+			),
+		tools: (groups) => mcpTools(catalog, groups),
+		functionForTool: (tool) => functionByTool.get(tool),
+	};
+};
+
 export const registerPlatformRoutes = (http: HttpRouter) => {
 	for (const method of ["GET", "POST"] as const) {
 		http.route({
@@ -31,19 +87,20 @@ export const registerPlatformRoutes = (http: HttpRouter) => {
 	http.route({
 		path: `${API_PREFIX}/me`,
 		method: "GET",
-		handler: apiRoute(async (ctx, req) => {
-			try {
-				const principal = await requireApiKey(ctx, req);
-				return Response.json({
-					userId: principal.userId,
-					organizationId: principal.organizationId,
-					role: principal.role,
-				});
-			} catch (error) {
-				return jsonError(error);
-			}
-		}),
+		handler: apiRoute((ctx, req) => whoAmI(ctx, req)),
 	});
+
+	// The web server proxies the panel's /api/mcp here, as it does
+	// /api/v1/*; the MCP server used to run in the web app's Node server.
+	for (const method of ["POST", "GET", "DELETE"] as const) {
+		http.route({
+			path: "/api/mcp",
+			method,
+			handler: httpAction((ctx, req) =>
+				handleMcp(req, gatewayBackend(ctx, req)),
+			),
+		});
+	}
 
 	http.route({
 		path: `${API_PREFIX}/projects`,

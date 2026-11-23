@@ -3,7 +3,6 @@
 import { api } from "@panara-cloud/backend/api";
 import { useMutation } from "convex/react";
 import { ArrowRightIcon } from "lucide-react";
-import Link from "next/link";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { errorMessage } from "@/lib/auth/errors";
+import Link from "@/lib/router/link";
 
 /** The quick "Add domain" dialog: host, port, HTTPS. Everything else (path,
     certificates, middlewares) lives on the full domain page. */

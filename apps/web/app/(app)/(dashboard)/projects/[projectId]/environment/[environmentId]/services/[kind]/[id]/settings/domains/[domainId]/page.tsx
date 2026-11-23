@@ -1,13 +1,10 @@
-import type { Metadata } from "next";
 import { SettingsSubPage } from "@/components/service-settings/sub-page";
+import type { Metadata } from "@/lib/router";
+import { useParams } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Settings" };
 
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ domainId: string }>;
-}) {
-	const { domainId } = await params;
+export default function Page() {
+	const { domainId } = useParams<{ domainId: string }>();
 	return <SettingsSubPage list="domains" itemId={domainId} />;
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { BellIcon } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
 	DropdownMenu,
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { authClient, authResult } from "@/lib/auth/client";
+import Link from "@/lib/router/link";
 
 export type PendingInvitation = {
 	id: string;

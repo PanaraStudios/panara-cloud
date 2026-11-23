@@ -118,7 +118,7 @@ cannot call.
 |---|---|---|
 | Backend | `packages/backend` | Self-hosted [Convex](https://convex.dev): data, auth (Better Auth), permissions, job queue, email |
 | Agent | `apps/agent` | Node process that runs jobs on servers over Docker and SSH, and serves live logs, terminals and stats |
-| Web | `apps/web` | Next.js app (App Router) |
+| Web | `apps/web` | React app built with Vite into static files, served with the panel's `/api` routes by a small Rust server (`apps/web/server`) |
 | Monitoring | `apps/monitoring` | Go metrics collector |
 
 ## Development

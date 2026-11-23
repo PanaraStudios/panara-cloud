@@ -5,7 +5,6 @@ import { api } from "@panara-cloud/backend/api";
 import { useMutation } from "convex/react";
 import copy from "copy-to-clipboard";
 import { Copy } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -30,6 +29,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
 import { FormSection } from "../../application/form-kit";
 import { composeIdOf, useCompose } from "../use-compose";
 

@@ -4,7 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useAction, useQuery } from "convex/react";
 import { ArrowUpRightIcon, KeyRoundIcon } from "lucide-react";
-import Link from "next/link";
 import { useId } from "react";
 import { FormError } from "@/components/dashboard/application/form-kit";
 import { SwitchRow } from "@/components/service-settings/sections/kit";
@@ -19,6 +18,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useOrganization } from "@/lib/organization";
+import Link from "@/lib/router/link";
 import {
 	type AutoDeployMode,
 	type GitDraft,

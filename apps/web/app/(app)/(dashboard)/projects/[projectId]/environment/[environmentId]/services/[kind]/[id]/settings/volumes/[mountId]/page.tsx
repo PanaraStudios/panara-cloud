@@ -1,15 +1,12 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { MountEditorPage } from "@/components/service-settings/mount-editor";
+import type { Metadata } from "@/lib/router";
+import { useParams } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Edit mount" };
 
-export default async function Page({
-	params,
-}: {
-	params: Promise<{ mountId: string }>;
-}) {
-	const { mountId } = await params;
+export default function Page() {
+	const { mountId } = useParams<{ mountId: string }>();
 	return (
 		<Suspense>
 			<MountEditorPage mountId={mountId} />

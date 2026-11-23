@@ -1,8 +1,6 @@
 "use client";
 
 import { CheckIcon, ChevronDownIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { EnvironmentMenu } from "@/components/project-pages/environment-switcher";
 import { LOCAL_SERVER_NAME } from "@/components/servers/use-server";
 import { ServiceIcon } from "@/components/service/service-icon";
@@ -33,6 +31,8 @@ import {
 } from "@/lib/navigation-tree";
 import { nameMark, type OptionNames } from "@/lib/option-icons";
 import { useIsInstanceAdmin } from "@/lib/organization";
+import { usePathname } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 // Where a page under a project, a service or a server is: one line above its

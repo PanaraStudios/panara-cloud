@@ -3,12 +3,11 @@
 import { api } from "@panara-cloud/backend/api";
 import { useQuery } from "convex/react";
 import { ShieldIcon } from "lucide-react";
-
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Section } from "@/components/ui-kit/primitives";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
 import { ShowUsers } from "./show-users";
 
 // Users and invitations page, with the fixed roles (there are no custom

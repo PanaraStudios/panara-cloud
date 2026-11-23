@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
-import { notFound, useParams, usePathname } from "next/navigation";
 import {
 	SettingsLayout,
 	SettingsPane,
@@ -12,6 +11,7 @@ import {
 	serverUrl,
 } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import { notFound, useParams, usePathname } from "@/lib/router";
 import { cn } from "@/lib/utils";
 import { ConnectionSettings } from "./settings-connection";
 import { DockerSettings, GpuSettings } from "./settings-docker";

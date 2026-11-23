@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/lib/router";
 
 export default function Page() {
 	redirect("/settings/s3");

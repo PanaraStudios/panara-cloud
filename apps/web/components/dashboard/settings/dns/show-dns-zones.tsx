@@ -4,7 +4,6 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useQuery } from "convex/react";
 import { Globe } from "lucide-react";
-import Link from "next/link";
 import { FormError, ListLoading } from "@/components/settings/form-kit";
 import { TableCell, TableRow } from "@/components/ui/table";
 import {
@@ -13,6 +12,7 @@ import {
 	ResourceTable,
 	Th,
 } from "@/components/ui-kit/primitives";
+import Link from "@/lib/router/link";
 import { useActionQuery } from "./use-action-query";
 
 interface Props {

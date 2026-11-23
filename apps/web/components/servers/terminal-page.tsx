@@ -7,8 +7,6 @@ import {
 	SquareTerminalIcon,
 	UserCogIcon,
 } from "lucide-react";
-import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -32,6 +30,8 @@ import { Label } from "@/components/ui/label";
 import { EmptyState, MoreMenu } from "@/components/ui-kit/primitives";
 import { serverUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import dynamic from "@/lib/router/dynamic";
+import Link from "@/lib/router/link";
 import { DarkWell, FootNote, StatusText } from "./server-ui";
 import { useServerRef } from "./use-server";
 

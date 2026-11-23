@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { MonitoringSettingsPage } from "@/components/servers/monitoring-setup";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Monitoring settings" };
 

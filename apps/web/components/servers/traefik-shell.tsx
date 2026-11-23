@@ -9,7 +9,6 @@ import {
 	RotateCwIcon,
 	ScrollTextIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -31,6 +30,7 @@ import { errorMessage } from "@/lib/auth/errors";
 import { useQueryResult, useSnapshot } from "@/lib/host-data";
 import { serverUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { LinkTabs, StatusText } from "./server-ui";
 import { useServerRef } from "./use-server";
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { GaugeIcon, Loader2Icon } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useServiceContainers } from "@/components/dashboard/docker/logs/use-service-containers";
 import { ContainerFreeMonitoring } from "@/components/dashboard/monitoring/free/container/show-free-container-monitoring";
@@ -22,6 +21,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui-kit/primitives";
 import { serverUrl } from "@/lib/navigation";
+import Link from "@/lib/router/link";
 import { serviceStatusWord } from "@/lib/service-actions";
 import { cn } from "@/lib/utils";
 import { FilterPills } from "./filter-pills";

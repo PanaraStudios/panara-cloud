@@ -4,12 +4,12 @@ import { api } from "@panara-cloud/backend/api";
 import type { Id } from "@panara-cloud/backend/dataModel";
 import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BadgeTone } from "@/components/ui-kit/primitives";
 import { deploymentUrl, serviceUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
 import type { ServiceInfo } from "./service-context";
 
 export type DeploymentRow = FunctionReturnType<

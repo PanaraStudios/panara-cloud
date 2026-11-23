@@ -21,8 +21,6 @@ import {
 	Undo2Icon,
 	WebhookIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ShowRollbackSettings } from "@/components/dashboard/application/rollbacks/show-rollback-settings";
@@ -73,6 +71,8 @@ import { errorMessage } from "@/lib/auth/errors";
 import { deploymentUrl, serviceUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { type ServiceInfo, sourceKind, useService } from "./service-context";

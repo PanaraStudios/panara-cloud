@@ -16,7 +16,6 @@ import {
 	MemoryStickIcon,
 	SlidersHorizontalIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ContainerFreeMonitoring } from "@/components/dashboard/monitoring/free/container/show-free-container-monitoring";
@@ -50,6 +49,7 @@ import {
 import { serverUrl } from "@/lib/navigation";
 import { useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import {
 	busiestRate,
 	cpuSummary,

@@ -1,5 +1,3 @@
-export const NEXT_PATH_HEADER = "x-panara-path";
-
 const BASE = "http://panara-cloud.invalid";
 
 // Only same-origin paths: `next` comes from the query string. Browsers drop

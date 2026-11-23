@@ -10,8 +10,6 @@ import {
 	RefreshCwIcon,
 	RotateCwIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ShowBackups } from "@/components/dashboard/database/backups/show-backups";
@@ -55,6 +53,8 @@ import { useCurrentUser } from "@/lib/current-user";
 import { GENERAL_SECTION_URLS } from "@/lib/navigation";
 import { useIsInstanceAdmin, useOrganization } from "@/lib/organization";
 import { usePermissions } from "@/lib/permissions";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router/link";
 import {
 	FieldGrid,
 	FormSection,

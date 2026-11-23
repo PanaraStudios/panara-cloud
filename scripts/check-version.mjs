@@ -42,6 +42,16 @@ for (const path of [
 	}
 }
 
+// The web server's crate carries the release version too.
+const crate = /^version = "([^"]+)"/m.exec(
+	read("apps/web/server/Cargo.toml"),
+)?.[1];
+if (crate !== version) {
+	problems.push(
+		`apps/web/server/Cargo.toml: version is ${crate}, package.json says ${version}`,
+	);
+}
+
 // CHANGELOG.md: the newest release heading is the last release made. With
 // changes waiting under "Unreleased", the version must already be the next
 // one, so a channel build is labelled with the release it leads to.

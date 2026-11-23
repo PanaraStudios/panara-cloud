@@ -7,7 +7,6 @@ import {
 	SearchCodeIcon,
 	SquareTerminalIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ImageMark } from "@/components/icons/server-icons";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -23,6 +22,7 @@ import {
 } from "@/components/ui-kit/primitives";
 import { serverUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 import {
 	type ContainerRow,

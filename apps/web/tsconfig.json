@@ -12,11 +12,11 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"jsx": "react-jsx",
-		"incremental": true,
-		"plugins": [{ "name": "next" }],
+		"allowImportingTsExtensions": true,
+		"types": ["vite/client", "node"],
 		"paths": {
 			"@/*": ["./*"],
-			// Packages without a React peer (next, convex) could otherwise
+			// Packages without a React peer (convex) could otherwise
 			// resolve another @types/react through pnpm's hoisting. Point every
 			// import at this app's types.
 			"react": ["./node_modules/@types/react"],
@@ -25,15 +25,11 @@
 			"react-dom/*": ["./node_modules/@types/react-dom/*"]
 		}
 	},
-	"include": [
-		"next-env.d.ts",
-		"**/*.ts",
-		"**/*.tsx",
-		".next/types/**/*.ts",
-		".next/dev/types/**/*.ts"
-	],
+	"include": ["**/*.ts", "**/*.tsx"],
 	"exclude": [
 		"node_modules",
+		"dist",
+		"server",
 		"test-results",
 		"playwright-report",
 		"lib/**/*.test.ts"

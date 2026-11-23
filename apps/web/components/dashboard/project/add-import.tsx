@@ -52,6 +52,7 @@ import {
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
 import { slugify } from "@/lib/slug";
+import { previewedImport, type ReviewedTemplate } from "@/lib/template-import";
 import { APP_NAME_MESSAGE, APP_NAME_REGEX } from "@/utils/schema";
 
 const AddImportSchema = z.object({
@@ -65,20 +66,6 @@ const AddImportSchema = z.object({
 });
 
 type AddImport = z.infer<typeof AddImportSchema>;
-
-type TemplateInfo = {
-	compose: string;
-	template: {
-		domains: Array<{
-			serviceName: string;
-			port: number;
-			path?: string;
-			host?: string;
-		}>;
-		envs: string[];
-		mounts: Array<{ filePath: string; content: string }>;
-	};
-};
 
 interface Props {
 	environmentId: string;
@@ -98,7 +85,9 @@ export const AddImport = ({
 		filePath: string;
 		content: string;
 	} | null>(null);
-	const [templateInfo, setTemplateInfo] = useState<TemplateInfo | null>(null);
+	const [templateInfo, setTemplateInfo] = useState<ReviewedTemplate | null>(
+		null,
+	);
 
 	const slug = slugify(projectName);
 	const servers = useServerNames()?.filter(
@@ -175,6 +164,7 @@ export const AddImport = ({
 			await importCompose({
 				composeId,
 				base64: data.base64.trim(),
+				...previewedImport(templateInfo),
 			});
 			toast.success("Compose imported successfully");
 			resetAll();

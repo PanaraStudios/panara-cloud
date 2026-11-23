@@ -1,10 +1,10 @@
 "use client";
 
 import { ArrowRightIcon, CheckIcon, ListChecksIcon } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/ui-kit/primitives";
+import Link from "@/lib/router/link";
 import { usePanelSetup, usePanelSetupStatus } from "./use-panel-setup";
 
 const DISMISSED_KEY = "panara-cloud-setup-checklist-dismissed";

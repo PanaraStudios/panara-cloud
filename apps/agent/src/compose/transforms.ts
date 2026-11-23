@@ -430,20 +430,57 @@ export const applyDefaultRestartPolicy = (
 
 // Resolves the compose file to deploy: collision transforms, Traefik labels for
 // the domains, Panara Cloud labels and extra service networks. Returns a new spec.
+// Domains and service networks name a service as it was when they were
+// saved: switching "Randomize names" on or off afterwards renames it
+// (`web` <-> `web-<suffix>`). Follows that rename so the next deploy keeps
+// routing instead of failing, and only that: with randomize on, every
+// service carries the suffix, so a plain name can only mean its suffixed
+// one; with it off, only a generated suffix (8 hex digits) is taken back
+// off, so a service a user named `worker-api` is never read as `worker`.
+export const followSuffixRename = (
+	spec: ComposeSpec,
+	name: string | undefined,
+	input: Pick<ResolveInput, "randomize" | "suffix" | "isolatedDeployment">,
+): string | undefined => {
+	const services = spec.services ?? {};
+	const { suffix } = input;
+	if (!name || !suffix || name in services) return name;
+	if (input.randomize && !input.isolatedDeployment) {
+		return `${name}-${suffix}` in services ? `${name}-${suffix}` : name;
+	}
+	if (!/^[0-9a-f]{8}$/.test(suffix) || !name.endsWith(`-${suffix}`)) {
+		return name;
+	}
+	const plain = name.slice(0, -suffix.length - 1);
+	return plain in services ? plain : name;
+};
+
 export const resolveComposeSpec = (
 	source: ComposeSpec,
 	input: ResolveInput,
 ): ComposeSpec => {
 	const spec = applyCollisionTransforms(structuredClone(source), input);
+	const follow = (name: string | undefined) =>
+		followSuffixRename(spec, name, input);
 	addDomainsToCompose(spec, {
 		appName: input.appName,
 		composeType: input.composeType,
-		domains: input.domains,
+		domains: input.domains.map((domain) => ({
+			...domain,
+			serviceName: follow(domain.serviceName),
+		})),
 		isolatedNetwork: input.isolatedDeployment ? input.appName : undefined,
 	});
 	applyPanaraCloudLabels(spec, input);
 	applyDefaultRestartPolicy(spec, input.composeType);
-	applyServiceNetworks(spec, input.serviceNetworks, input.isolatedDeployment);
+	applyServiceNetworks(
+		spec,
+		input.serviceNetworks.map((config) => ({
+			...config,
+			serviceName: follow(config.serviceName) ?? config.serviceName,
+		})),
+		input.isolatedDeployment,
+	);
 	return spec;
 };
 

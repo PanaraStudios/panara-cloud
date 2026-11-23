@@ -1,10 +1,7 @@
-import { redirect } from "next/navigation";
-import { type SearchParams, serverIdFrom } from "@/lib/redirects/old-routes";
+import { serverIdFrom } from "@/lib/redirects/old-routes";
+import { redirect, useSearchParams } from "@/lib/router";
 
-export default async function Page({
-	searchParams,
-}: {
-	searchParams: SearchParams;
-}) {
-	redirect(`/servers/${await serverIdFrom(searchParams)}/monitoring`);
+export default function Page() {
+	const searchParams = useSearchParams();
+	redirect(`/servers/${serverIdFrom(searchParams)}/monitoring`);
 }

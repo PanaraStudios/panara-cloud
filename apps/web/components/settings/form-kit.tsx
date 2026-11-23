@@ -1,7 +1,6 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import Link from "next/link";
 import { createContext, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +11,7 @@ import {
 	toneDotClassName,
 } from "@/components/ui-kit/primitives";
 import { useActiveSection } from "@/components/ui-kit/settings-page";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 /** State in a table cell: a coloured dot, then the word at the row's size. */

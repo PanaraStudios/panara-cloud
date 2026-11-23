@@ -1,8 +1,6 @@
 "use client";
 
 import { ActivityIcon } from "lucide-react";
-import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAppContainers } from "@/components/dashboard/settings/web-server/host-containers";
 import {
@@ -13,6 +11,8 @@ import {
 } from "@/components/ui/select";
 import { EmptyState, PageHeader } from "@/components/ui-kit/primitives";
 import { type Permissions, usePermissions } from "@/lib/permissions";
+import { useSearchParams } from "@/lib/router";
+import dynamic from "@/lib/router/dynamic";
 import { containerStatus } from "./containers-data";
 import { StatusText } from "./server-ui";
 import { useServerRef } from "./use-server";

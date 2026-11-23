@@ -14,7 +14,6 @@ import {
 	RefreshCw,
 	RotateCcw,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -68,6 +67,7 @@ import {
 } from "@/components/ui/tooltip";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
 import { cn } from "@/lib/utils";
 import { type JobId, useJobStatus } from "../../shared/job-logs";
 import { type OpId, useBackupFiles } from "./use-backup-files";

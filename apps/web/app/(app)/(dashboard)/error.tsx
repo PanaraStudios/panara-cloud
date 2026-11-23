@@ -1,7 +1,6 @@
 "use client";
 
 import { CloudOffIcon } from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AccessDeniedState, EmptyState } from "@/components/ui-kit/primitives";
 import {
@@ -9,6 +8,7 @@ import {
 	useServerError,
 } from "@/hooks/use-server-error";
 import { deniedResource } from "@/lib/access-denied";
+import Link from "@/lib/router/link";
 
 export default function DashboardError(props: ErrorBoundaryProps) {
 	const retry = useServerError(props);

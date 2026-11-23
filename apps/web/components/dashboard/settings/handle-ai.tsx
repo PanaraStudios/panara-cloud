@@ -6,7 +6,6 @@ import type { Id } from "@panara-cloud/backend/dataModel";
 import { useAction, useQuery } from "convex/react";
 import type { FunctionArgs, FunctionReturnType } from "convex/server";
 import { Check, ChevronDown, PenBoxIcon, PlusIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -57,6 +56,7 @@ import {
 } from "@/components/ui-kit/form-shell";
 import { errorMessage } from "@/lib/auth/errors";
 import { useOrganization } from "@/lib/organization";
+import { useRouter } from "@/lib/router";
 import { cn } from "@/lib/utils";
 
 const AI_PROVIDERS = [

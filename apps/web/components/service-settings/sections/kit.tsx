@@ -1,10 +1,10 @@
 "use client";
 
 import { ArrowLeftIcon } from "lucide-react";
-import Link from "next/link";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import Link from "@/lib/router/link";
 import { cn } from "@/lib/utils";
 
 /** The row above a section's table: a count or a filter on the left, the

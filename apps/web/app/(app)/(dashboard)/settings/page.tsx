@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { SettingsHub } from "@/components/settings/settings-area";
+import type { Metadata } from "@/lib/router";
 
 export const metadata: Metadata = { title: "Settings" };
 

@@ -289,6 +289,108 @@ describe("compose removal", () => {
 		}
 	});
 
+	test("without volumes the data bind mounts wrote under the service's directory stays", async () => {
+		const { host, commands } = fakeHost();
+		await removeCompose(
+			host,
+			{
+				appName: "shop-abc123",
+				composeType: "docker-compose",
+				deleteVolumes: false,
+			},
+			log,
+		);
+		const script = commands.join("\n");
+		expect(script).not.toMatch(
+			/rm -rf \/etc\/panara-cloud\/compose\/shop-abc123( |$)/m,
+		);
+		expect(script).toContain(
+			"rm -f /etc/panara-cloud/compose/shop-abc123/code/.env",
+		);
+		expect(script).toContain(
+			"rm -f /etc/panara-cloud/compose/shop-abc123/code/docker-compose.yml",
+		);
+		expect(script).toContain(
+			"rm -rf /etc/panara-cloud/compose-state/shop-abc123",
+		);
+	});
+
+	// The agent's record of the last deploy's source, or (none recorded) what
+	// the `.git` check answers.
+	const sourceHost = (recorded: string | null, gitCheck = "raw") =>
+		fakeHost((command) =>
+			command.includes("compose-state/shop-abc123/source") &&
+			command.includes("cat <&3")
+				? recorded === null
+					? { code: 3, output: "" }
+					: { code: 0, output: recorded }
+				: command.includes("/code/.git")
+					? { code: 0, output: `${gitCheck}\n` }
+					: undefined,
+		);
+	const keepData = {
+		appName: "shop-abc123",
+		composeType: "docker-compose" as const,
+		deleteVolumes: false,
+	};
+	const removesCheckout = (commands: string[]) => {
+		const script = commands.join("\n");
+		expect(script).not.toMatch(
+			/rm -rf \/etc\/panara-cloud\/compose\/shop-abc123( |$)/m,
+		);
+		expect(script).not.toContain("shop-abc123/files");
+		return script.includes("rm -rf /etc/panara-cloud/compose/shop-abc123/code");
+	};
+
+	test("without volumes a git service loses its checkout (and any nested .env), not files/", async () => {
+		const { host, commands } = sourceHost("git\n");
+		await removeCompose(host, keepData, log);
+		expect(removesCheckout(commands)).toBe(true);
+		expect(commands.some((c) => c.includes("/code/.git"))).toBe(false);
+	});
+
+	test("without volumes a raw service keeps code/, whatever a container put there", async () => {
+		const { host, commands } = sourceHost("raw\n", "git");
+		await removeCompose(host, keepData, log);
+		expect(removesCheckout(commands)).toBe(false);
+		expect(commands.join("\n")).toContain(
+			"rm -f /etc/panara-cloud/compose/shop-abc123/code/.env",
+		);
+	});
+
+	test("with no record (an older agent deployed it), only a real .git folder makes it a checkout", async () => {
+		const git = sourceHost(null, "git");
+		await removeCompose(git.host, keepData, log);
+		expect(removesCheckout(git.commands)).toBe(true);
+		const check = git.commands.find((c) => c.includes("/code/.git")) ?? "";
+		expect(check).toContain(
+			"[ -d /etc/panara-cloud/compose/shop-abc123/code/.git ]",
+		);
+		expect(check).toContain(
+			"[ ! -L /etc/panara-cloud/compose/shop-abc123/code/.git ]",
+		);
+		const raw = sourceHost(null, "raw");
+		await removeCompose(raw.host, keepData, log);
+		expect(removesCheckout(raw.commands)).toBe(false);
+	});
+
+	test("with volumes the service's directory goes too", async () => {
+		const { host, commands } = projectHost();
+		await removeCompose(
+			host,
+			{
+				appName: "shop-abc123",
+				composeType: "docker-compose",
+				deleteVolumes: true,
+			},
+			log,
+			{ checks: checks() },
+		);
+		expect(commands.join("\n")).toMatch(
+			/rm -rf \/etc\/panara-cloud\/compose\/shop-abc123( |$)/m,
+		);
+	});
+
 	test("the images it built are looked at once its containers are gone", async () => {
 		const { host, commands } = fakeHost();
 		await removeCompose(

@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckIcon, Loader2Icon, PlusIcon } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSwarmNodes } from "@/components/dashboard/swarm/use-swarm-data";
 import { swarmRoleIcon } from "@/components/icons/server-icons";
@@ -14,6 +13,7 @@ import {
 import { maskToken, SWARM_PORTS, SWARM_PORTS_GUIDE } from "@/lib/cluster";
 import { serverUrl } from "@/lib/navigation";
 import { usePermissions } from "@/lib/permissions";
+import Link from "@/lib/router/link";
 import { useJoinInfo } from "./cluster-data";
 import {
 	ChoiceCards,

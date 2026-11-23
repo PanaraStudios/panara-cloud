@@ -103,7 +103,7 @@ const DEPLOY_KINDS: readonly JobKind[] = [
 	"databases.rebuild",
 ];
 
-const hasDeployed = async (ctx: QueryCtx, group: string) => {
+export const hasDeployed = async (ctx: QueryCtx, group: string) => {
 	for (const kind of DEPLOY_KINDS) {
 		const succeeded = await ctx.db
 			.query("jobs")
