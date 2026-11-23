@@ -13,6 +13,7 @@ import {
 import type { RouteMatch, RouteParams } from "@/lib/route-match";
 import {
 	getState,
+	getView,
 	navigate,
 	prefetch,
 	type RouterState,
@@ -331,7 +332,7 @@ function RouteAnnouncer({ id, kind }: { id: number; kind: string }) {
 }
 
 export function RouterView() {
-	const state = useSyncExternalStore(subscribe, getState);
+	const state = useSyncExternalStore(subscribe, getView);
 	useScrollOnNavigation(state);
 	const title = state.match
 		? resolveTitle(moduleChain(state.match).map((mod) => mod?.metadata))

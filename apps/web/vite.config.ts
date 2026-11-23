@@ -1,8 +1,15 @@
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { devServer, fontPreloads, routePreloads } from "./dev-server";
+
+// The dev server takes the settings the panel's web server reads from its
+// environment (CONVEX_PUBLIC_URL, …); for `pnpm dev` they live in .env.local,
+// and Vite only loads VITE_-prefixed ones by itself.
+const localEnv = fileURLToPath(new URL(".env.local", import.meta.url));
+if (existsSync(localEnv)) process.loadEnvFile(localEnv);
 
 export default defineConfig({
 	plugins: [

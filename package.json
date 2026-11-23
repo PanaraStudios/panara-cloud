@@ -1,6 +1,6 @@
 {
 	"name": "panara-cloud",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"private": true,
 	"description": "Open-source, self-hosted Platform as a Service",
 	"license": "MIT",

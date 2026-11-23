@@ -5,6 +5,27 @@ What changed in each release of Panara Cloud, newest first. To update, see
 
 ## Unreleased
 
+## 0.1.8 - 2026-11-24
+
+### Fixed
+
+- **Settings sections open again.** Since 0.1.7, clicking another section in a settings
+  list changed the address but left the first section open: the server settings (Setup,
+  Security, Docker & builds, GPU, Connection), a service's and a project's settings, and
+  the API reference's groups. The `[` and `]` shortcuts and the section picker on phones
+  had the same problem. These lists change the address without reloading the page, so a
+  form being edited is not reset, and 0.1.7's new page router did not notice that kind of
+  change; it does now. Back and Forward move between sections as before. The log filters,
+  which keep their search in the address the same way, still update it without
+  re-rendering the page.
+
+### Development
+
+- `pnpm dev` reads `apps/web/.env.local` again, so pages served by the Vite dev server
+  find Convex (before, every page stopped with "The panel's configuration has no Convex
+  URL"). The end-to-end tests run on it, and a new one opens settings sections from the
+  list, the keyboard and the browser history.
+
 ## 0.1.7 - 2026-11-24
 
 ### Changed

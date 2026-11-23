@@ -6,6 +6,7 @@ import {
 	type RouteMatch,
 	type RouteParams,
 } from "@/lib/route-match";
+import { followHistoryCalls } from "@/lib/router-history";
 import type { RouteModule } from "./types";
 
 // The layouts and boundaries around every page, down to the one that
@@ -95,8 +96,14 @@ let state: RouterState = {
 	id: 0,
 };
 const listeners = new Set<() => void>();
+// What the route tree renders: the state of the last navigation, moved on by
+// a URL-only change only when that change opens other route files. Hooks
+// that read the URL follow `state` instead, so a log filter writing its query
+// does not re-render every layout.
+let view = state;
 
 export const getState = () => state;
+export const getView = () => view;
 export const subscribe = (listener: () => void) => {
 	listeners.add(listener);
 	return () => listeners.delete(listener);
@@ -125,10 +132,26 @@ const commit = (
 		scroll,
 		id: state.id + 1,
 	};
+	view = state;
 	for (const listener of listeners) listener();
 };
 
+const sameRoute = (a: RouteMatch | null, b: RouteMatch | null) =>
+	a === b ||
+	(a !== null &&
+		b !== null &&
+		a.nodes.length === b.nodes.length &&
+		a.nodes.every((node, i) => node === b.nodes[i]));
+
 type HistoryEntry = { panaraCloud: true; scrollY?: number };
+
+// The router's own history calls, not reported back to it as app changes.
+let history = {
+	push: (...args: Parameters<History["pushState"]>) =>
+		window.history.pushState(...args),
+	replace: (...args: Parameters<History["replaceState"]>) =>
+		window.history.replaceState(...args),
+};
 
 const rememberScroll = () => {
 	const entry: HistoryEntry = {
@@ -136,7 +159,7 @@ const rememberScroll = () => {
 		panaraCloud: true,
 		scrollY: window.scrollY,
 	};
-	window.history.replaceState(entry, "");
+	history.replace(entry, "");
 };
 
 export const savedScroll = (): number | undefined =>
@@ -175,14 +198,14 @@ export async function navigate(
 	}
 	if (id !== latest) return;
 	if (replace) {
-		window.history.replaceState(
+		history.replace(
 			{ ...(window.history.state as object | null), panaraCloud: true },
 			"",
 			url.href,
 		);
 	} else {
 		rememberScroll();
-		window.history.pushState({ panaraCloud: true }, "", url.href);
+		history.push({ panaraCloud: true }, "", url.href);
 	}
 	commit(url, match, replace ? "replace" : "push", scroll);
 }
@@ -192,6 +215,58 @@ export function prefetch(href: string) {
 	if (url.origin !== window.location.origin) return;
 	const { ready, load } = resolve(url.pathname);
 	if (!ready) load().catch(() => {});
+}
+
+// A URL changed by app code without a navigation (a settings section, the
+// log filters): hooks reading the URL follow it, but it is not a new page,
+// so `id` stays and nothing scrolls, announces or resets.
+function onAppHistoryChange() {
+	const url = new URL(window.location.href);
+	if (
+		url.pathname === state.pathname &&
+		url.search === state.search &&
+		url.hash === state.hash
+	) {
+		return;
+	}
+	const update = (match: RouteMatch | null) => {
+		const params = match?.params ?? {};
+		state = {
+			...state,
+			pathname: url.pathname,
+			search: url.search,
+			hash: url.hash,
+			match,
+			params: sameParams(params, state.params) ? state.params : params,
+		};
+		if (!sameRoute(view.match, match)) view = state;
+		for (const listener of listeners) listener();
+	};
+	const { match, ready, load } = resolve(url.pathname);
+	if (ready) {
+		update(match);
+		return;
+	}
+	// Not a navigation, so `latest` stays (a log filter must not cancel one
+	// in flight); the result applies only while nothing has moved the URL on.
+	const id = latest;
+	const current = () => {
+		const now = new URL(window.location.href);
+		return (
+			id === latest &&
+			now.pathname === url.pathname &&
+			now.search === url.search &&
+			now.hash === url.hash
+		);
+	};
+	load().then(
+		() => {
+			if (current()) update(match);
+		},
+		() => {
+			if (current()) window.location.reload();
+		},
+	);
 }
 
 async function onPopState() {
@@ -227,6 +302,7 @@ export function startRouter() {
 		url = new URL(redirected, url);
 		window.history.replaceState(null, "", url.href);
 	}
+	history = followHistoryCalls(window.history, onAppHistoryChange);
 	window.addEventListener("popstate", () => {
 		void onPopState();
 	});
@@ -240,6 +316,7 @@ export function startRouter() {
 				sessionStorage.removeItem("panara-cloud:reloaded");
 			} catch {}
 			state = { ...state };
+			view = state;
 			for (const listener of listeners) listener();
 		},
 		(error: unknown) => {
