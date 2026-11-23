@@ -1,0 +1,18 @@
+Panara Cloud
+Copyright 2026 Panara Studios
+
+Panara Cloud is licensed under the MIT License (see LICENSE).
+
+Some files are still derived from Dokploy
+(https://github.com/Dokploy/dokploy), Copyright Dokploy Technology, Inc.
+Those portions remain under the Apache License 2.0
+(see LICENSES/Apache-2.0.txt) until they are replaced.
+
+The panara-cloud-convex image (deploy/convex) redistributes the unmodified
+Convex self-hosted backend binary and its start-up scripts
+(https://github.com/convex/convex-backend), Copyright Convex, Inc., under the
+Functional Source License 1.1 with Apache 2.0 future license
+(FSL-1.1-Apache-2.0; deploy/convex/LICENSE.md, also /convex/LICENSE.md in the
+image). It also carries Node.js from the same upstream image, under the MIT
+License and the licences of its dependencies (deploy/convex/NODE-LICENSE,
+/usr/share/doc/nodejs/LICENSE in the image).

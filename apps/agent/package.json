@@ -1,0 +1,37 @@
+{
+	"name": "@panara-cloud/agent",
+	"version": "0.1.6",
+	"private": true,
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/PanaraStudios/panara-cloud"
+	},
+	"type": "module",
+	"scripts": {
+		"dev": "tsx watch --env-file-if-exists=.env.local src/index.ts",
+		"start": "tsx --env-file-if-exists=.env.local src/index.ts",
+		"build": "node build.mjs",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@panara-cloud/backend": "workspace:*",
+		"adm-zip": "^0.6.1",
+		"convex": "1.50.0",
+		"dockerode": "4.0.2",
+		"shell-quote": "^1.12.0",
+		"ssh2": "~1.16.0",
+		"ws": "8.21.0",
+		"yaml": "2.8.3"
+	},
+	"devDependencies": {
+		"@types/dockerode": "3.3.23",
+		"@types/node": "^24.4.0",
+		"@types/ssh2": "1.15.1",
+		"@types/ws": "8.5.10",
+		"tsx": "4.22.4",
+		"typescript": "^7.0.2",
+		"vitest": "5.1.0"
+	}
+}

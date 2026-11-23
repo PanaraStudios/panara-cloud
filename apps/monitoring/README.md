@@ -1,0 +1,168 @@
+# Panara Cloud monitoring
+
+The metrics collector behind Panara Cloud's server and service monitoring. The
+agent runs it as the `panara-cloud-monitoring` Swarm service (image
+`<registry>/<owner>/panara-cloud-monitoring`, built from `Dockerfile` here) on
+the panel host and on every monitored server.
+
+Derived from Dokploy's monitoring service, MIT licensed: see `LICENSE.md`.
+
+## Requirements
+
+- Go 1.24 with cgo (SQLite)
+
+## Configuration
+
+Create a `.env` file in the root of the project with the following content:
+
+```shell
+METRICS_CONFIG='{
+  "server": {
+    "refreshRate": 25,
+    "port": 3001,
+    "type": "Remote | Panel",
+    "token": "metrics",
+    "urlCallback": "http://127.0.0.1:3211/live/monitoring/alert",
+    "retentionDays": 7,
+    "cronJob": "0 0 * * *",
+    "thresholds": {
+      "cpu": 0,
+      "memory": 0
+    }
+  },
+  "containers": {
+    "refreshRate": 25,
+    "services": {
+      "include": ["testing-elasticsearch-14649e"],
+      "exclude": []
+    }
+  }
+}'
+```
+
+## Installation
+
+```bash
+go mod download
+```
+
+## Execution
+
+```bash
+go run main.go
+```
+
+## Endpoints
+
+- `GET /health` - Check service health status (no authentication required)
+- `GET /metrics?limit=<number|all>` - Get server metrics (default limit: 50): an array of the
+  last `limit` readings, oldest first
+- `GET /metrics?from=<time>&to=<time>&step=<seconds>` - Server metrics of a range, summarised:
+  one object with a bucket per `step` seconds starting at `from` (`from <= time < to`; times
+  are Unix seconds, a decimal fraction or an RFC 3339 timestamp is accepted). Each bucket has
+  its `start`, the times of its `first` and `last` reading, their `count`, and `avg`/`min`/`max`
+  of `cpu`, `memUsed`, `diskUsed` (percent) and of `networkIn`, `networkOut` (MB/s since the
+  reading before; `null` when no reading has one before it), plus `cpuMaxAt`. A bucket without
+  readings is left out, never written as zeros. `latest` is the newest reading kept. At most
+  2000 buckets per answer; a bad range is HTTP 400. The answer does not depend on the
+  collector's time zone. A `limit` sent along is ignored, so a client that may be talking to an
+  older collector sends both and tells by the shape of the answer (array or object)
+- `GET /metrics/containers?limit=<number|all>&appName=<name>` - Get container metrics for a specific application (default limit: 50)
+
+## Features
+
+### Server
+
+- CPU Usage (%)
+- Memory Usage (%)
+- Disk
+- Network
+- CPU Model
+- Operating System
+- Kernel
+- Architecture
+- Threads
+
+Example response:
+
+| Field              | Value                       |
+| ------------------ | --------------------------- |
+| timestamp          | 2025-01-19T21:44:54.232164Z |
+| cpu                | 24.57%                      |
+| cpu_model          | Apple M1 Pro                |
+| cpu_cores          | 8                           |
+| cpu_physical_cores | 1                           |
+| cpu_speed          | 3228.0 MHz                  |
+| os                 | darwin                      |
+| distro             | darwin                      |
+| kernel             | 23.4.0                      |
+| arch               | arm64                       |
+| mem_used           | 81.91%                      |
+| mem_used_gb        | 13.11 GB                    |
+| mem_total          | 16.0 GB                     |
+| uptime             | 752232s                     |
+| disk_used          | 89.34%                      |
+| total_disk         | 460.43 GB                   |
+| network_in         | 54.78 MB                    |
+| network_out        | 31.72 MB                    |
+
+### Containers
+
+Compatible with all Docker container types (standalone containers, Docker Compose, and Docker Swarm stacks). Note: When monitoring Docker Compose or Swarm stacks, use the `--p` flag to properly identify all services within the stack.
+
+Example response:
+
+| Field          | Value                                 |
+| -------------- | ------------------------------------- |
+| id             | 1                                     |
+| timestamp      | 2025-01-19T22:16:30.796129Z           |
+| container_id   | 7428f5a49039                          |
+| container_name | testing-elasticsearch-14649e-kibana-1 |
+
+Metrics JSON:
+
+```json
+{
+  "timestamp": "2025-01-19T22:16:30.796129Z",
+  "CPU": 83.76,
+  "Memory": {
+    "percentage": 0.03,
+    "used": 2.262,
+    "total": 7.654,
+    "usedUnit": "MB",
+    "totalUnit": "GB"
+  },
+  "Network": {
+    "input": 306,
+    "output": 0,
+    "inputUnit": "B",
+    "outputUnit": "B"
+  },
+  "BlockIO": {
+    "read": 28.7,
+    "write": 0,
+    "readUnit": "kB",
+    "writeUnit": "B"
+  },
+  "Container": "7428f5a49039",
+  "ID": "7428f5a49039",
+  "Name": "testing-elasticsearch-14649e-kibana-1"
+}
+```
+
+## Notifications
+
+The collector uses a callback URL to send notifications when metrics exceed configured thresholds. Notifications are sent via POST request in the following format:
+
+Note: Setting a threshold to 0 disables notifications for that metric.
+
+```typescript
+interface Notification {
+  Type: "Memory" | "CPU";
+  Value: number;
+  Threshold: number;
+  Message: string;
+  Timestamp: string;
+  Token: string;
+}
+```

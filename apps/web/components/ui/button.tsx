@@ -1,0 +1,181 @@
+"use client";
+
+import { Button as ButtonPrimitive } from "@base-ui/react/button";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "cn";
+import { Loader2Icon } from "lucide-react";
+import * as React from "react";
+import { Kbd } from "@/components/ui/kbd";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { actionIcon, plainLabel } from "@/lib/action-icons";
+import { actionShortcut } from "@/lib/dashboard/shortcuts";
+import {
+	isVisible,
+	ShortcutAction,
+	useShortcut,
+	useShortcutModifier,
+} from "@/lib/dashboard/use-shortcut";
+
+/* Copied from the "Button" node (SW-0) in the Reechlist Paper file: 32px tall, 10px radius,
+   1px brand border, near-black gradient (near-white in dark mode), 14px/500 contrasting text
+   with a 1px etched shadow, 16px Lucide icon, the ten-layer glass bevel.
+   Press is scale(.97) over 160ms, hover dims to 90%.
+   Sizes: xs 24 / sm 28 / default 32 / lg 36 / xl 40.
+   `default` is the brand gradient with an etched text shadow. It keeps the bright light-mode
+   bevel in dark mode too (shadow-glass-accent never switches, exactly as on the site);
+   `destructive` uses the same bevel over a filled red gradient so it does not go pastel in dark mode;
+   `secondary` is the same bevel and press, in the grey/white surface gradient;
+   `outline` and `ghost` are flat. */
+const buttonVariants = cva(
+	"group/button relative inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all ease-(--ease-press) outline-none select-none focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] active:transition-transform active:duration-(--dur-press) disabled:pointer-events-none disabled:opacity-50 disabled:active:scale-100 aria-disabled:cursor-not-allowed aria-disabled:opacity-50! aria-disabled:active:scale-100 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&>[data-slot=button-spinner]+svg]:hidden [&>svg[class*='lucide-arrow']]:transition-transform [&>svg[class*='lucide-arrow']]:duration-200 hover:[&>svg.lucide-arrow-left]:-translate-x-0.5 hover:[&>svg.lucide-arrow-right]:translate-x-0.5 hover:[&>svg.lucide-arrow-up-right]:translate-x-0.5 hover:[&>svg.lucide-arrow-up-right]:-translate-y-0.5 motion-reduce:[&>svg]:transform-none",
+	{
+		variants: {
+			variant: {
+				default:
+					"border-primary-border bg-primary bg-(image:--gradient-primary) text-primary-foreground shadow-glass-accent [text-shadow:0_1px_1px_rgb(32_34_36/0.25)] hover:opacity-90 aria-expanded:opacity-90",
+				secondary:
+					"border-secondary-border bg-secondary bg-(image:--gradient-secondary) text-foreground shadow-glass hover:opacity-90 aria-expanded:opacity-90",
+				outline:
+					"border-border bg-background text-foreground hover:bg-muted hover:text-foreground aria-disabled:hover:bg-background aria-expanded:bg-muted aria-expanded:text-foreground dark:border-border-strong dark:bg-border-strong/30 dark:hover:bg-border-strong/50 dark:aria-disabled:hover:bg-border-strong/30 dark:aria-expanded:bg-border-strong/50",
+				ghost:
+					"text-muted-foreground hover:text-foreground aria-disabled:hover:text-muted-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
+				destructive:
+					"border-destructive-border bg-destructive bg-(image:--gradient-destructive) text-white shadow-glass-accent [text-shadow:0_1px_1px_rgb(32_34_36/0.25)] hover:opacity-90 focus-visible:outline-destructive aria-expanded:opacity-90",
+				link: "h-auto rounded-none border-0 px-0 text-primary underline-offset-4 hover:text-primary-hover hover:underline",
+			},
+			size: {
+				/* SW-0 in the Paper file: 32px tall, 10px radius, 12px sides (8px next to an icon), 6px gap */
+				default:
+					"h-8 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 has-[>svg:first-child:not(:only-child)]:pl-2 has-[>svg:last-child:not(:only-child)]:pr-2",
+				xs: "h-6 gap-1 rounded-md px-2 text-xs has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
+				sm: "h-7 gap-1.5 rounded-md px-2.5 text-[13px] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 has-[>svg:first-child:not(:only-child)]:pl-1.5 has-[>svg:last-child:not(:only-child)]:pr-1.5 [&_svg:not([class*='size-'])]:size-3.5",
+				lg: "h-9 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 has-[>svg:first-child:not(:only-child)]:pl-2 has-[>svg:last-child:not(:only-child)]:pr-2",
+				xl: "h-10 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 has-[>svg:first-child:not(:only-child)]:pl-2 has-[>svg:last-child:not(:only-child)]:pr-2",
+				icon: "size-8",
+				"icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
+				"icon-sm": "size-7 rounded-md [&_svg:not([class*='size-'])]:size-3.5",
+				"icon-lg": "size-9",
+				"icon-xl": "size-10",
+			},
+		},
+		defaultVariants: {
+			variant: "default",
+			size: "default",
+		},
+	},
+);
+
+function Button({
+	className,
+	variant = "default",
+	size = "default",
+	ref,
+	isLoading = false,
+	autoIcon = true,
+	disabled,
+	disabledReason,
+	children,
+	...props
+}: ButtonPrimitive.Props &
+	VariantProps<typeof buttonVariants> & {
+		/** Panara Cloud: disables the button and shows a spinner while an action runs. */
+		isLoading?: boolean;
+		/** A text-only label gets the icon of its action ("Deploy", "Save");
+		    false for a label that is data, not an action. */
+		autoIcon?: boolean;
+		/** Why the action can't run right now, in a few words ("Deploying…").
+		    Disables the button but keeps it focusable, so the reason shows on
+		    hover and on keyboard focus and is read with its name. */
+		disabledReason?: string | null;
+	}) {
+	const action = React.useContext(ShortcutAction);
+	const target = React.useRef<HTMLButtonElement>(null);
+	const mergedRef = React.useCallback(
+		(node: HTMLButtonElement | null) => {
+			target.current = node;
+			if (typeof ref === "function") return ref(node);
+			if (ref) ref.current = node;
+		},
+		[ref],
+	);
+	const modifier = useShortcutModifier();
+	const label = props["aria-label"] ?? buttonText(children).trim();
+	const plain =
+		autoIcon && variant !== "link" && !size?.startsWith("icon")
+			? plainLabel(children)
+			: null;
+	const ActionIcon = plain ? actionIcon(plain) : null;
+	const shortcut = actionShortcut(action, label);
+	const blocked = Boolean(disabledReason);
+	useShortcut(shortcut, () => {
+		const button = target.current;
+		if (
+			!button ||
+			!isVisible(button) ||
+			button.disabled ||
+			button.getAttribute("aria-disabled") === "true"
+		)
+			return false;
+		button.click();
+	});
+	const button = (
+		<ButtonPrimitive
+			ref={mergedRef}
+			aria-keyshortcuts={shortcut?.replace(
+				"mod+",
+				modifier === "⌘" ? "Meta+" : "Control+",
+			)}
+			data-slot="button"
+			className={cn(buttonVariants({ variant, size, className }))}
+			disabled={isLoading || disabled || blocked}
+			// A natively disabled button gets no hover or focus, so its reason
+			// could never be shown.
+			focusableWhenDisabled={blocked}
+			{...props}
+		>
+			{isLoading ? (
+				<Loader2Icon data-slot="button-spinner" className="animate-spin" />
+			) : ActionIcon ? (
+				<ActionIcon aria-hidden />
+			) : null}
+			{children}
+			{blocked ? <span className="sr-only">, {disabledReason}</span> : null}
+		</ButtonPrimitive>
+	);
+	if (blocked) {
+		return (
+			<Tooltip>
+				<TooltipTrigger render={button} />
+				<TooltipContent>{disabledReason}</TooltipContent>
+			</Tooltip>
+		);
+	}
+	if (!shortcut) return button;
+	return (
+		<Tooltip>
+			<TooltipTrigger render={button} />
+			<TooltipContent>
+				{label}
+				<Kbd>{shortcut.replace("mod+", `${modifier} `).toUpperCase()}</Kbd>
+			</TooltipContent>
+		</Tooltip>
+	);
+}
+
+function buttonText(children: React.ReactNode): string {
+	return React.Children.toArray(children)
+		.map((child) => {
+			if (typeof child === "string" || typeof child === "number")
+				return String(child);
+			if (React.isValidElement<{ children?: React.ReactNode }>(child))
+				return buttonText(child.props.children);
+			return "";
+		})
+		.join("");
+}
+
+export { Button, buttonVariants };

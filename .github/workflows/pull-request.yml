@@ -1,0 +1,61 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.22.1
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm format-and-lint
+      - name: Dead code
+        run: pnpm dead-code
+      - name: Version
+        run: pnpm check-version
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Backend and agent tests
+        run: pnpm test
+      - name: Web build
+        run: pnpm --filter @panara-cloud/web build
+        env:
+          CONVEX_INTERNAL_URL: http://localhost:3210
+          CONVEX_INTERNAL_SITE_URL: http://localhost:3211
+          CONVEX_PUBLIC_URL: http://localhost:3210
+
+  convex-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build deploy/convex
+        run: docker build -t convex-check deploy/convex
+      # What the installer's health check and "use node" actions need: the
+      # backend answers /version through curl, and node is a version the
+      # backend accepts.
+      - name: Start it
+        run: |
+          docker run -d --name convex-check -e DISABLE_BEACON=true -e INSTANCE_NAME=check \
+            -e CONVEX_CLOUD_ORIGIN=http://localhost:3210 -e CONVEX_SITE_ORIGIN=http://localhost:3211 convex-check
+          for i in $(seq 1 60); do
+            if docker exec convex-check curl -fsS http://localhost:3210/version; then break; fi
+            [ "$i" = 60 ] && { docker logs convex-check; exit 1; }
+            sleep 1
+          done
+          docker exec convex-check node --version | grep -E '^v(22|24|26)\.'
+          docker exec convex-check sh -c 'test -s /convex/LICENSE.md && command -v openssl'

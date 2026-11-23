@@ -1,0 +1,40 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"ignoreExportsUsedInFile": true,
+	"workspaces": {
+		".": {
+			"entry": []
+		},
+		"apps/web": {
+			"entry": [
+				"app/**/{page,layout,route,loading,error,not-found,template,default,global-error,icon,apple-icon}.{ts,tsx}",
+				"lib/*.test.ts",
+				"tests/e2e/**/*.ts"
+			],
+			"project": ["**/*.{ts,tsx,mjs,css}"]
+		},
+		"apps/agent": {
+			"entry": [
+				"src/panelSetup.ts",
+				"src/migrate/main.ts",
+				"src/dev/*.ts",
+				"src/**/*.test.ts",
+				"docker/*.mjs"
+			],
+			"project": ["**/*.{ts,mjs}"]
+		},
+		"packages/backend": {
+			"entry": ["convex/**/*.ts", "scripts/*.{ts,mjs}"],
+			"project": ["convex/**/*.ts", "scripts/**/*.{ts,mjs}"]
+		}
+	},
+	"ignoreIssues": {
+		"apps/web/components/ui/**": ["exports", "types"],
+		"apps/web/components/ui-kit/**": ["exports", "types"],
+		"apps/web/lib/auth/errors.ts": ["duplicates"],
+		"apps/agent/src/host/index.ts": ["types"],
+		"apps/agent/src/infra/traefik/index.ts": ["exports", "types"],
+		"apps/agent/src/lib/env.ts": ["exports"],
+		"apps/agent/src/live/sandbox.ts": ["exports"]
+	}
+}

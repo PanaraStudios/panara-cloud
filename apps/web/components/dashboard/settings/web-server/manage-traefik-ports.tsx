@@ -1,0 +1,323 @@
+"use client";
+
+import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/standard-schema";
+import { api } from "@panara-cloud/backend/api";
+import { useMutation, useQuery } from "convex/react";
+import { Plus, Trash2 } from "lucide-react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { AlertBlock } from "@/components/shared/alert-block";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { errorMessage } from "@/lib/auth/errors";
+import { hostId, useWaitForJob } from "../servers/host-jobs";
+
+interface Props {
+	children: React.ReactNode;
+	serverId?: string;
+}
+
+const PortSchema = z.object({
+	targetPort: z.number().min(1, "Target port is required"),
+	publishedPort: z.number().min(1, "Published port is required"),
+	protocol: z.enum(["tcp", "udp", "sctp"]),
+});
+
+const TraefikPortsSchema = z.object({
+	ports: z.array(PortSchema),
+});
+
+type TraefikPortsForm = z.infer<typeof TraefikPortsSchema>;
+
+export const ManageTraefikPorts = ({ children, serverId }: Props) => {
+	const [open, setOpen] = useState(false);
+
+	const form = useForm<TraefikPortsForm>({
+		resolver: zodResolver(TraefikPortsSchema),
+		defaultValues: {
+			ports: [],
+		},
+	});
+
+	const { fields, append, remove } = useFieldArray({
+		control: form.control,
+		name: "ports",
+	});
+
+	const traefikSettings = useQuery(api.infra.webServer.getTraefikSettings, {
+		serverId: hostId(serverId),
+	});
+	const currentPorts = traefikSettings?.additionalPorts;
+
+	const updatePorts = useMutation(api.infra.webServer.setAdditionalPorts);
+	const waitForJob = useWaitForJob();
+	const [isPending, setIsPending] = useState(false);
+	const [isHealthCheckExecuting, setIsHealthCheckExecuting] = useState(false);
+
+	useEffect(() => {
+		if (currentPorts) {
+			form.reset({
+				ports: currentPorts.map((port) => ({
+					...port,
+					protocol: port.protocol as "tcp" | "udp" | "sctp",
+				})),
+			});
+		}
+	}, [currentPorts, form]);
+
+	const handleAddPort = () => {
+		append({ targetPort: 0, publishedPort: 0, protocol: "tcp" });
+	};
+
+	const onSubmit = async (data: TraefikPortsForm) => {
+		try {
+			setIsPending(true);
+			const jobId = await updatePorts({
+				serverId: hostId(serverId),
+				additionalPorts: data.ports,
+			}).finally(() => setIsPending(false));
+			setIsHealthCheckExecuting(true);
+			await waitForJob(jobId).finally(() => setIsHealthCheckExecuting(false));
+			toast.success("Ports updated successfully");
+			setOpen(false);
+		} catch (error) {
+			toast.error(errorMessage(error) || "Error updating Traefik ports");
+		}
+	};
+
+	return (
+		<>
+			<button type="button" onClick={() => setOpen(true)}>
+				{children}
+			</button>
+			<Dialog open={open} onOpenChange={setOpen}>
+				<DialogContent className="flex max-h-[90vh] flex-col overflow-y-auto overscroll-contain sm:max-w-lg sm:max-w-3xl">
+					<DialogHeader>
+						<DialogTitle className="flex items-center gap-2 text-xl">
+							Additional Port Mappings
+						</DialogTitle>
+						<DialogDescription className="text-base w-full">
+							<div className="flex items-center justify-between">
+								<div className="flex flex-col gap-1">
+									Add or remove additional ports for Traefik
+									<span className="text-sm text-muted-foreground">
+										{fields.length} port mapping{fields.length !== 1 ? "s" : ""}{" "}
+										configured
+									</span>
+								</div>
+								<Button
+									onClick={handleAddPort}
+									variant="default"
+									className="gap-2"
+								>
+									<Plus className="h-4 w-4" />
+									Add Mapping
+								</Button>
+							</div>
+						</DialogDescription>
+					</DialogHeader>
+
+					<Form {...form}>
+						<form
+							method="post"
+							onSubmit={form.handleSubmit(onSubmit)}
+							className="space-y-6"
+						>
+							<div className="grid gap-6 py-4">
+								{fields.length === 0 ? (
+									<p className="py-3 text-muted-foreground text-sm">
+										No port mappings yet.
+									</p>
+								) : (
+									<ScrollArea className="pr-4">
+										<div className="grid gap-4">
+											{fields.map((field, index) => (
+												<div
+													key={field.id}
+													className="border-border border-b pb-4 last:border-b-0 last:pb-0"
+												>
+													<div className="grid grid-cols-4 gap-4">
+														<FormField
+															control={form.control}
+															name={`ports.${index}.targetPort`}
+															render={({ field }) => (
+																<FormItem>
+																	<FormLabel>Target port</FormLabel>
+																	<FormControl>
+																		<Input
+																			type="number"
+																			{...field}
+																			onChange={(e) => {
+																				const value = e.target.value;
+																				field.onChange(
+																					value === ""
+																						? undefined
+																						: Number(value),
+																				);
+																			}}
+																			value={field.value || ""}
+																			placeholder="e.g. 8080"
+																		/>
+																	</FormControl>
+																	<FormMessage />
+																</FormItem>
+															)}
+														/>
+
+														<FormField
+															control={form.control}
+															name={`ports.${index}.publishedPort`}
+															render={({ field }) => (
+																<FormItem>
+																	<FormLabel>Published port</FormLabel>
+																	<FormControl>
+																		<Input
+																			type="number"
+																			{...field}
+																			onChange={(e) => {
+																				const value = e.target.value;
+																				field.onChange(
+																					value === ""
+																						? undefined
+																						: Number(value),
+																				);
+																			}}
+																			value={field.value || ""}
+																			placeholder="e.g. 80"
+																		/>
+																	</FormControl>
+																	<FormMessage />
+																</FormItem>
+															)}
+														/>
+														<FormField
+															control={form.control}
+															name={`ports.${index}.protocol`}
+															render={({ field }) => (
+																<FormItem>
+																	<FormLabel>Protocol</FormLabel>
+																	<FormControl>
+																		<Select
+																			onValueChange={field.onChange}
+																			value={field.value ?? null}
+																		>
+																			<SelectTrigger className="w-full">
+																				<SelectValue placeholder="Select a protocol" />
+																			</SelectTrigger>
+																			<SelectContent>
+																				<SelectGroup>
+																					{["tcp", "udp", "sctp"].map(
+																						(protocol) => (
+																							<SelectItem
+																								key={protocol}
+																								value={protocol}
+																							>
+																								{protocol}
+																							</SelectItem>
+																						),
+																					)}
+																				</SelectGroup>
+																			</SelectContent>
+																		</Select>
+																	</FormControl>
+																	<FormMessage />
+																</FormItem>
+															)}
+														/>
+
+														<div className="flex items-end">
+															<Button
+																onClick={() => remove(index)}
+																variant="ghost"
+																size="icon"
+																className="text-muted-foreground hover:text-destructive"
+															>
+																<Trash2 className="h-4 w-4" />
+															</Button>
+														</div>
+													</div>
+												</div>
+											))}
+										</div>
+									</ScrollArea>
+								)}
+
+								{fields.length > 0 && (
+									<AlertBlock type="info">
+										<div className="flex flex-col gap-2">
+											<span className="text-sm">
+												<strong>
+													Each port mapping defines how external traffic reaches
+													your containers through Traefik.
+												</strong>
+												<ul className="pt-2">
+													<li>
+														<strong>Target Port:</strong> The port inside your
+														container that the service is listening on.
+													</li>
+													<li>
+														<strong>Published Port:</strong> The port on your
+														host machine that will be mapped to the target port.
+													</li>
+												</ul>
+												<p className="mt-2">
+													All ports are bound directly to the host machine,
+													allowing Traefik to handle incoming traffic and route
+													it appropriately to your services.
+												</p>
+											</span>
+										</div>
+									</AlertBlock>
+								)}
+
+								<AlertBlock type="warning">
+									The Traefik container will be recreated from scratch. This
+									means the container will be deleted and created again, which
+									may cause downtime in your applications.
+								</AlertBlock>
+							</div>
+							<DialogFooter>
+								<Button
+									type="submit"
+									variant="default"
+									className="text-sm"
+									isLoading={isPending || isHealthCheckExecuting}
+								>
+									Save
+								</Button>
+							</DialogFooter>
+						</form>
+					</Form>
+				</DialogContent>
+			</Dialog>
+		</>
+	);
+};
