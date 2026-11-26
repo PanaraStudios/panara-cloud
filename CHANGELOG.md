@@ -5,6 +5,17 @@ What changed in each release of Panara Cloud, newest first. To update, see
 
 ## Unreleased
 
+## 0.1.9 - 2026-11-25
+
+### Fixed
+
+- **Connecting GitHub works.** "Create GitHub App on GitHub" kept loading, for a personal
+  account and for an organization: the panel posts the app's manifest to GitHub, and the
+  page's Content-Security-Policy only let forms post to the panel itself, so the browser
+  dropped the post without an error. Forms may now post to any HTTPS address (GitHub, or
+  the GitHub Enterprise host you enter); scripts are still limited to the panel's own
+  files. This affected every release since the policy was added.
+
 ## 0.1.8 - 2026-11-24
 
 ### Fixed

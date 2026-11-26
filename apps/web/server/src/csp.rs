@@ -68,7 +68,9 @@ pub fn content_security_policy(convex_url: Option<&str>, live_url: Option<&str>)
         ("worker-src", vec!["'self'".into(), "blob:".into()]),
         ("object-src", vec!["'none'".into()]),
         ("base-uri", vec!["'self'".into()]),
-        ("form-action", vec!["'self'".into()]),
+        // Connecting GitHub posts the app manifest to github.com or to a
+        // GitHub Enterprise host the admin types in, so any HTTPS target.
+        ("form-action", vec!["'self'".into(), "https:".into()]),
         ("frame-ancestors", vec!["'none'".into()]),
     ];
     directives
@@ -134,6 +136,12 @@ mod tests {
     fn without_a_live_url_websockets_stay_allowed() {
         let policy = content_security_policy(Some("https://x.test/convex"), None);
         assert!(directive(&policy, "connect-src").contains(&"wss:".to_string()));
+    }
+
+    #[test]
+    fn forms_may_post_to_github_but_not_over_plain_http() {
+        let policy = content_security_policy(Some("https://x.test/convex"), None);
+        assert_eq!(directive(&policy, "form-action"), ["'self'", "https:"]);
     }
 
     #[test]
